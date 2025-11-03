@@ -44,233 +44,236 @@ docker compose up -d
 
 ##  Table of Contents
 
-- [Quick Start with Docker](#-quick-start-with-docker-recommended)
 - [Overview](#overview)
 - [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Clean Architecture](#clean-architecture)
-- [System Requirements](#system-requirements)
-- [Installation Guide](#installation-guide)
-  - [Docker Setup (Recommended)](#docker-setup-recommended)
-  - [Manual Installation](#manual-installation)
+- [Technology Stack](#technology-stack)
+- [Architecture](#architecture)
+- [Installation](#installation)
 - [Project Structure](#project-structure)
 - [Database Schema](#database-schema)
-- [Usage Guide](#usage-guide)
-- [API Documentation](#api-documentation)
-- [Screenshots](#screenshots)
-- [Contributing](#contributing)
+- [Usage](#usage)
+- [Development](#development)
+- [Security](#security)
 - [License](#license)
 
 ---
 
-## 🎯 Overview
+## Overview
 
-Shoeler is a modern shoe store management web application designed following **Clean Architecture** and **Clean Code** principles. It offers a minimalist, responsive UI for both customers and administrators, ensuring seamless user experience across all devices.
+Shoeler is a full-featured e-commerce platform for shoe retailers, built with Laravel 11 and following Clean Architecture principles. The application separates business logic from infrastructure concerns, making it maintainable, testable, and scalable.
 
-### Key Highlights
+**Key Characteristics:**
 
-- ✅ **Clean Architecture**: Separation of concerns with Domain, Application, Infrastructure, and Presentation layers
-- ✅ **Clean Code**: Readable, maintainable, and modular codebase
-- ✅ **Responsive Design**: Mobile-first approach with Bootstrap 5
-- ✅ **Role-based Access**: Admin and User roles with proper authorization
-- ✅ **Complete CRUD**: Full Create, Read, Update, Delete operations
-- ✅ **Search & Filter**: Advanced product search and filtering capabilities
-- ✅ **Reviews System**: Customer reviews and ratings
-- ✅ **Promotions**: Discount codes and vouchers
-- ✅ **Order Management**: Complete order tracking and management
-
----
-
-## ✨ Features
-
-### Customer Features
-
-1. **Homepage**
-   - Featured shoes carousel
-   - Product categories navigation
-   - Promotional banners
-   - Latest arrivals
-
-2. **Product Browsing**
-   - View all shoes with pagination
-   - Filter by category, brand, price, size
-   - Real-time search functionality
-   - Product details with images and reviews
-   - Rating and review system
-
-3. **Shopping Cart**
-   - Add/update/remove items
-   - Automatic price calculation
-   - Size selection
-   - Quantity management
-
-4. **Checkout Process**
-   - Shipping information form
-   - Multiple payment methods (COD, Bank Transfer, Credit Card, E-Wallet)
-   - Promo code application
-   - Order summary and confirmation
-
-5. **User Account**
-   - Registration and login
-   - Profile management
-   - Order history tracking
-   - Address book management
-   - Review management
-
-### Admin Features
-
-1. **Dashboard**
-   - Sales statistics
-   - Revenue tracking
-   - Order analytics
-   - Recent orders overview
-
-2. **Product Management**
-   - CRUD operations for shoes
-   - Category management
-   - Stock tracking
-   - Image upload
-   - Bulk operations
-
-3. **Order Management**
-   - View all orders
-   - Update order status
-   - Update payment status
-   - Order details view
-   - Customer information
-
-4. **Promotion Management**
-   - Create discount codes
-   - Set validity periods
-   - Usage limits
-   - Minimum purchase requirements
-
-5. **Banner Management**
-   - Homepage banner CRUD
-   - Image upload
-   - Link management
-   - Display order control
-
-6. **User Management**
-   - View customer list
-   - User statistics
+- Clean Architecture with distinct Domain, Application, Infrastructure, and Presentation layers
+- Repository pattern for data access abstraction
+- Service layer for business logic encapsulation
+- Dependency injection for loose coupling
+- Responsive UI with Bootstrap 5
+- Role-based access control (Admin/Customer)
+- Session-based shopping cart
+- Advanced search and filtering
+- Product review and rating system
+- Promotional discount system
 
 ---
 
-## 🛠 Tech Stack
+## Features
 
-### Backend
-- **Framework**: Laravel 11
-- **Language**: PHP 8.2+
-- **Database**: MySQL 8.0+
-- **ORM**: Eloquent
-- **Authentication**: Laravel Auth
+### Customer Interface
 
-### Frontend
-- **Template Engine**: Blade
-- **CSS Framework**: Bootstrap 5.3
-- **Icons**: Bootstrap Icons
-- **JavaScript**: Vanilla JS (minimal)
+**Product Catalog**
+- Browse shoes with pagination
+- Advanced filtering (category, brand, price range, size)
+- Search functionality
+- Product detail pages with images and specifications
+- Customer reviews and ratings
 
-### Architecture
-- **Pattern**: Clean Architecture
-- **Principles**: SOLID, DRY, KISS
-- **Repository Pattern**: Interface-based repositories
-- **Service Layer**: Business logic separation
+**Shopping Experience**
+- Session-based shopping cart
+- Size and quantity selection
+- Real-time price calculation including tax and shipping
+- Promo code application
+- Multiple payment methods (COD, Bank Transfer, Credit Card, E-Wallet)
+
+**User Account**
+- User registration and authentication
+- Profile management
+- Order history and tracking
+- Shipping address management
+- Product review submission
+
+### Administration Panel
+
+**Dashboard**
+- Sales analytics and statistics
+- Revenue tracking
+- Order status overview
+- User metrics
+
+**Catalog Management**
+- CRUD operations for products and categories
+- Stock level management
+- Image uploads
+- Discount/promotion configuration
+- Featured product selection
+
+**Order Management**
+- Order listing and search
+- Order status updates (Pending, Processing, Shipped, Delivered, Cancelled)
+- Payment status tracking
+- Customer information access
+
+**Marketing Tools**
+- Promotional discount codes with constraints
+- Homepage banner management
+- Featured product promotion
 
 ---
 
-## 🏗 Clean Architecture
+## Technology Stack
 
-This project follows Clean Architecture principles with clear separation of concerns:
+**Backend:**
+- Laravel 11 (PHP Framework)
+- PHP 8.2+
+- MySQL 8.0+
+- Eloquent ORM
+- Laravel Authentication
+
+**Frontend:**
+- Blade Templating Engine
+- Bootstrap 5.3
+- Bootstrap Icons
+- Vanilla JavaScript
+
+**Infrastructure:**
+- Docker & Docker Compose
+- Composer (Dependency Management)
+
+**Development:**
+- PSR-4 Autoloading
+- PSR-12 Coding Standards
+
+---
+
+## Architecture
+
+### Clean Architecture Implementation
+
+The application follows Clean Architecture principles, organizing code into distinct layers with clear dependencies:
 
 ```
 src/
-├── Domain/              # Enterprise Business Rules
-│   ├── Entities/        # Business objects
-│   └── Repositories/    # Repository interfaces
+├── Domain/                  # Enterprise Business Rules
+│   ├── Entities/           # Core business objects (Category, Shoe, Order)
+│   └── Repositories/       # Repository contracts (interfaces)
 │
-├── Application/         # Application Business Rules
-│   └── Services/        # Use cases and business logic
+├── Application/            # Application Business Rules
+│   └── Services/          # Use cases and orchestration logic
 │
-└── Infrastructure/      # Frameworks & Drivers
-    └── Repositories/    # Repository implementations
+└── Infrastructure/         # Framework & External Integrations
+    └── Repositories/      # Eloquent repository implementations
 
-app/                     # Presentation Layer
+app/                        # Presentation Layer (Laravel)
 ├── Http/
-│   ├── Controllers/     # HTTP request handlers
-│   └── Middleware/      # Request filters
-└── Models/              # Eloquent models
+│   ├── Controllers/       # Request handlers
+│   └── Middleware/        # Request filters
+├── Models/                # Eloquent models
+└── Providers/             # Dependency injection bindings
 ```
 
-### Layer Responsibilities
+**Layer Responsibilities:**
 
-1. **Domain Layer** (`src/Domain/`)
-   - Contains enterprise business rules
-   - Defines entities and repository interfaces
-   - Independent of frameworks and external dependencies
+1. **Domain Layer**: Pure business logic, framework-independent
+   - Defines business entities and their behavior
+   - Declares repository interfaces without implementation details
 
-2. **Application Layer** (`src/Application/`)
-   - Contains application-specific business rules
-   - Implements use cases and services
-   - Orchestrates data flow between layers
+2. **Application Layer**: Application-specific business rules
+   - Implements use cases (ShoeService, OrderService, CartService)
+   - Orchestrates data flow between domain and infrastructure
 
-3. **Infrastructure Layer** (`src/Infrastructure/`)
-   - Implements repository interfaces
-   - Handles data persistence
-   - Interacts with Eloquent ORM
+3. **Infrastructure Layer**: Technical implementation details
+   - Implements repository interfaces using Eloquent
+   - Handles database queries and data persistence
 
-4. **Presentation Layer** (`app/`)
-   - Controllers handle HTTP requests
-   - Blade views render UI
-   - Middleware handles authentication/authorization
+4. **Presentation Layer**: User interface and HTTP handling
+   - Controllers receive requests and return responses
+   - Views render HTML using Blade templates
+   - Middleware handles authentication and authorization
+
+**Design Patterns:**
+
+- Repository Pattern for data access abstraction
+- Service Pattern for business logic encapsulation
+- Dependency Injection for loose coupling
+- Interface-based programming for flexibility
+
+**Principles Applied:**
+
+- Single Responsibility Principle
+- Dependency Inversion Principle
+- Don't Repeat Yourself (DRY)
+- Keep It Simple (KISS)
 
 ---
 
-## 💻 System Requirements
+## Installation
 
+### Prerequisites
+
+**Using Docker:**
+- Docker Desktop (Windows/Mac) or Docker Engine (Linux)
+
+**Manual Installation:**
 - PHP >= 8.2
 - Composer >= 2.0
-- MySQL >= 8.0 or MariaDB >= 10.3
-- Node.js >= 18.x (for asset compilation, optional)
-- Web Server (Apache/Nginx)
+- MySQL >= 8.0
+- Web server (Apache/Nginx) or use PHP built-in server
 
-### Recommended
-- 2GB RAM minimum
-- 1GB free disk space
-- Modern web browser (Chrome, Firefox, Safari, Edge)
+### Docker Installation (Recommended)
 
----
-
-## 📦 Installation Guide
-
-### 1. Clone the Repository
-
+1. Clone the repository
 ```bash
 git clone <repository-url>
 cd shoeler
 ```
 
-### 2. Install Dependencies
+2. Start the application
+```bash
+docker compose up -d
+```
 
+3. Access the application
+- Application: http://localhost:8000
+- phpMyAdmin: http://localhost:8080
+- Admin login: admin@shoeler.com / password
+
+The Docker setup automatically handles:
+- Dependency installation
+- Environment configuration
+- Database creation and migration
+- Sample data seeding
+- Server startup
+
+### Manual Installation
+
+1. Clone the repository
+```bash
+git clone <repository-url>
+cd shoeler
+```
+
+2. Install PHP dependencies
 ```bash
 composer install
 ```
 
-### 3. Environment Configuration
-
+3. Configure environment
 ```bash
-# Copy environment file
-copy .env.example .env
-
-# Generate application key
+cp .env.example .env
 php artisan key:generate
 ```
 
-### 4. Configure Database
-
-Edit `.env` file and set your database credentials:
-
+4. Configure database in `.env`
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -280,51 +283,32 @@ DB_USERNAME=root
 DB_PASSWORD=your_password
 ```
 
-### 5. Create Database
-
-```bash
-# Using MySQL command line
-mysql -u root -p
+5. Create database
+```sql
 CREATE DATABASE shoeler_db;
-exit;
 ```
 
-### 6. Run Migrations
-
+6. Run migrations and seed data
 ```bash
 php artisan migrate
-```
-
-### 7. Seed Database (Optional)
-
-```bash
 php artisan db:seed
 ```
 
-This will create:
-- Admin account: `admin@shoeler.com` / `password`
-- Sample users
-- Sample categories
-- Sample shoes
-- Sample promotions
-
-### 8. Create Storage Link
-
+7. Create storage symlink
 ```bash
 php artisan storage:link
 ```
 
-### 9. Start Development Server
-
+8. Start the development server
 ```bash
 php artisan serve
 ```
 
-Visit: `http://localhost:8000`
+9. Visit http://localhost:8000
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 shoeler/
@@ -392,7 +376,7 @@ shoeler/
 
 ---
 
-## 🗄 Database Schema
+## Database Schema
 
 ### Core Tables
 
@@ -419,7 +403,7 @@ shoeler/
 
 ---
 
-## 📖 Usage Guide
+## Usage
 
 ### For Customers
 
@@ -486,7 +470,78 @@ shoeler/
 
 ---
 
-## 🔒 Security Features
+## Development
+
+### Running Artisan Commands
+
+**With Docker:**
+```bash
+docker compose exec app php artisan <command>
+```
+
+**Examples:**
+```bash
+# Clear cache
+docker compose exec app php artisan cache:clear
+
+# Run migrations
+docker compose exec app php artisan migrate
+
+# Create new migration
+docker compose exec app php artisan make:migration create_example_table
+
+# Create new controller
+docker compose exec app php artisan make:controller ExampleController
+
+# List all routes
+docker compose exec app php artisan route:list
+```
+
+### Database Operations
+
+**Reset database:**
+```bash
+docker compose exec app php artisan migrate:fresh --seed
+```
+
+**Access MySQL CLI:**
+```bash
+docker compose exec mysql mysql -u shoeler -p
+# Password: shoeler123
+```
+
+### Logs
+
+**View application logs:**
+```bash
+docker compose logs -f app
+```
+
+**View specific service logs:**
+```bash
+docker compose logs -f mysql
+docker compose logs -f phpmyadmin
+```
+
+### Stopping the Application
+
+```bash
+docker compose down
+```
+
+### Code Quality
+
+The codebase follows PSR-12 coding standards and implements:
+- Meaningful variable and function names
+- Single Responsibility Principle
+- DRY (Don't Repeat Yourself)
+- Proper error handling
+- Input validation on all forms
+- Eloquent ORM to prevent SQL injection
+
+---
+
+## Security
 
 - Password hashing with bcrypt
 - CSRF protection on all forms
