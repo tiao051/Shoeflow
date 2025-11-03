@@ -1,48 +1,37 @@
 # Shoeler - Shoe Store Management System
 
-A comprehensive web-based shoe store management system built with **Laravel 11**, **MySQL**, and **Clean Architecture** principles. This application provides a complete e-commerce solution for managing and selling shoes online with separate interfaces for customers and administrators.
+A comprehensive e-commerce platform built with Laravel 11 and MySQL, implementing Clean Architecture principles for maintainability and scalability.
 
 ---
 
-## � Quick Start with Docker (Recommended)
+## Quick Start
 
-**The easiest way to run Shoeler - just one command!**
+### Using Docker (Recommended)
 
-### Prerequisites
-- Install [Docker Desktop](https://www.docker.com/products/docker-desktop) (includes Docker Compose)
-
-### Start the Application
-
-**On Windows:**
-```bash
-start.bat
-```
-
-**On Mac/Linux:**
-```bash
-./start.sh
-```
-
-**Or manually:**
 ```bash
 docker compose up -d
 ```
 
-### Access the Application
+The application will automatically:
+- Install all dependencies
+- Configure the database
+- Run migrations and seeders
+- Start the development server
 
-- **Application**: http://localhost:8000
-- **Admin Dashboard**: http://localhost:8000/admin
-- **phpMyAdmin**: http://localhost:8080
+**Access Points:**
+- Application: http://localhost:8000
+- Admin Panel: http://localhost:8000/admin
+- phpMyAdmin: http://localhost:8080
 
-**Admin Login:**
-- Email: `admin@shoeler.com`
-- Password: `password`
+**Default Credentials:**
+- Admin: admin@shoeler.com / password
+- User: john@example.com / password
 
-👉 **For complete Docker documentation, see [DOCKER_GUIDE.md](DOCKER_GUIDE.md)**
+For complete Docker documentation, see [DOCKER_GUIDE.md](DOCKER_GUIDE.md)
 
 ---
 
-##  Table of Contents
+## Table of Contents
 
 - [Overview](#overview)
 - [Features](#features)
@@ -60,9 +49,9 @@ docker compose up -d
 
 ## Overview
 
-Shoeler is a full-featured e-commerce platform for shoe retailers, built with Laravel 11 and following Clean Architecture principles. The application separates business logic from infrastructure concerns, making it maintainable, testable, and scalable.
+Shoeler is a full-featured e-commerce platform designed for shoe retailers. Built with Laravel 11, it follows Clean Architecture principles to ensure separation of concerns, making the codebase maintainable, testable, and scalable.
 
-**Key Characteristics:**
+**Core Capabilities:**
 
 - Clean Architecture with distinct Domain, Application, Infrastructure, and Presentation layers
 - Repository pattern for data access abstraction
@@ -84,22 +73,22 @@ Shoeler is a full-featured e-commerce platform for shoe retailers, built with La
 **Product Catalog**
 - Browse shoes with pagination
 - Advanced filtering (category, brand, price range, size)
-- Search functionality
+- Keyword search functionality
 - Product detail pages with images and specifications
 - Customer reviews and ratings
 
 **Shopping Experience**
 - Session-based shopping cart
 - Size and quantity selection
-- Real-time price calculation including tax and shipping
-- Promo code application
+- Real-time price calculation (subtotal, tax, shipping)
+- Promotional code application
 - Multiple payment methods (COD, Bank Transfer, Credit Card, E-Wallet)
 
 **User Account**
 - User registration and authentication
 - Profile management
 - Order history and tracking
-- Shipping address management
+- Multiple shipping addresses
 - Product review submission
 
 ### Administration Panel
@@ -119,12 +108,12 @@ Shoeler is a full-featured e-commerce platform for shoe retailers, built with La
 
 **Order Management**
 - Order listing and search
-- Order status updates (Pending, Processing, Shipped, Delivered, Cancelled)
+- Status updates (Pending, Processing, Shipped, Delivered, Cancelled)
 - Payment status tracking
 - Customer information access
 
 **Marketing Tools**
-- Promotional discount codes with constraints
+- Promotional discount codes with usage constraints
 - Homepage banner management
 - Featured product promotion
 
@@ -149,9 +138,10 @@ Shoeler is a full-featured e-commerce platform for shoe retailers, built with La
 - Docker & Docker Compose
 - Composer (Dependency Management)
 
-**Development:**
+**Development Standards:**
 - PSR-4 Autoloading
 - PSR-12 Coding Standards
+- SOLID Principles
 
 ---
 
@@ -159,7 +149,7 @@ Shoeler is a full-featured e-commerce platform for shoe retailers, built with La
 
 ### Clean Architecture Implementation
 
-The application follows Clean Architecture principles, organizing code into distinct layers with clear dependencies:
+The application follows Clean Architecture principles with clear separation of concerns across four distinct layers:
 
 ```
 src/
@@ -181,38 +171,43 @@ app/                        # Presentation Layer (Laravel)
 └── Providers/             # Dependency injection bindings
 ```
 
-**Layer Responsibilities:**
+### Layer Responsibilities
 
-1. **Domain Layer**: Pure business logic, framework-independent
-   - Defines business entities and their behavior
-   - Declares repository interfaces without implementation details
+**1. Domain Layer** (Pure Business Logic)
+- Defines business entities and their behavior
+- Declares repository interfaces without implementation details
+- Framework-independent and contains no external dependencies
 
-2. **Application Layer**: Application-specific business rules
-   - Implements use cases (ShoeService, OrderService, CartService)
-   - Orchestrates data flow between domain and infrastructure
+**2. Application Layer** (Use Cases)
+- Implements application-specific business rules
+- Contains services: ShoeService, OrderService, CartService, etc.
+- Orchestrates data flow between domain and infrastructure
 
-3. **Infrastructure Layer**: Technical implementation details
-   - Implements repository interfaces using Eloquent
-   - Handles database queries and data persistence
+**3. Infrastructure Layer** (Technical Implementation)
+- Implements repository interfaces using Eloquent ORM
+- Handles database queries and data persistence
+- Manages external integrations
 
-4. **Presentation Layer**: User interface and HTTP handling
-   - Controllers receive requests and return responses
-   - Views render HTML using Blade templates
-   - Middleware handles authentication and authorization
+**4. Presentation Layer** (User Interface)
+- Controllers handle HTTP requests and responses
+- Blade templates render HTML views
+- Middleware manages authentication and authorization
 
-**Design Patterns:**
+### Design Patterns
 
-- Repository Pattern for data access abstraction
-- Service Pattern for business logic encapsulation
-- Dependency Injection for loose coupling
-- Interface-based programming for flexibility
+- **Repository Pattern**: Abstracts data access logic
+- **Service Pattern**: Encapsulates business logic
+- **Dependency Injection**: Achieves loose coupling
+- **Interface-based Programming**: Enables flexibility and testability
 
-**Principles Applied:**
+### Principles Applied
 
-- Single Responsibility Principle
-- Dependency Inversion Principle
+- Single Responsibility Principle (SRP)
+- Dependency Inversion Principle (DIP)
 - Don't Repeat Yourself (DRY)
-- Keep It Simple (KISS)
+- Keep It Simple, Stupid (KISS)
+
+For detailed architecture documentation, see [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ---
 
@@ -220,60 +215,64 @@ app/                        # Presentation Layer (Laravel)
 
 ### Prerequisites
 
-**Using Docker:**
+**Docker Installation (Recommended):**
 - Docker Desktop (Windows/Mac) or Docker Engine (Linux)
 
 **Manual Installation:**
 - PHP >= 8.2
 - Composer >= 2.0
 - MySQL >= 8.0
-- Web server (Apache/Nginx) or use PHP built-in server
+- Web server (Apache/Nginx) or PHP built-in server
 
-### Docker Installation (Recommended)
+### Docker Setup (Recommended)
 
-1. Clone the repository
+**1. Clone the repository**
 ```bash
-git clone <repository-url>
+git clone https://github.com/tiao051/Shoeflow.git
 cd shoeler
 ```
 
-2. Start the application
+**2. Start the application**
 ```bash
 docker compose up -d
 ```
 
-3. Access the application
+**3. Access the application**
 - Application: http://localhost:8000
+- Admin Panel: http://localhost:8000/admin
 - phpMyAdmin: http://localhost:8080
-- Admin login: admin@shoeler.com / password
 
 The Docker setup automatically handles:
-- Dependency installation
-- Environment configuration
+- Composer dependency installation
+- Environment file generation
+- Application key generation
 - Database creation and migration
 - Sample data seeding
-- Server startup
+- Storage symlink creation
+- Development server startup
 
-### Manual Installation
+### Manual Setup
 
-1. Clone the repository
+**1. Clone the repository**
 ```bash
-git clone <repository-url>
+git clone https://github.com/tiao051/Shoeflow.git
 cd shoeler
 ```
 
-2. Install PHP dependencies
+**2. Install dependencies**
 ```bash
 composer install
 ```
 
-3. Configure environment
+**3. Configure environment**
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-4. Configure database in `.env`
+**4. Configure database**
+
+Edit `.env` file:
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -283,28 +282,30 @@ DB_USERNAME=root
 DB_PASSWORD=your_password
 ```
 
-5. Create database
+**5. Create database**
 ```sql
 CREATE DATABASE shoeler_db;
 ```
 
-6. Run migrations and seed data
+**6. Run migrations and seeders**
 ```bash
 php artisan migrate
 php artisan db:seed
 ```
 
-7. Create storage symlink
+**7. Create storage symlink**
 ```bash
 php artisan storage:link
 ```
 
-8. Start the development server
+**8. Start development server**
 ```bash
 php artisan serve
 ```
 
-9. Visit http://localhost:8000
+**9. Access the application**
+
+Visit http://localhost:8000
 
 ---
 
@@ -312,354 +313,275 @@ php artisan serve
 
 ```
 shoeler/
-├── app/                        # Application layer
+├── app/                        # Laravel Application Layer
 │   ├── Http/
-│   │   ├── Controllers/        # HTTP controllers
+│   │   ├── Controllers/        # Request handlers
 │   │   │   ├── Admin/          # Admin controllers
-│   │   │   ├── Auth/           # Authentication controllers
 │   │   │   └── ...             # Customer controllers
 │   │   └── Middleware/         # Custom middleware
 │   ├── Models/                 # Eloquent models
 │   └── Providers/              # Service providers
-│
-├── bootstrap/                  # Application bootstrap
-│   ├── app.php                 # Application bootstrap
-│   └── providers.php           # Service provider registration
 │
 ├── config/                     # Configuration files
 │   ├── app.php
 │   ├── database.php
 │   └── ...
 │
-├── database/                   # Database files
-│   ├── migrations/             # Database migrations
-│   ├── seeders/                # Database seeders
+├── database/
+│   ├── migrations/             # Database schema migrations
+│   ├── seeders/                # Sample data seeders
 │   └── factories/              # Model factories
 │
-├── public/                     # Public assets
-│   ├── index.php               # Entry point
-│   └── storage/                # Symlink to storage
+├── public/                     # Public web root
+│   └── index.php               # Application entry point
 │
-├── resources/                  # Views and assets
+├── resources/
 │   └── views/                  # Blade templates
 │       ├── layouts/            # Layout templates
-│       ├── auth/               # Authentication views
 │       ├── admin/              # Admin views
-│       ├── shoes/              # Product views
-│       └── ...
+│       ├── auth/               # Authentication views
+│       └── ...                 # Customer views
 │
-├── routes/                     # Route definitions
-│   ├── web.php                 # Web routes
-│   └── console.php             # Console routes
+├── routes/
+│   └── web.php                 # Web route definitions
 │
-├── src/                        # Clean Architecture layers
-│   ├── Domain/                 # Domain layer
+├── src/                        # Clean Architecture Layers
+│   ├── Domain/
 │   │   ├── Entities/           # Business entities
 │   │   └── Repositories/       # Repository interfaces
-│   │
-│   ├── Application/            # Application layer
+│   ├── Application/
 │   │   └── Services/           # Business services
-│   │
-│   └── Infrastructure/         # Infrastructure layer
+│   └── Infrastructure/
 │       └── Repositories/       # Repository implementations
 │
-├── storage/                    # Storage files
-│   ├── app/
-│   │   └── public/             # Public uploads
-│   ├── framework/
-│   └── logs/
+├── storage/                    # Application storage
+│   ├── app/public/             # Public file uploads
+│   ├── framework/              # Framework cache/sessions
+│   └── logs/                   # Application logs
 │
+├── docker-compose.yml          # Docker service definitions
+├── Dockerfile                  # Docker image configuration
 ├── .env.example                # Environment template
-├── composer.json               # PHP dependencies
-└── README.md                   # This file
+└── composer.json               # PHP dependencies
 ```
 
 ---
 
 ## Database Schema
 
-### Core Tables
+### Tables
 
-1. **users** - User accounts (customers and admins)
-2. **categories** - Product categories
-3. **shoes** - Product catalog
-4. **orders** - Customer orders
-5. **order_items** - Order line items
+1. **users** - User accounts (customers and administrators)
+2. **categories** - Product category taxonomy
+3. **shoes** - Product catalog with specifications
+4. **orders** - Customer purchase orders
+5. **order_items** - Line items for each order
 6. **addresses** - User shipping addresses
 7. **reviews** - Product reviews and ratings
 8. **promotions** - Discount codes and vouchers
 9. **banners** - Homepage promotional banners
-10. **contacts** - Customer inquiries
+10. **contacts** - Customer support inquiries
 
-### Key Relationships
+### Relationships
 
-- `categories` → `shoes` (1-to-many)
-- `users` → `orders` (1-to-many)
-- `users` → `addresses` (1-to-many)
-- `users` → `reviews` (1-to-many)
-- `orders` → `order_items` (1-to-many)
-- `shoes` → `reviews` (1-to-many)
-- `shoes` → `order_items` (1-to-many)
+- categories → shoes (one-to-many)
+- users → orders (one-to-many)
+- users → addresses (one-to-many)
+- users → reviews (one-to-many)
+- orders → order_items (one-to-many)
+- shoes → reviews (one-to-many)
+- shoes → order_items (one-to-many)
 
 ---
 
 ## Usage
 
-### For Customers
+### Customer Workflow
 
-1. **Browse Products**
-   - Visit homepage to see featured shoes
-   - Click "All Shoes" to browse complete catalog
-   - Use filters to narrow down products
-   - Click on product to view details
+**1. Browse Products**
+- Visit homepage for featured products
+- Navigate to "All Shoes" for complete catalog
+- Apply filters (category, brand, price, size)
+- Search by keyword
 
-2. **Add to Cart**
-   - Select size and quantity
-   - Click "Add to Cart"
-   - View cart from navigation menu
+**2. Shopping Cart**
+- Select product size and quantity
+- Add items to cart
+- Update quantities or remove items
+- View cart summary
 
-3. **Checkout**
-   - Click "Proceed to Checkout" from cart
-   - Fill in shipping information
-   - Select payment method
-   - Apply promo code (optional)
-   - Confirm order
+**3. Checkout**
+- Proceed to checkout from cart
+- Enter shipping information
+- Select payment method
+- Apply promotional code (optional)
+- Review and confirm order
 
-4. **Manage Account**
-   - Register/Login from navigation
-   - Update profile information
-   - View order history
-   - Manage shipping addresses
-   - Write product reviews
+**4. Account Management**
+- Register new account or login
+- Update profile information
+- View order history
+- Manage shipping addresses
+- Submit product reviews
 
-### For Administrators
+### Administrator Workflow
 
-1. **Login**
-   - Use admin credentials: `admin@shoeler.com` / `password`
-   - Access admin panel from navigation
+**1. Access Admin Panel**
+- Login with admin credentials
+- Navigate to /admin
 
-2. **Manage Categories**
-   - Navigate to Categories
-   - Create, edit, or delete categories
-   - Set category status (active/inactive)
+**2. Manage Categories**
+- Create, edit, delete categories
+- Toggle active/inactive status
+- Set category slugs
 
-3. **Manage Products**
-   - Navigate to Shoes
-   - Add new shoes with details
-   - Upload product images
-   - Set prices and discounts
-   - Manage stock levels
-   - Mark products as featured
+**3. Manage Products**
+- Add new products with details
+- Upload product images
+- Set pricing and discounts
+- Manage inventory levels
+- Mark products as featured
 
-4. **Manage Orders**
-   - View all orders
-   - Update order status (pending → processing → shipped → delivered)
-   - Update payment status
-   - View order details and customer info
+**4. Manage Orders**
+- View all customer orders
+- Update order status
+- Track payment status
+- View customer details
 
-5. **Manage Promotions**
-   - Create discount codes
-   - Set discount type (percentage/fixed)
-   - Define validity period
-   - Set usage limits
+**5. Manage Promotions**
+- Create discount codes
+- Set discount type (percentage/fixed amount)
+- Define validity period
+- Configure usage limits and minimum purchase amounts
 
-6. **Manage Banners**
-   - Upload promotional banners
-   - Set display order
-   - Add links to banner images
+**6. Manage Banners**
+- Upload promotional banners
+- Configure display order
+- Set banner links
 
 ---
 
 ## Development
 
-### Running Artisan Commands
+### Docker Commands
 
-**With Docker:**
+**View logs:**
 ```bash
-docker compose exec app php artisan <command>
+# All services
+docker compose logs -f
+
+# Application only
+docker compose logs -f app
+
+# Database only
+docker compose logs -f mysql
 ```
 
-**Examples:**
+**Restart services:**
 ```bash
-# Clear cache
+docker compose restart
+```
+
+**Stop services:**
+```bash
+docker compose down
+```
+
+**Rebuild containers:**
+```bash
+docker compose up -d --build
+```
+
+### Artisan Commands (with Docker)
+
+```bash
+# Clear application cache
 docker compose exec app php artisan cache:clear
+
+# Clear configuration cache
+docker compose exec app php artisan config:clear
 
 # Run migrations
 docker compose exec app php artisan migrate
 
-# Create new migration
-docker compose exec app php artisan make:migration create_example_table
+# Rollback migrations
+docker compose exec app php artisan migrate:rollback
+
+# Reset database with fresh data
+docker compose exec app php artisan migrate:fresh --seed
 
 # Create new controller
 docker compose exec app php artisan make:controller ExampleController
+
+# Create new migration
+docker compose exec app php artisan make:migration create_example_table
 
 # List all routes
 docker compose exec app php artisan route:list
 ```
 
-### Database Operations
+### Database Access
 
-**Reset database:**
-```bash
-docker compose exec app php artisan migrate:fresh --seed
-```
-
-**Access MySQL CLI:**
+**MySQL CLI:**
 ```bash
 docker compose exec mysql mysql -u shoeler -p
 # Password: shoeler123
 ```
 
-### Logs
+**phpMyAdmin:**
 
-**View application logs:**
-```bash
-docker compose logs -f app
-```
+Visit http://localhost:8080
+- Server: mysql
+- Username: shoeler
+- Password: shoeler123
 
-**View specific service logs:**
-```bash
-docker compose logs -f mysql
-docker compose logs -f phpmyadmin
-```
+### Code Quality Standards
 
-### Stopping the Application
-
-```bash
-docker compose down
-```
-
-### Code Quality
-
-The codebase follows PSR-12 coding standards and implements:
-- Meaningful variable and function names
+The codebase adheres to:
+- PSR-12 coding standards
+- Meaningful variable and function naming
 - Single Responsibility Principle
 - DRY (Don't Repeat Yourself)
+- Comprehensive input validation
 - Proper error handling
-- Input validation on all forms
-- Eloquent ORM to prevent SQL injection
+- SQL injection prevention via Eloquent ORM
 
 ---
 
 ## Security
 
-- Password hashing with bcrypt
-- CSRF protection on all forms
+**Authentication & Authorization:**
+- Bcrypt password hashing
+- Session-based authentication
+- Role-based access control (Admin/Customer)
+- CSRF token protection on all forms
+
+**Data Protection:**
 - SQL injection prevention via Eloquent ORM
 - XSS protection via Blade templating
-- Role-based access control
-- Middleware authentication
-- Session management
-- Input validation
+- Input validation and sanitization
+- Prepared database statements
+
+**Best Practices:**
+- Environment variables for sensitive configuration
+- Secure session management
+- HTTP-only cookies
+- Database credentials excluded from version control
 
 ---
 
-## 🎨 UI/UX Design
-
-### Design Principles
-
-- **Minimalist**: Clean and uncluttered interface
-- **Responsive**: Mobile-first approach
-- **Accessible**: Semantic HTML and ARIA labels
-- **Consistent**: Uniform color scheme and typography
-- **User-friendly**: Intuitive navigation and clear CTAs
-
-### Color Scheme
-
-- Primary: `#2c3e50` (Dark blue-gray)
-- Secondary: `#34495e` (Slate)
-- Accent: `#7f8c8d` (Gray)
-- Background: `#ffffff` (White)
-- Light Background: `#f8f9fa` (Light gray)
-
----
-
-## 🧪 Testing
-
-### Manual Testing Checklist
-
-- [ ] User registration and login
-- [ ] Product browsing and filtering
-- [ ] Add to cart functionality
-- [ ] Checkout process
-- [ ] Order placement
-- [ ] Admin CRUD operations
-- [ ] File uploads
-- [ ] Form validations
-- [ ] Responsive design
-
----
-
-## 📝 Code Quality
-
-### Clean Code Principles Applied
-
-1. **Meaningful Names**: Variables, functions, and classes have descriptive names
-2. **Single Responsibility**: Each class/function has one clear purpose
-3. **DRY (Don't Repeat Yourself)**: No code duplication
-4. **KISS (Keep It Simple)**: Simple, straightforward solutions
-5. **SOLID Principles**: Proper object-oriented design
-6. **Separation of Concerns**: Clear layer boundaries
-
----
-
-## 🚀 Deployment
-
-### Production Checklist
-
-1. Set `APP_ENV=production` in `.env`
-2. Set `APP_DEBUG=false`
-3. Configure proper database credentials
-4. Set up SSL certificate (HTTPS)
-5. Configure mail server
-6. Optimize autoloader: `composer install --optimize-autoloader --no-dev`
-7. Cache configuration: `php artisan config:cache`
-8. Cache routes: `php artisan route:cache`
-9. Cache views: `php artisan view:cache`
-10. Set proper file permissions
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these guidelines:
-
-1. Fork the repository
-2. Create a feature branch
-3. Follow coding standards (PSR-12)
-4. Write meaningful commit messages
-5. Create pull request with description
-
----
-
-## 📄 License
+## License
 
 This project is licensed under the MIT License.
 
 ---
 
-## 👨‍💻 Developer
+## Additional Resources
 
-Developed with ❤️ using Laravel 11 and Clean Architecture principles.
-
----
-
-## 📞 Support
-
-For support and questions:
-- Email: info@shoeler.com
-- Documentation: This README file
-- Issues: Use GitHub Issues
+- [DOCKER_GUIDE.md](DOCKER_GUIDE.md) - Complete Docker documentation
+- [QUICKSTART.md](QUICKSTART.md) - Quick reference guide
+- [ARCHITECTURE.md](ARCHITECTURE.md) - Detailed architecture documentation
 
 ---
 
-## 🙏 Acknowledgments
-
-- Laravel Framework
-- Bootstrap Team
-- Bootstrap Icons
-- All open-source contributors
-
----
-
-**Happy Coding! 🎉**
+Developed with Laravel 11 implementing Clean Architecture principles.
