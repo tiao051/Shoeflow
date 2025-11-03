@@ -7,6 +7,7 @@
 docker-compose.yml
 Dockerfile
 .dockerignore
+public/storage
 
 # Environment
 .env
