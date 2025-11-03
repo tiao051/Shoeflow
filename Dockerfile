@@ -39,3 +39,6 @@ RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Expose port 8000
 EXPOSE 8000
+
+# Run Laravel dev server
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
