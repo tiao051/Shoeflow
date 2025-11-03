@@ -50,8 +50,10 @@ services:
       - shoeler_network
     command: >
       sh -c "
+        if [ ! -f .env ]; then cp .env.example .env; fi &&
         composer install --no-interaction --optimize-autoloader &&
         php artisan key:generate --force &&
+        php artisan config:clear &&
         php artisan storage:link &&
         php artisan migrate --force &&
         php artisan db:seed --force &&
