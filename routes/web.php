@@ -47,7 +47,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     
     // Upload Avatar (Added based on your controller)
-    Route::post('/profile/avatar', [ProfileController::class, 'uploadAvatar'])->name('profile.avatar');
+    Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar.update');
 
     // --- Address & Contact Routes ---
     Route::resource('addresses', App\Http\Controllers\AddressController::class);
