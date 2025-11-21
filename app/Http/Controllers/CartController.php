@@ -9,92 +9,141 @@ use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
-    // Xem giỏ hàng
+    /**
+     * Display the shopping cart contents.
+     */
     public function index()
     {
+        // Assuming the user is authenticated via web middleware
         $user = auth()->user();
         $cart = Cart::where('user_id', $user->id)->first();
         
+        // If cart does not exist, return an empty cart view
         if (!$cart) {
-            return view('cart', ['cartItems' => collect(), 'subtotal' => 0, 'shipping' => 0, 'tax' => 0, 'total' => 0]);
+            return view('cart', [
+                'cartItems' => collect(), 
+                'subtotal' => 0, 
+                'shipping' => 0, 
+                'tax' => 0, 
+                'total' => 0
+            ]);
         }
 
+        // Load cart items with related product information
         $cartItems = $cart->items()->with('product')->get();
         
+        // Calculate totals
         $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
-        $shipping = $subtotal > 2000000 ? 0 : 50000;
+        
+        // Shipping rule: Free shipping for orders over 2,000,000 VND
+        $shipping = $subtotal > 2000000 ? 0 : 50000; 
+        
+        // Tax calculation (e.g., 10% VAT)
         $tax = $subtotal * 0.1;
+        
+        // Final total
         $total = $subtotal + $shipping + $tax;
 
         return view('cart', compact('cartItems', 'subtotal', 'shipping', 'tax', 'total'));
     }
 
-    // Thêm vào giỏ hàng
+    /**
+     * Add a product to the cart.
+     */
     public function add(Request $request)
     {
         $user = auth()->user();
+        
+        // Validate required fields (assuming product_id is required)
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'nullable|integer|min:1',
+            'size' => 'nullable|string|max:50',
+            'color' => 'nullable|string|max:50',
+        ]);
+        
         $product = Product::findOrFail($request->product_id);
 
-        // Tìm hoặc tạo cart
+        // Find or create the user's cart
         $cart = Cart::firstOrCreate(['user_id' => $user->id]);
 
-        // Kiểm tra sản phẩm đã có trong cart chưa
+        // Check if an identical item (same product, size, and color) already exists
         $cartItem = $cart->items()
             ->where('product_id', $product->id)
             ->where('size', $request->size ?? null)
             ->where('color', $request->color ?? null)
             ->first();
+            
+        $quantity = $request->quantity ?? 1;
 
         if ($cartItem) {
-            $cartItem->quantity += $request->quantity ?? 1;
+            // Update quantity if item exists
+            $cartItem->quantity += $quantity;
             $cartItem->save();
         } else {
+            // Create new cart item
             CartItem::create([
                 'cart_id' => $cart->id,
                 'product_id' => $product->id,
                 'price' => $product->price,
-                'quantity' => $request->quantity ?? 1,
+                'quantity' => $quantity,
                 'size' => $request->size,
                 'color' => $request->color,
             ]);
         }
 
-        return redirect()->back()->with('success', 'Sản phẩm đã thêm vào giỏ hàng');
+        return redirect()->back()->with('success', 'Product added to cart successfully.');
     }
 
-    // Cập nhật số lượng
+    /**
+     * Update the quantity of a specific cart item.
+     */
     public function update(Request $request, $itemId)
     {
         $cartItem = CartItem::findOrFail($itemId);
         
-        if ($request->quantity <= 0) {
+        $request->validate([
+            'quantity' => 'required|integer|min:0',
+        ]);
+        
+        $newQuantity = $request->quantity;
+
+        if ($newQuantity <= 0) {
+            // Remove item if quantity is zero or less
             $cartItem->delete();
         } else {
-            $cartItem->update(['quantity' => $request->quantity]);
+            // Update quantity
+            $cartItem->update(['quantity' => $newQuantity]);
         }
 
-        return redirect()->back()->with('success', 'Giỏ hàng đã cập nhật');
+        return redirect()->back()->with('success', 'Cart updated successfully.');
     }
 
-    // Xóa sản phẩm khỏi giỏ
+    /**
+     * Remove a product from the cart.
+     */
     public function remove($itemId)
     {
         $cartItem = CartItem::findOrFail($itemId);
         $cartItem->delete();
 
-        return redirect()->back()->with('success', 'Sản phẩm đã được xóa khỏi giỏ');
+        return redirect()->back()->with('success', 'Product removed from cart.');
     }
 
-    // Xóa toàn bộ giỏ hàng
+    /**
+     * Clear the entire shopping cart for the current user.
+     */
     public function clear()
     {
         $user = auth()->user();
         Cart::where('user_id', $user->id)->delete();
 
-        return redirect()->back()->with('success', 'Giỏ hàng đã được xóa');
+        return redirect()->back()->with('success', 'Shopping cart cleared.');
     }
 
-    // Lấy số lượng sản phẩm trong giỏ (AJAX)
+    /**
+     * Get the total number of items in the cart (for AJAX calls).
+     */
     public function count()
     {
         $user = auth()->user();
