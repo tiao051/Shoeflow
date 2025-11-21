@@ -22,14 +22,12 @@
 </section>
 
 <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-    
     <!-- SECTION: SHOP BY CATEGORY -->
     <section class="mb-12">
         <h2 class="text-center mb-8 font-extrabold uppercase text-3xl md:text-4xl" 
             style="font-family: 'Oswald', sans-serif;">
             Shop By Category
         </h2>
-        
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Category 1: Chuck Taylor -->
             <div class="relative bg-white rounded-xl shadow-lg overflow-hidden transition duration-300 hover:shadow-2xl">
@@ -60,7 +58,7 @@
                 </div>
                 <a href="#" class="absolute inset-0 z-10"></a>
             </div>
-            
+
             <!-- Category 3: All Star -->
             <div class="relative bg-white rounded-xl shadow-lg overflow-hidden transition duration-300 hover:shadow-2xl">
                 <div class="bg-gray-100 flex items-center justify-center h-80">
@@ -84,11 +82,8 @@
             style="font-family: 'Oswald', sans-serif;">
             New Arrivals
         </h2>
-        
-        <!-- Carousel Container -->
         <div id="new-arrivals-carousel" 
              class="flex overflow-x-auto whitespace-nowrap space-x-6 pb-4 scroll-smooth snap-x snap-mandatory">
-            
             @foreach($newArrivals as $product)
             <div class="inline-block w-64 min-w-64 snap-center group relative bg-white transition duration-300 hover:shadow-lg rounded-lg">
                 <div class="relative overflow-hidden h-64">
@@ -101,7 +96,22 @@
                 <div class="p-4">
                     <h5 class="font-bold uppercase text-base mb-1 truncate">{{ $product->name }}</h5>
                     <p class="text-gray-500 text-sm mb-2 truncate">{{ $product->color ?? 'Multiple Colors' }}</p>
-                    <p class="font-bold mb-3 text-lg">{{ number_format($product->price, 0, ',', '.') }} ₫</p>
+                    <div class="flex justify-between items-center mb-3">
+                        <p class="font-bold text-lg">{{ number_format($product->price, 0, ',', '.') }} ₫</p>
+                        <button class="text-black-500 hover:text-red-600 transition duration-150" 
+                                title="Add to Wishlist">
+                            <svg xmlns="http://www.w3.org/2000/svg" 
+                                 class="w-6 h-6" 
+                                 fill="none" 
+                                 viewBox="0 0 24 24" 
+                                 stroke="currentColor" 
+                                 stroke-width="2">
+                                <path stroke-linecap="round" 
+                                      stroke-linejoin="round" 
+                                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-.318-.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                        </button>
+                    </div>
                     <a href="#" 
                        class="block border border-black text-black px-4 py-2 text-xs uppercase font-bold text-center hover:bg-black hover:text-white transition duration-200">
                         Add to Cart
@@ -110,12 +120,9 @@
             </div>
             @endforeach
         </div>
-        
-        <!-- Hint for scrolling -->
         <div class="text-center text-sm text-gray-500 mt-4">
             ← Swipe or scroll to view more products →
         </div>
-        
     </section>
 
     <!-- SECTION: CUSTOMIZATION CALL TO ACTION -->
@@ -149,7 +156,6 @@
             </div>
         </div>
     </section>
-
 </div>
 
 <style>
@@ -174,66 +180,66 @@
 </style>
 
 <script>
-    // Auto-scroll functionality for the carousel
-    document.addEventListener('DOMContentLoaded', function() {
-        const carousel = document.getElementById('new-arrivals-carousel');
-        if (!carousel) return; 
-        
-        const scrollDistance = 256 + 24; // Item width + gap
-        let scrollPosition = 0;
-        let direction = 1; // 1: scroll right, -1: scroll left
-        let scrollInterval;
+// Auto-scroll functionality for the carousel
+document.addEventListener('DOMContentLoaded', function() {
+    const carousel = document.getElementById('new-arrivals-carousel');
+    if (!carousel) return; 
 
-        function autoScroll() {
-            if (carousel.scrollWidth <= carousel.clientWidth) {
-                 clearInterval(scrollInterval);
-                 return;
-            }
+    const scrollDistance = 256 + 24; // Item width + gap
+    let scrollPosition = 0;
+    let direction = 1; // 1: scroll right, -1: scroll left
+    let scrollInterval;
 
-            const newScrollPosition = scrollPosition + (direction * scrollDistance);
-            const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
-
-            if (direction === 1) {
-                if (newScrollPosition >= maxScrollLeft) {
-                    direction = -1;
-                    scrollPosition = maxScrollLeft;
-                } else {
-                    scrollPosition = newScrollPosition;
-                }
-            } else {
-                if (newScrollPosition <= 0) {
-                    direction = 1;
-                    scrollPosition = 0;
-                } else {
-                    scrollPosition = newScrollPosition;
-                }
-            }
-
-            carousel.scrollTo({
-                left: scrollPosition,
-                behavior: 'smooth'
-            });
+    function autoScroll() {
+        if (carousel.scrollWidth <= carousel.clientWidth) {
+             clearInterval(scrollInterval);
+             return;
         }
 
-        const startAutoScroll = () => {
-            if (carousel.scrollWidth > carousel.clientWidth) {
-                scrollInterval = setInterval(autoScroll, 4000);
+        const newScrollPosition = scrollPosition + (direction * scrollDistance);
+        const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
+
+        if (direction === 1) {
+            if (newScrollPosition >= maxScrollLeft) {
+                direction = -1;
+                scrollPosition = maxScrollLeft;
+            } else {
+                scrollPosition = newScrollPosition;
             }
-        };
+        } else {
+            if (newScrollPosition <= 0) {
+                direction = 1;
+                scrollPosition = 0;
+            } else {
+                scrollPosition = newScrollPosition;
+            }
+        }
 
-        startAutoScroll();
-
-        const stopAutoScroll = () => clearInterval(scrollInterval);
-        
-        carousel.addEventListener('mouseenter', stopAutoScroll);
-        carousel.addEventListener('touchstart', stopAutoScroll);
-        carousel.addEventListener('mouseleave', startAutoScroll);
-        carousel.addEventListener('touchend', startAutoScroll);
-
-        window.addEventListener('resize', () => {
-             stopAutoScroll();
-             startAutoScroll();
+        carousel.scrollTo({
+            left: scrollPosition,
+            behavior: 'smooth'
         });
+    }
+
+    const startAutoScroll = () => {
+        if (carousel.scrollWidth > carousel.clientWidth) {
+            scrollInterval = setInterval(autoScroll, 4000);
+        }
+    };
+
+    startAutoScroll();
+
+    const stopAutoScroll = () => clearInterval(scrollInterval);
+    
+    carousel.addEventListener('mouseenter', stopAutoScroll);
+    carousel.addEventListener('touchstart', stopAutoScroll);
+    carousel.addEventListener('mouseleave', startAutoScroll);
+    carousel.addEventListener('touchend', startAutoScroll);
+
+    window.addEventListener('resize', () => {
+         stopAutoScroll();
+         startAutoScroll();
     });
+});
 </script>
 @endsection
