@@ -25,8 +25,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('address_id')->references('id')->on('addresses')->onDelete('set null');
-            $table->foreign('voucher_id')->references('id')->on('vouchers')->onDelete('set null');
+            // address_id, voucher_id foreign key sẽ được thêm ở migration riêng
         });
     }
 
