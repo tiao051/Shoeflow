@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Trang chủ - Converse Vietnam')
+@section('title', 'Dashboard - Converse Vietnam')
 
 @section('content')
     <section class="hero-section text-center text-white d-flex align-items-center justify-content-center" 

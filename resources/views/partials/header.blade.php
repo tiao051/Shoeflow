@@ -47,7 +47,7 @@
 <!-- START: HEADER MAIN -->
 <header>
     <div class="header-content">
-        <a href="{{ url('/') }}" class="logo">CONVERSE</a>
+        <a href="#" class="logo">CONVERSE</a>
         
         <div class="nav-center">
             <a href="#" class="font-bold hover:text-gray-600">Run Star Trainer</a>

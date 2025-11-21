@@ -1,7 +1,5 @@
 @extends('layouts.app')
 
-{{-- Assume Alpine.js is included in layouts/app.blade.php --}}
-
 @section('title', 'My Profile')
 
 @section('content')
@@ -35,7 +33,6 @@
             </script>
         @endif
 
-        {{-- Validation Error Display for Avatar --}}
         @error('avatar')
             <div x-data="{ open: true }" x-show="open" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
                 <strong class="font-bold">Error!</strong>
@@ -49,19 +46,12 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8" x-data="{ currentTab: 'profile' }">
             
             <div class="md:col-span-1 bg-white rounded-lg shadow-lg p-6 h-fit sticky top-24">
-                <div class="text-center mb-6">
-                    
-                    {{-- AVATAR UPLOAD SECTION --}}
+                <div class="text-center mb-6">                 
                     <div x-data="{ isHovering: false }" class="relative inline-block mx-auto" @mouseenter="isHovering = true" @mouseleave="isHovering = false">
-                        {{-- 
-                            FIXED: Đã thêm . '?v=' . time() vào đường dẫn ảnh 
-                            để ngăn trình duyệt lưu cache ảnh cũ 
-                        --}}
                         <img src="{{ $user->avatar ? asset('storage/' . $user->avatar) . '?v=' . time() : 'https://via.placeholder.com/128/000000/FFFFFF?text=A' }}" 
                             alt="{{ $user->name }}" 
                             class="w-24 h-24 rounded-full mx-auto object-cover border-4 border-gray-100 shadow-md">
 
-                        {{-- Pencil Icon Overlay --}}
                         <div x-show="isHovering"
                               @click="$refs.avatarInput.click()"
                               class="absolute inset-0 w-24 h-24 rounded-full bg-black bg-opacity-50 flex items-center justify-center cursor-pointer transition duration-300">
@@ -70,8 +60,7 @@
                             </svg>
                         </div>
                     </div>
-                    
-                    {{-- Hidden Form for Avatar Upload --}}
+      
                     <form id="avatarUploadForm" action="{{ route('profile.avatar.update') }}" method="POST" enctype="multipart/form-data" class="hidden" x-ref="avatarUploadForm">
                         @csrf
                         <input type="file" name="avatar" x-ref="avatarInput" accept="image/*" @change="$refs.avatarUploadForm.submit()">
@@ -117,13 +106,11 @@
                             @csrf
                             @method('PATCH')
 
-                            {{-- START: Tách First Name & Last Name --}}
                             @php
                                 $nameParts = explode(' ', $user->name);
                                 $firstName = array_shift($nameParts); 
                                 $lastName = implode(' ', $nameParts); 
                             @endphp
-                            {{-- END: Tách First Name & Last Name --}}
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
