@@ -4,10 +4,6 @@
 
 @section('content')
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Oswald:wght@200..700&display=swap" rel="stylesheet">
-<!--
-    Note: This file assumes Tailwind CSS is configured in your project and is extending a base layout
-    that includes necessary dependencies like Tailwind and the Inter/Oswald fonts.
--->
 
 <!-- HERO SECTION: CHUCK TAYLOR BANNER -->
 <section class="flex items-center justify-center min-h-[500px] text-white py-20 px-5" 
@@ -24,18 +20,6 @@
         </a>
     </div>
 </section>
-
-<!-- MOCK DATA FOR NEW ARRIVALS -->
-@php
-    $newArrivals = [
-        ['name' => 'Chuck 70 High Top', 'color' => 'Classic Black', 'price' => '1,890,000 ₫', 'image' => 'images/chuck_70_hightop1.jpg'],
-        ['name' => 'Run Star Motion CX', 'color' => 'White/Black/Gum', 'price' => '2,550,000 ₫', 'image' => 'images/one_start1.jpg'], // Using one_start1 image temporarily
-        ['name' => 'Chuck Taylor All Star Lift', 'color' => 'Pink Foam', 'price' => '1,790,000 ₫', 'image' => 'images/all_star1.jpg'], // Using all_star1 image temporarily
-        ['name' => 'Chuck 70 Hi Vintage', 'color' => 'Ivory', 'price' => '1,990,000 ₫', 'image' => 'images/chuck_taylor1.jpg'], // Using chuck_taylor1 image temporarily
-        ['name' => 'One Star Pro Suede', 'color' => 'Obsidian', 'price' => '2,200,000 ₫', 'image' => 'images/one_start1.jpg'],
-        ['name' => 'All Star BB Shift', 'color' => 'Volt Orange', 'price' => '2,100,000 ₫', 'image' => 'images/all_star1.jpg'],
-    ];
-@endphp
 
 <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
     
@@ -94,33 +78,30 @@
         </div>
     </section>
 
-    <!-- SECTION: NEW ARRIVALS (SCROLLING CAROUSEL) -->
+    <!-- SECTION: NEW ARRIVALS -->
     <section class="mb-12">
         <h2 class="text-center mb-8 font-extrabold uppercase text-3xl md:text-4xl" 
             style="font-family: 'Oswald', sans-serif;">
             New Arrivals
         </h2>
         
-        <!-- CAROUSEL CONTAINER -->
-        <!-- Add 'snap-x snap-mandatory' for a better manual swipe experience -->
+        <!-- Carousel Container -->
         <div id="new-arrivals-carousel" 
              class="flex overflow-x-auto whitespace-nowrap space-x-6 pb-4 scroll-smooth snap-x snap-mandatory">
             
             @foreach($newArrivals as $product)
             <div class="inline-block w-64 min-w-64 snap-center group relative bg-white transition duration-300 hover:shadow-lg rounded-lg">
-                {{-- Fixed height (h-64) for the image container to ensure a consistent 1:1 (square) ratio --}}
                 <div class="relative overflow-hidden h-64">
-                    {{-- The PHP array keys are correctly quoted here: $product['image'], $product['name'], $product['color'] --}}
-                    <img src="{{ asset($product['image']) }}" 
+                    <img src="{{ asset($product->image ?? 'images/placeholder.jpg') }}" 
                          class="w-full h-full object-cover rounded-t-lg transition duration-500 group-hover:opacity-90" 
-                         alt="{{ $product['name'] }} - {{ $product['color'] }}"
-                         onerror="this.onerror=null;this.src='https://placehold.co/400x400/000000/FFFFFF?text={{ urlencode($product['name']) }}';">
+                         alt="{{ $product->name }} - {{ $product->color ?? '' }}"
+                         onerror="this.onerror=null;this.src='https://placehold.co/400x400/000000/FFFFFF?text={{ urlencode($product->name ?? 'Product') }}';">
                     <span class="absolute top-2 left-2 bg-black text-white text-xs px-2 py-1 font-bold rounded-md">NEW</span>
                 </div>
                 <div class="p-4">
-                    <h5 class="font-bold uppercase text-base mb-1 truncate">{{ $product['name'] }}</h5>
-                    <p class="text-gray-500 text-sm mb-2 truncate">{{ $product['color'] }}</p>
-                    <p class="font-bold mb-3 text-lg">{{ $product['price'] }}</p>
+                    <h5 class="font-bold uppercase text-base mb-1 truncate">{{ $product->name }}</h5>
+                    <p class="text-gray-500 text-sm mb-2 truncate">{{ $product->color ?? 'Multiple Colors' }}</p>
+                    <p class="font-bold mb-3 text-lg">{{ number_format($product->price, 0, ',', '.') }} ₫</p>
                     <a href="#" 
                        class="block border border-black text-black px-4 py-2 text-xs uppercase font-bold text-center hover:bg-black hover:text-white transition duration-200">
                         Add to Cart
@@ -130,7 +111,7 @@
             @endforeach
         </div>
         
-        <!-- Hint for users that they can scroll horizontally on desktop/mobile -->
+        <!-- Hint for scrolling -->
         <div class="text-center text-sm text-gray-500 mt-4">
             ← Swipe or scroll to view more products →
         </div>
@@ -183,57 +164,65 @@
 </style>
 
 <script>
+    // Auto-scroll functionality for the carousel
     document.addEventListener('DOMContentLoaded', function() {
         const carousel = document.getElementById('new-arrivals-carousel');
-        const scrollDistance = 256 + 24; // Item width (w-64 = 256px) + gap (space-x-6 = 24px)
+        if (!carousel) return; 
+        
+        const scrollDistance = 256 + 24; // Item width + gap
         let scrollPosition = 0;
         let direction = 1; // 1: scroll right, -1: scroll left
+        let scrollInterval;
 
-        // Function to scroll the carousel
         function autoScroll() {
-            // Calculate the new scroll position
-            const newScrollPosition = scrollPosition + (direction * scrollDistance);
-
-            // Check scroll limits:
-            // 1. If scrolled too far right, reverse direction (scroll back to left)
-            if (newScrollPosition >= (carousel.scrollWidth - carousel.clientWidth)) {
-                direction = -1;
-                scrollPosition = carousel.scrollWidth - carousel.clientWidth; // Ensure scroll to the end
-            } 
-            // 2. If scrolled to the far left (back to 0), reverse direction (scroll back to right)
-            else if (newScrollPosition <= 0) {
-                direction = 1;
-                scrollPosition = 0; // Ensure scroll to the beginning
-            } 
-            // 3. If still within limits
-            else {
-                scrollPosition = newScrollPosition;
+            if (carousel.scrollWidth <= carousel.clientWidth) {
+                 clearInterval(scrollInterval);
+                 return;
             }
 
-            // Perform smooth scrolling
+            const newScrollPosition = scrollPosition + (direction * scrollDistance);
+            const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
+
+            if (direction === 1) {
+                if (newScrollPosition >= maxScrollLeft) {
+                    direction = -1;
+                    scrollPosition = maxScrollLeft;
+                } else {
+                    scrollPosition = newScrollPosition;
+                }
+            } else {
+                if (newScrollPosition <= 0) {
+                    direction = 1;
+                    scrollPosition = 0;
+                } else {
+                    scrollPosition = newScrollPosition;
+                }
+            }
+
             carousel.scrollTo({
                 left: scrollPosition,
                 behavior: 'smooth'
             });
         }
 
-        // Start auto-scrolling every 4 seconds (4000ms)
-        const scrollInterval = setInterval(autoScroll, 4000);
+        const startAutoScroll = () => {
+            if (carousel.scrollWidth > carousel.clientWidth) {
+                scrollInterval = setInterval(autoScroll, 4000);
+            }
+        };
 
-        // Stop auto-scrolling when user hovers/touches the carousel
-        carousel.addEventListener('mouseenter', () => clearInterval(scrollInterval));
-        carousel.addEventListener('touchstart', () => clearInterval(scrollInterval));
+        startAutoScroll();
 
-        // Resume auto-scrolling when user leaves the carousel
-        carousel.addEventListener('mouseleave', () => {
-            // Clear the old interval before creating a new one to prevent multiple intervals
-            clearInterval(scrollInterval);
-            scrollInterval = setInterval(autoScroll, 4000);
-        });
-        carousel.addEventListener('touchend', () => {
-            // Clear the old interval before creating a new one to prevent multiple intervals
-            clearInterval(scrollInterval);
-            scrollInterval = setInterval(autoScroll, 4000);
+        const stopAutoScroll = () => clearInterval(scrollInterval);
+        
+        carousel.addEventListener('mouseenter', stopAutoScroll);
+        carousel.addEventListener('touchstart', stopAutoScroll);
+        carousel.addEventListener('mouseleave', startAutoScroll);
+        carousel.addEventListener('touchend', startAutoScroll);
+
+        window.addEventListener('resize', () => {
+             stopAutoScroll();
+             startAutoScroll();
         });
     });
 </script>

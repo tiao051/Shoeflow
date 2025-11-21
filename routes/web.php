@@ -3,7 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CartController; // Import CartController
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\DashboardController; // <<< ĐÃ THÊM: Import DashboardController
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Staff\OrderController as StaffOrder;
 // Add other imports as needed for Category, Banner, etc.
@@ -14,9 +15,8 @@ use App\Http\Controllers\Staff\OrderController as StaffOrder;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Trang chủ công khai (không cần auth) - Trỏ đến DashboardController để lấy dữ liệu sản phẩm mới
+Route::get('/', [DashboardController::class, 'index'])->name('home');
 
 // Product routes
 Route::get('products/search', [ProductController::class, 'search'])->name('products.search');
@@ -29,24 +29,19 @@ Route::resource('products', ProductController::class)->only(['index', 'show']);
 |--------------------------------------------------------------------------
 */
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
+// Dùng chung DashboardController@index cho cả / (home) và /dashboard
+// Đặt dưới middleware 'auth' để đảm bảo việc truy cập /dashboard yêu cầu đăng nhập
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified']) // Thường có thêm 'verified'
+    ->name('dashboard'); 
 
 // All authenticated routes grouped
 Route::middleware('auth')->group(function () {
     
     // --- User Profile Routes ---
-    // View Profile
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-    
-    // Update Information
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    
-    // Change Password (Added based on your controller)
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
-    
-    // Upload Avatar (Added based on your controller)
     Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar.update');
 
     // --- Address & Contact Routes ---
@@ -55,12 +50,12 @@ Route::middleware('auth')->group(function () {
 
     // --- CART ROUTES ---
     Route::prefix('cart')->name('cart.')->group(function () {
-        Route::get('/', [CartController::class, 'index'])->name('index'); // Xem giỏ hàng
-        Route::post('add', [CartController::class, 'add'])->name('add'); // Thêm sản phẩm
-        Route::patch('update/{itemId}', [CartController::class, 'update'])->name('update'); // Cập nhật số lượng
-        Route::delete('remove/{itemId}', [CartController::class, 'remove'])->name('remove'); // Xóa sản phẩm
-        Route::post('clear', [CartController::class, 'clear'])->name('clear'); // Xóa toàn bộ giỏ
-        Route::get('count', [CartController::class, 'count'])->name('count'); // Lấy số lượng (AJAX)
+        Route::get('/', [CartController::class, 'index'])->name('index');
+        Route::post('add', [CartController::class, 'add'])->name('add');
+        Route::patch('update/{itemId}', [CartController::class, 'update'])->name('update');
+        Route::delete('remove/{itemId}', [CartController::class, 'remove'])->name('remove');
+        Route::post('clear', [CartController::class, 'clear'])->name('clear');
+        Route::get('count', [CartController::class, 'count'])->name('count');
     });
 });
 
@@ -73,7 +68,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
 
     // Management Resources
-    Route::resource('products', App\Http\Controllers\ProductController::class)->except(['index', 'show']); // Chỉ dùng cho Admin
+    Route::resource('products', App\Http\Controllers\ProductController::class)->except(['index', 'show']);
     Route::resource('categories', App\Http\Controllers\CategoryController::class);
     Route::resource('banners', App\Http\Controllers\BannerController::class);
     Route::resource('news', App\Http\Controllers\NewsController::class);
