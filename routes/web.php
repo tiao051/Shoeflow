@@ -29,10 +29,9 @@ Route::resource('products', ProductController::class)->only(['index', 'show']);
 |--------------------------------------------------------------------------
 */
 
-// General Dashboard
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth'])->name('dashboard');
 
 // All authenticated routes grouped
 Route::middleware('auth')->group(function () {
