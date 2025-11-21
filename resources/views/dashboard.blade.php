@@ -29,9 +29,9 @@
 @php
     $newArrivals = [
         ['name' => 'Chuck 70 High Top', 'color' => 'Classic Black', 'price' => '1,890,000 ₫', 'image' => 'images/chuck_70_hightop1.jpg'],
-        ['name' => 'Run Star Motion CX', 'color' => 'White/Black/Gum', 'price' => '2,550,000 ₫', 'image' => 'images/one_start1.jpg'], // Dùng tạm ảnh one_start1
-        ['name' => 'Chuck Taylor All Star Lift', 'color' => 'Pink Foam', 'price' => '1,790,000 ₫', 'image' => 'images/all_star1.jpg'], // Dùng tạm ảnh all_star1
-        ['name' => 'Chuck 70 Hi Vintage', 'color' => 'Ivory', 'price' => '1,990,000 ₫', 'image' => 'images/chuck_taylor1.jpg'], // Dùng tạm ảnh chuck_taylor1
+        ['name' => 'Run Star Motion CX', 'color' => 'White/Black/Gum', 'price' => '2,550,000 ₫', 'image' => 'images/one_start1.jpg'], // Using one_start1 image temporarily
+        ['name' => 'Chuck Taylor All Star Lift', 'color' => 'Pink Foam', 'price' => '1,790,000 ₫', 'image' => 'images/all_star1.jpg'], // Using all_star1 image temporarily
+        ['name' => 'Chuck 70 Hi Vintage', 'color' => 'Ivory', 'price' => '1,990,000 ₫', 'image' => 'images/chuck_taylor1.jpg'], // Using chuck_taylor1 image temporarily
         ['name' => 'One Star Pro Suede', 'color' => 'Obsidian', 'price' => '2,200,000 ₫', 'image' => 'images/one_start1.jpg'],
         ['name' => 'All Star BB Shift', 'color' => 'Volt Orange', 'price' => '2,100,000 ₫', 'image' => 'images/all_star1.jpg'],
     ];
@@ -108,7 +108,7 @@
             
             @foreach($newArrivals as $product)
             <div class="inline-block w-64 min-w-64 snap-center group relative bg-white transition duration-300 hover:shadow-lg rounded-lg">
-                {{-- Đã thêm h-64 để cố định chiều cao của khung ảnh, tạo tỷ lệ 1:1 (hình vuông) --}}
+                {{-- Fixed height (h-64) for the image container to ensure a consistent 1:1 (square) ratio --}}
                 <div class="relative overflow-hidden h-64">
                     {{-- The PHP array keys are correctly quoted here: $product['image'], $product['name'], $product['color'] --}}
                     <img src="{{ asset($product['image']) }}" 
@@ -130,9 +130,9 @@
             @endforeach
         </div>
         
-        <!-- Dấu hiệu cho người dùng biết có thể cuộn ngang trên desktop/mobile -->
+        <!-- Hint for users that they can scroll horizontally on desktop/mobile -->
         <div class="text-center text-sm text-gray-500 mt-4">
-            ← Vuốt hoặc cuộn để xem thêm sản phẩm →
+            ← Swipe or scroll to view more products →
         </div>
         
     </section>
@@ -172,7 +172,7 @@
 </div>
 
 <style>
-/* Ẩn thanh cuộn ngang mặc định của trình duyệt cho container cuộn */
+/* Hide default browser horizontal scrollbar for the scroll container */
 #new-arrivals-carousel::-webkit-scrollbar {
     display: none;
 }
@@ -189,49 +189,49 @@
         let scrollPosition = 0;
         let direction = 1; // 1: scroll right, -1: scroll left
 
-        // Hàm cuộn carousel
+        // Function to scroll the carousel
         function autoScroll() {
-            // Tính toán vị trí cuộn mới
+            // Calculate the new scroll position
             const newScrollPosition = scrollPosition + (direction * scrollDistance);
 
-            // Kiểm tra giới hạn cuộn:
-            // 1. Nếu cuộn qua bên phải quá nhiều, đảo chiều (scroll back to left)
+            // Check scroll limits:
+            // 1. If scrolled too far right, reverse direction (scroll back to left)
             if (newScrollPosition >= (carousel.scrollWidth - carousel.clientWidth)) {
                 direction = -1;
-                scrollPosition = carousel.scrollWidth - carousel.clientWidth; // Đảm bảo cuộn đến cuối cùng
+                scrollPosition = carousel.scrollWidth - carousel.clientWidth; // Ensure scroll to the end
             } 
-            // 2. Nếu cuộn qua bên trái (về 0), đảo chiều (scroll back to right)
+            // 2. If scrolled to the far left (back to 0), reverse direction (scroll back to right)
             else if (newScrollPosition <= 0) {
                 direction = 1;
-                scrollPosition = 0; // Đảm bảo cuộn về đầu tiên
+                scrollPosition = 0; // Ensure scroll to the beginning
             } 
-            // 3. Nếu vẫn trong giới hạn
+            // 3. If still within limits
             else {
                 scrollPosition = newScrollPosition;
             }
 
-            // Thực hiện cuộn mượt mà
+            // Perform smooth scrolling
             carousel.scrollTo({
                 left: scrollPosition,
                 behavior: 'smooth'
             });
         }
 
-        // Bắt đầu tự động cuộn sau mỗi 4 giây (4000ms)
+        // Start auto-scrolling every 4 seconds (4000ms)
         const scrollInterval = setInterval(autoScroll, 4000);
 
-        // Dừng tự động cuộn khi người dùng chạm/di chuột vào carousel
+        // Stop auto-scrolling when user hovers/touches the carousel
         carousel.addEventListener('mouseenter', () => clearInterval(scrollInterval));
         carousel.addEventListener('touchstart', () => clearInterval(scrollInterval));
 
-        // Tiếp tục tự động cuộn khi người dùng rời khỏi carousel
+        // Resume auto-scrolling when user leaves the carousel
         carousel.addEventListener('mouseleave', () => {
-            // Cần xóa interval cũ trước khi tạo cái mới để tránh tạo nhiều interval
+            // Clear the old interval before creating a new one to prevent multiple intervals
             clearInterval(scrollInterval);
             scrollInterval = setInterval(autoScroll, 4000);
         });
         carousel.addEventListener('touchend', () => {
-            // Cần xóa interval cũ trước khi tạo cái mới để tránh tạo nhiều interval
+            // Clear the old interval before creating a new one to prevent multiple intervals
             clearInterval(scrollInterval);
             scrollInterval = setInterval(autoScroll, 4000);
         });
