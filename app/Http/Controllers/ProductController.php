@@ -3,110 +3,83 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Http\Controllers\Controller;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    // Danh sách sản phẩm
+    public function index(Request $request)
     {
-        $products = Product::orderByDesc('id')->paginate(10);
-        return view('products.index', compact('products'));
-    }
+        $products = Product::query();
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        $categories = \App\Models\Category::all();
-        return view('products.create', compact('categories'));
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric',
-            'sale_price' => 'nullable|numeric',
-            'stock' => 'required|integer',
-            'category_id' => 'required|exists:categories,id',
-            'brand' => 'nullable|string|max:255',
-            'image' => 'nullable|image|max:2048',
-            'description' => 'nullable|string',
-            'is_active' => 'nullable|boolean',
-        ]);
-
-        $validated['slug'] = \Str::slug($validated['name']) . '-' . uniqid();
-        $validated['is_active'] = $request->has('is_active');
-
-        if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('products', 'public');
+        // Filter theo category
+        if ($request->has('category')) {
+            $products->where('category_id', $request->category);
         }
 
-        $product = Product::create($validated);
-        return redirect()->route('products.index')->with('success', 'Product created successfully.');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Product $product)
-    {
-        return view('products.show', compact('product'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Product $product)
-    {
-        $categories = \App\Models\Category::all();
-        return view('products.edit', compact('product', 'categories'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Product $product)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric',
-            'sale_price' => 'nullable|numeric',
-            'stock' => 'required|integer',
-            'category_id' => 'required|exists:categories,id',
-            'brand' => 'nullable|string|max:255',
-            'image' => 'nullable|image|max:2048',
-            'description' => 'nullable|string',
-            'is_active' => 'nullable|boolean',
-        ]);
-
-        $validated['is_active'] = $request->has('is_active');
-
-        if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('products', 'public');
+        // Sort
+        if ($request->has('sort')) {
+            match($request->sort) {
+                'price_low' => $products->orderBy('price', 'asc'),
+                'price_high' => $products->orderBy('price', 'desc'),
+                'popular' => $products->orderBy('views', 'desc'),
+                default => $products->orderBy('created_at', 'desc'),
+            };
         }
 
-        $product->update($validated);
-        return redirect()->route('products.index')->with('success', 'Product updated successfully.');
+        $products = $products->paginate(12);
+
+        // SỬA Ở ĐÂY: Trỏ vào thư mục products, file index
+        return view('products.index', compact('products')); 
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Product $product)
+    // Chi tiết sản phẩm
+    public function show($id)
     {
-        if ($product->image) {
-            \Storage::disk('public')->delete($product->image);
+        $product = Product::findOrFail($id);
+        $relatedProducts = Product::where('category_id', $product->category_id)
+            ->where('id', '!=', $id)
+            ->limit(4)
+            ->get();
+
+        $product->increment('views');
+
+        // SỬA Ở ĐÂY: Trỏ vào thư mục products, file show
+        return view('products.show', compact('product', 'relatedProducts')); 
+    }
+
+    // Tìm kiếm
+    public function search(Request $request)
+    {
+        $query = $request->input('q');
+        
+        $products = Product::where('name', 'LIKE', "%{$query}%")
+            ->orWhere('description', 'LIKE', "%{$query}%")
+            ->paginate(12);
+
+        // SỬA Ở ĐÂY: Trỏ vào thư mục products, file search (hoặc dùng chung index tùy bạn)
+        return view('products.search', compact('products', 'query')); 
+    }
+
+    // Filter (Giữ nguyên vì trả về JSON)
+    public function filter(Request $request)
+    {
+        $products = Product::query();
+
+        if ($request->has('price_min')) {
+            $products->where('price', '>=', $request->price_min);
         }
-        $product->delete();
-        return redirect()->route('products.index')->with('success', 'Product deleted successfully.');
+        if ($request->has('price_max')) {
+            $products->where('price', '<=', $request->price_max);
+        }
+        if ($request->has('sizes')) {
+            $products->whereJsonContains('sizes', $request->sizes);
+        }
+        if ($request->has('colors')) {
+            $products->whereJsonContains('colors', $request->colors);
+        }
+
+        return response()->json($products->paginate(12));
     }
 }

@@ -3,64 +3,56 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Danh sách đơn hàng
     public function index()
     {
-        //
+        $user = auth()->user();
+        $orders = Order::where('user_id', $user->id)
+            ->with('items')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return view('orders.index', compact('orders'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    // Chi tiết đơn hàng
+    public function show($id)
     {
-        //
+        $user = auth()->user();
+        $order = Order::where('user_id', $user->id)
+            ->with('items.product')
+            ->findOrFail($id);
+
+        return view('order-detail', compact('order'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    // Hủy đơn hàng
+    public function cancel($id)
     {
-        //
+        $user = auth()->user();
+        $order = Order::where('user_id', $user->id)->findOrFail($id);
+
+        if ($order->status === 'pending') {
+            $order->update(['status' => 'cancelled']);
+            return redirect()->back()->with('success', 'Đơn hàng đã bị hủy');
+        }
+
+        return redirect()->back()->with('error', 'Không thể hủy đơn hàng này');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Order $order)
+    // Tải hóa đơn PDF
+    public function invoice($id)
     {
-        //
-    }
+        $user = auth()->user();
+        $order = Order::where('user_id', $user->id)->findOrFail($id);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Order $order)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Order $order)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Order $order)
-    {
-        //
+        // Generate PDF - cần package laravel-dompdf
+        // return PDF::loadView('invoice', compact('order'))->download('order-' . $order->id . '.pdf');
+        
+        return view('invoice', compact('order'));
     }
 }
