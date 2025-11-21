@@ -96,7 +96,6 @@
 
             <div class="md:col-span-3 space-y-8">
 
-                {{-- TAB 1: PROFILE & INFO UPDATE --}}
                 <div x-show="currentTab === 'profile'" class="space-y-6">
 
                     <div class="bg-white rounded-lg shadow-lg p-6">
@@ -155,8 +154,6 @@
                     </div>
                 </div>
 
-
-                {{-- TAB 2: RECENT ORDERS --}}
                 <div x-show="currentTab === 'orders'">
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <h2 class="text-lg font-black text-gray-900 mb-6 tracking-wide uppercase">Recent Orders (Last 5)</h2>
@@ -195,7 +192,6 @@
                     </div>
                 </div>
 
-                {{-- TAB 3: ADDRESSES (Placeholder) --}}
                 <div x-show="currentTab === 'addresses'">
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <h2 class="text-lg font-black text-gray-900 mb-4 tracking-wide uppercase">Shipping Addresses (Placeholder)</h2>
@@ -208,7 +204,6 @@
                     </div>
                 </div>
 
-                {{-- TAB 4: PASSWORD & SECURITY SETTINGS --}}
                 <div x-show="currentTab === 'settings'">
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <h2 class="text-lg font-black text-gray-900 mb-4 tracking-wide uppercase">Change Password</h2>

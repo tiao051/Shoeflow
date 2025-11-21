@@ -17,7 +17,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * The attributes that are mass assignable.
-     * Đã thêm 'role_id' để khắc phục lỗi vi phạm ràng buộc khóa ngoại.
      *
      * @var array<int, string>
      */
@@ -28,7 +27,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone',
         'bio',
         'avatar',
-        'role_id', // <-- ĐÃ ĐƯỢC THÊM VÀO ĐÂY
+        'role_id', 
     ];
 
     /**
@@ -50,24 +49,14 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-
-    // --- MỐI QUAN HỆ ---
-
-    /**
-     * Định nghĩa mối quan hệ: Một User thuộc về một Role (N:1).
-     */
+    
     public function role(): BelongsTo
     {
-        // Liên kết với Role model thông qua cột role_id
         return $this->belongsTo(Role::class);
     }
 
-    /**
-     * Định nghĩa mối quan hệ: Một User có nhiều Orders (1:N).
-     */
     public function orders(): HasMany
     {
-        // Liên kết với Order model thông qua cột user_id
         return $this->hasMany(Order::class);
     }
 }
