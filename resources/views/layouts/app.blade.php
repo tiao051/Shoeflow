@@ -197,6 +197,7 @@
             background: #1a1a1a;
             color: white;
             padding: 3rem 2rem;
+            padding-bottom: 0;
             text-align: center;
             margin-top: auto;
         }
