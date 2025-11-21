@@ -11,14 +11,33 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
 
+    <!-- Bootstrap CSS (Giữ lại nếu các component khác dùng) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- THÊM: Tailwind CSS CDN (Bắt buộc phải có để profile.blade.php hoạt động) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Cấu hình Tailwind (tùy chọn, nếu cần tùy chỉnh) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Oswald', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
 
     <style>
         /* --- RESET & BASE --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; /* Ưu tiên Inter */
+            /* Tailwind Inter is set above, here is custom base */
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #f5f5f5;
             color: #1a1a1a;
             overflow-x: hidden;
@@ -51,7 +70,7 @@
             border-bottom: 1px solid #f0f0f0;
             font-size: 0.75rem;
             color: #666;
-            display: none; /* Mặc định ẩn trên mobile */
+            display: none;
         }
         @media (min-width: 769px) { .top-bar.visible { display: block; } }
 
@@ -94,7 +113,7 @@
             color: #000;
         }
         .nav-center {
-            display: none; /* Ẩn mobile */
+            display: none;
             gap: 2.5rem;
             align-items: center;
             flex: 1;
@@ -145,14 +164,11 @@
         }
 
         /* --- SHARED COMPONENTS (Buttons, Layout) --- */
-        .container-custom { /* Container riêng cho layout kiểu cũ nếu không muốn dùng bootstrap container */
+        .container-custom {
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 2rem;
         }
-
-        /* Override Bootstrap Container nếu cần rộng hơn */
-        /* .container { max-width: 1400px !important; } */
 
         .btn-primary-custom {
             background: white; color: black;
@@ -182,10 +198,13 @@
             color: white;
             padding: 3rem 2rem;
             text-align: center;
-            margin-top: auto; /* Đẩy footer xuống đáy nếu nội dung ngắn */
+            margin-top: auto;
         }
     </style>
     
+    <!-- Alpine.js (Cần thiết cho profile.blade.php) -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     @stack('styles')
 </head>
 <body class="d-flex flex-column min-vh-100">
