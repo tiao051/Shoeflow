@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class RoleSeeder extends Seeder
 {
@@ -12,10 +12,30 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        \DB::table('roles')->insert([
-            ['name' => 'admin', 'description' => 'Administrator', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'staff', 'description' => 'Staff', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'customer', 'description' => 'Customer', 'created_at' => now(), 'updated_at' => now()],
+        // 1. Vai trò mặc định cho người dùng mới (để khớp với role_id = 1 trong RegisteredUserController)
+        DB::table('roles')->insert([
+            'id' => 1,
+            'name' => 'User',
+            'description' => 'Standard user/customer role.',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // 2. Các vai trò khác (ví dụ)
+        DB::table('roles')->insert([
+            'id' => 2,
+            'name' => 'Admin',
+            'description' => 'Full access administrator.',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('roles')->insert([
+            'id' => 3,
+            'name' => 'Editor',
+            'description' => 'Content editor.',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 }
