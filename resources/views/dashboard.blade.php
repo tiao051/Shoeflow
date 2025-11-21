@@ -36,7 +36,7 @@
                 <div class="bg-gray-100 flex items-center justify-center h-80">
                     <img src="{{ asset('images/chuck_taylor1.jpg') }}" 
                          alt="Chuck Taylor Shoes" 
-                         class="w-full h-full object-cover transition duration-500 hover:scale-105"
+                         class="w-full h-full object-cover transition duration-200 hover:scale-105"
                          onerror="this.onerror=null;this.src='https://placehold.co/400x320/E5E7EB/4B5563?text=Chuck+Taylor';">
                 </div>
                 <div class="p-6 text-center">
@@ -51,7 +51,7 @@
                 <div class="bg-gray-100 flex items-center justify-center h-80">
                     <img src="{{ asset('images/one_start1.jpg') }}" 
                          alt="One Star Shoes" 
-                         class="w-full h-full object-cover transition duration-500 hover:scale-105"
+                         class="w-full h-full object-cover transition duration-200 hover:scale-105"
                          onerror="this.onerror=null;this.src='https://placehold.co/400x320/E5E7EB/4B5563?text=One+Star';">
                 </div>
                 <div class="p-6 text-center">
@@ -66,7 +66,7 @@
                 <div class="bg-gray-100 flex items-center justify-center h-80">
                     <img src="{{ asset('images/all_star1.jpg') }}" 
                          alt="All Star Shoes" 
-                         class="w-full h-full object-cover transition duration-500 hover:scale-105"
+                         class="w-full h-full object-cover transition duration-200 hover:scale-105"
                          onerror="this.onerror=null;this.src='https://placehold.co/400x320/E5E7EB/4B5563?text=All+Star';">
                 </div>
                 <div class="p-6 text-center">
@@ -93,7 +93,7 @@
             <div class="inline-block w-64 min-w-64 snap-center group relative bg-white transition duration-300 hover:shadow-lg rounded-lg">
                 <div class="relative overflow-hidden h-64">
                     <img src="{{ asset($product->image ?? 'images/placeholder.jpg') }}" 
-                         class="w-full h-full object-cover rounded-t-lg transition duration-500 group-hover:opacity-90" 
+                         class="w-full h-full object-cover rounded-t-lg transition duration-200 group-hover:opacity-90" 
                          alt="{{ $product->name }} - {{ $product->color ?? '' }}"
                          onerror="this.onerror=null;this.src='https://placehold.co/400x400/000000/FFFFFF?text={{ urlencode($product->name ?? 'Product') }}';">
                     <span class="absolute top-2 left-2 bg-black text-white text-xs px-2 py-1 font-bold rounded-md">NEW</span>
@@ -160,6 +160,16 @@
 #new-arrivals-carousel {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
+}
+
+/* Ensure text turns white when hovering over Add to Cart button */
+.hover\:bg-black:hover {
+    color: white !important;
+}
+
+/* Disable image hover scaling */
+.group:hover .group-hover\:opacity-90 {
+    opacity: 1 !important;
 }
 </style>
 
