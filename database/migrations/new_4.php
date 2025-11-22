@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Sử dụng Schema::table() để chỉnh sửa bảng products.
+        // Use Schema::table() to modify the 'products' table
         if (Schema::hasTable('products')) {
             Schema::table('products', function (Blueprint $table) {
-                // Kiểm tra để tránh lỗi nếu cột đã tồn tại
-                if (!Schema::hasColumn('products', 'is_new')) {
-                    // Thêm cột boolean 'is_new' với giá trị mặc định là false (0)
-                    $table->boolean('is_new')->default(false)->after('is_active');
+                    // Check if 'is_new' column does not already exist (avoid duplicates)
+                    if (!Schema::hasColumn('products', 'is_new')) {
+                        // Add 'is_new' boolean column with default false (0)
+                        $table->boolean('is_new')->default(0)->after('is_active');
                 }
             });
         }
@@ -33,5 +33,6 @@ return new class extends Migration
                 $table->dropColumn('is_new');
             });
         }
+            // On rollback, drop the column if it exists
     }
 };

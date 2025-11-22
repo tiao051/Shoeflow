@@ -13,35 +13,51 @@ class ProductController extends Controller
     {
         $products = Product::query();
 
-        // Filter by category
+        // Default category name
+        $categoryName = 'All Sneakers';
+
+        // 1. Filter by Category
         if ($request->has('category')) {
-            $products->where('category_id', $request->category);
+            $slug = $request->input('category');
+            
+            // Find category first
+            $category = Category::where('slug', $slug)->first();
+
+            if ($category) {
+                // If found, assign name and filter by ID (faster than whereHas)
+                $categoryName = $category->name;
+                $products->where('category_id', $category->id);
+            }
         }
 
-        // Sort
+        // 2. Sort
         if ($request->has('sort')) {
             match($request->sort) {
-                'price_low' => $products->orderBy('price', 'asc'),
+                'price_low'  => $products->orderBy('price', 'asc'),
                 'price_high' => $products->orderBy('price', 'desc'),
-                'popular' => $products->orderBy('views', 'desc'),
-                default => $products->orderBy('created_at', 'desc'),
+                // 'popular'    => $products->orderBy('views', 'desc'), 
+                default      => $products->orderBy('created_at', 'desc'),
             };
         } else {
             $products->orderBy('created_at', 'desc');
         }
 
-        $products = $products->paginate(12);
+        // 3. Pagination & Preserve URL parameters
+        $products = $products->paginate(12)->withQueryString();
 
+        // 4. Return JSON if AJAX (Load More / Filter without reload)
         if ($request->ajax()) {
+            $productCardsHtml = view('partials.product-cards', compact('products'))->render();
+            $paginationHtml = $products->links('pagination::bootstrap-5')->toHtml();
+
             return response()->json([
-                'products' => $products->items(),
-                'pagination' => (string) $products->links('pagination::bootstrap-5')
+                'product_list' => $productCardsHtml,
+                'pagination' => $paginationHtml,   
             ]);
         }
 
-        return view('products.index', compact('products'));
+        return view('products.index', compact('products', 'categoryName'));
     }
-
 
     // Product details
     public function show($id)

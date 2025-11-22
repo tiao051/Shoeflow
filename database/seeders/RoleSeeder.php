@@ -12,7 +12,7 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Vai trò mặc định cho người dùng mới (để khớp với role_id = 1 trong RegisteredUserController)
+        // 1. Default role for new users (matches role_id = 1 in RegisteredUserController)
         DB::table('roles')->insert([
             'id' => 1,
             'name' => 'User',
@@ -21,7 +21,7 @@ class RoleSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
-        // 2. Các vai trò khác (ví dụ)
+        // 2. Other roles (example)
         DB::table('roles')->insert([
             'id' => 2,
             'name' => 'Admin',

@@ -321,8 +321,8 @@
                         }
                     </script>
 
-                    {{-- GIAO DIỆN CHÍNH --}}
-                    {{-- Gọi hàm addressManager() tại đây --}}
+                    {{-- Main UI --}}
+                    {{-- Initialize addressManager() here --}}
                     <div x-data="addressManager()"> 
                         <div class="bg-white rounded-lg shadow-lg p-6">
                             {{-- Header --}}
@@ -463,7 +463,7 @@
                                         </div>
 
                                         <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse sm:items-center border-t gap-3">
-                                            {{-- Nút SAVE (Màu đen) --}}
+                                            {{-- Save button (black) --}}
                                             <button 
                                                 type="submit" 
                                                 class="h-12 w-full inline-flex justify-center items-center rounded-lg border border-transparent shadow-sm px-6 bg-black text-base font-bold text-white hover:bg-gray-800 sm:w-auto uppercase transition disabled:opacity-50"
@@ -471,7 +471,7 @@
                                                 <span x-text="isLoading ? 'Saving...' : (isEditing ? 'Update Address' : 'Save Address')"></span>
                                             </button>
 
-                                            {{-- Nút CANCEL (Màu trắng) --}}
+                                            {{-- Cancel button (white) --}}
                                             <button 
                                                 type="button" 
                                                 @click="addressModalOpen = false" 

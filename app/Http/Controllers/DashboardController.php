@@ -8,16 +8,15 @@ use Illuminate\Http\Request;
 class DashboardController extends Controller
 {
     /**
-     * Hiển thị trang dashboard với các sản phẩm mới nhất.
+     * Display the dashboard page with the latest products.
      */
     public function index()
     {
-        // 1. Lấy 6 sản phẩm mới nhất (New Arrivals)
+        // 1. Get 6 latest products (New Arrivals)
         $newArrivals = Product::orderBy('created_at', 'desc')->limit(6)->get();
-
-        // 2. Lấy 3 danh mục chính (ví dụ: Chuck Taylor, One Star, All Star)
-        // Trong môi trường Laravel thực tế, bạn sẽ cần Category Model và logic lấy Category.
-        // Tạm thời, chúng ta sẽ giữ nguyên phần danh mục trong Blade để tối giản.
+        // 2. Load 3 main categories (e.g., Chuck Taylor, One Star, All Star)
+        // In a real Laravel app you'd fetch categories via a Category model.
+        // For simplicity, keep category markup in the Blade for now.
         
         return view('dashboard', [
             'newArrivals' => $newArrivals,

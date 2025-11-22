@@ -41,8 +41,7 @@
                     <p class="text-gray-500 text-sm">Classic high tops & low tops</p>
                 </div>
                 
-                {{-- [EDIT] Link to a specific product (e.g., ID = 1). Replace 1 with desired product ID. --}}
-                <a href="{{ route('products.show', ['product' => 1]) }}" class="absolute inset-0 z-10"></a>
+               <a href="{{ route('products.index', ['category' => 'chuck-taylor']) }}" class="absolute inset-0 z-10"></a>
             </div>
 
             <div class="relative bg-white rounded-xl shadow-lg overflow-hidden transition duration-300 hover:shadow-2xl group">
@@ -57,8 +56,7 @@
                     <p class="text-gray-500 text-sm">Retro basketball style</p>
                 </div>
 
-                {{-- [EDIT] Link to a specific product (e.g., ID = 2). Replace 2 with desired product ID. --}}
-                <a href="{{ route('products.show', ['product' => 2]) }}" class="absolute inset-0 z-10"></a>
+               <a href="{{ route('products.index', ['category' => 'one-star']) }}" class="absolute inset-0 z-10"></a>
             </div>
 
             <div class="relative bg-white rounded-xl shadow-lg overflow-hidden transition duration-300 hover:shadow-2xl group">
@@ -73,8 +71,7 @@
                     <p class="text-gray-500 text-sm">Heritage basketball sneakers</p>
                 </div>
 
-                {{-- [EDIT] Link to a specific product (e.g., ID = 3). Replace 3 with desired product ID. --}}
-                <a href="{{ route('products.show', ['product' => 3]) }}" class="absolute inset-0 z-10"></a>
+               <a href="{{ route('products.index', ['category' => 'all-star']) }}" class="absolute inset-0 z-10"></a>
             </div>
         </div>
     </section>

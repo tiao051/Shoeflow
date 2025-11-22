@@ -1,21 +1,21 @@
-<!-- START: TOP BAR (Bao gồm Banner, VN, và Menu phụ) -->
+<!-- START: TOP BAR (includes promo banner, VN, and utility menu) -->
 <div class="top-bar visible">
-    <!-- Đặt 'relative' cho container để làm mốc cho phần tử 'absolute' bên trong -->
+    <!-- Set container to relative so absolute children are positioned correctly -->
     <div class="top-bar-content relative flex justify-between items-center">
-        <!-- 1. KHU VỰC BÊN TRÁI: VN -->
+        <!-- Left area: VN -->
         <div class="top-bar-item flex items-center space-x-2 z-10">
             <img src="https://www.converse.vn/media/wysiwyg/VN_Flag.jpg" alt="VN" class="w-4 h-3">
             <span>VN</span>
         </div>
 
-        <!-- 2. KHU VỰC TRUNG TÂM: PROMO BANNER (Sử dụng Absolute để căn giữa màn hình tuyệt đối) -->
+        <!-- Center area: promo banner (uses absolute to center over the screen) -->
         <div class="absolute inset-0 flex justify-center items-center promo-content text-center font-bold text-xs md:text-sm pointer-events-none">
             <a href="#" class="hover:underline pointer-events-auto">
                 <span>Up to 400K off for order from 2 mil - Shop Now!</span>
             </a>
         </div>
 
-        <!-- 3. KHU VỰC BÊN PHẢI: MENU TIỆN ÍCH -->
+        <!-- Right area: utility menu -->
         <div class="flex items-center space-x-6 text-xs md:text-sm font-normal text-gray-600 z-10">
             <a href="#" class="top-bar-item hover:text-black hidden md:flex">
                 <!-- Icon Store Locator -->

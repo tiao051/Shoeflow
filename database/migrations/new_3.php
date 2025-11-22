@@ -13,15 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        // Kiểm tra xem cột 'New' có tồn tại không (Đảm bảo an toàn)
+        // Check if the 'New' column exists (safety check)
         if (Schema::hasTable('products') && Schema::hasColumn('products', 'New')) {
             Schema::table('products', function (Blueprint $table) {
-                // KHẮC PHỤC LỖI: Cần khai báo lại kiểu dữ liệu (boolean) và giá trị mặc định (default(0))
-                // khi dùng renameColumn để Laravel không phải tự động truy vấn lại metadata, 
-                // giúp tránh lỗi "Trying to access array offset on value of type null".
+                // Fix: ensure correct data type (boolean) and default(0)
+                // when renaming columns so Laravel doesn't re-query metadata,
+                // which avoids "Trying to access array offset on value of type null" errors.
                 $table->boolean('New')
-                      ->default(0) // Giả định giá trị mặc định là 0
-                      ->renameColumn('New', 'is_new'); 
+                      ->default(0) // assume default value is 0
+                      ->renameColumn('New', 'is_new');
             });
         }
     }
@@ -33,10 +33,10 @@ return new class extends Migration
      */
     public function down()
     {
-        // Chỉ hoàn tác nếu cột mới 'is_new' tồn tại
+        // Only rollback if the new 'is_new' column exists
         if (Schema::hasTable('products') && Schema::hasColumn('products', 'is_new')) {
             Schema::table('products', function (Blueprint $table) {
-                // Hoàn tác: Cần khai báo lại kiểu dữ liệu (boolean) và giá trị mặc định (default(0))
+                // Rollback: ensure data type (boolean) and default(0) before renaming
                 $table->boolean('is_new')
                       ->default(0)
                       ->renameColumn('is_new', 'New');
