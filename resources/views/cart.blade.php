@@ -23,7 +23,7 @@
                             
                             <div class="flex-1">
                                 <h3 class="font-bold text-gray-900 mb-1">{{ strtoupper($item->product->name) }}</h3>
-                                <p class="text-sm text-gray-600 mb-3">{{ $item->size }} | {{ $item->color }}</p>
+                                <p class="text-sm text-gray-600 mb-3">{{ $item->size }}</p>
                                 
                                 <!-- Quantity -->
                                 <div class="flex items-center gap-3 mb-4">
@@ -68,7 +68,10 @@
                     <span>TOTAL</span>
                     <span>{{ number_format($total, 0, ',', '.') }}₫</span>
                 </div>
-            
+                
+                <a href="#" class="block w-full bg-black text-white py-3 rounded-full font-bold text-center hover:bg-gray-800 transition mb-3">
+                    CHECKOUT
+                </a>
                 <a href="/products" class="block w-full border-2 border-gray-900 text-gray-900 py-3 rounded-full font-bold text-center hover:bg-gray-50 transition">
                     CONTINUE SHOPPING
                 </a>
