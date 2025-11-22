@@ -3,62 +3,53 @@
 namespace App\Http\Controllers;
 
 use App\Models\Wishlist;
-use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class WishlistController extends Controller
 {
-    // Xem wishlist
     public function index()
     {
-        $user = auth()->user();
-        $wishlistItems = Wishlist::where('user_id', $user->id)
-            ->with('product')
-            ->paginate(12);
+        // Retrieve the current user's wishlist items with product relation
+        $wishlistItems = Auth::user()->wishlistItems()->with('product')->latest()->get();
 
-        return view('wishlist', compact('wishlistItems'));
+        return view('wishlist.index', compact('wishlistItems'));
     }
 
-    // Thêm vào wishlist
-    public function add(Request $request)
+    public function store(Request $request)
     {
-        $user = auth()->user();
-        $product = Product::findOrFail($request->product_id);
-
-        $existingWishlist = Wishlist::where('user_id', $user->id)
-            ->where('product_id', $product->id)
-            ->first();
-
-        if (!$existingWishlist) {
-            Wishlist::create([
-                'user_id' => $user->id,
-                'product_id' => $product->id,
-            ]);
-            return response()->json(['message' => 'Sản phẩm đã thêm vào wishlist'], 200);
+        // Ensure the user is authenticated (route may already have middleware)
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Please login to add items to wishlist.');
         }
 
-        return response()->json(['message' => 'Sản phẩm đã có trong wishlist'], 200);
+        $data = [
+            'user_id' => Auth::id(),
+            'product_id' => $request->product_id,
+        ];
+
+        // Prevent duplicates: only create if the entry doesn't already exist
+        if (!Wishlist::where($data)->exists()) {
+            Wishlist::create($data);
+
+            return redirect()->back()->with('success', 'Product added to wishlist!');
+        }
+
+        return redirect()->back()->with('info', 'This product is already in your wishlist.');
     }
 
-    // Xóa khỏi wishlist
-    public function remove($productId)
+    public function destroy(Request $request, $id)
     {
-        $user = auth()->user();
-        Wishlist::where('user_id', $user->id)
-            ->where('product_id', $productId)
-            ->delete();
+        $wishlist = Wishlist::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+        $wishlist->delete();
 
-        return redirect()->back()->with('success', 'Sản phẩm đã được xóa khỏi wishlist');
-    }
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Item removed from wishlist.'
+            ]);
+        }
 
-    // Kiểm tra có trong wishlist không (AJAX)
-    public function check($productId)
-    {
-        $user = auth()->user();
-        $exists = Wishlist::where('user_id', $user->id)
-            ->where('product_id', $productId)
-            ->exists();
-
-        return response()->json(['in_wishlist' => $exists]);
+        return redirect()->back()->with('success', 'Item removed from wishlist.');
     }
 }

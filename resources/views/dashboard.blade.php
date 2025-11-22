@@ -5,7 +5,6 @@
 @section('content')
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Oswald:wght@200..700&display=swap" rel="stylesheet">
 
-<!-- HERO SECTION: CHUCK TAYLOR BANNER -->
 <section class="flex items-center justify-center min-h-[500px] text-white py-20 px-5" 
          style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);">
     <div class="text-center">
@@ -22,113 +21,125 @@
 </section>
 
 <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-    <!-- SECTION: SHOP BY CATEGORY -->
+    
     <section class="mb-12">
         <h2 class="text-center mb-8 font-extrabold uppercase text-3xl md:text-4xl" 
             style="font-family: 'Oswald', sans-serif;">
             Shop By Category
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Category 1: Chuck Taylor -->
-            <div class="relative bg-white rounded-xl shadow-lg overflow-hidden transition duration-300 hover:shadow-2xl">
+            
+            <div class="relative bg-white rounded-xl shadow-lg overflow-hidden transition duration-300 hover:shadow-2xl group">
                 <div class="bg-gray-100 flex items-center justify-center h-80">
                     <img src="{{ asset('images/chuck_taylor1.jpg') }}" 
                          alt="Chuck Taylor Shoes" 
-                         class="w-full h-full object-cover transition duration-200 hover:scale-105"
+                         class="w-full h-full object-cover transition duration-200 group-hover:scale-105"
                          onerror="this.onerror=null;this.src='https://placehold.co/400x320/E5E7EB/4B5563?text=Chuck+Taylor';">
                 </div>
                 <div class="p-6 text-center">
                     <h3 class="font-bold text-lg uppercase">Chuck Taylor</h3>
                     <p class="text-gray-500 text-sm">Classic high tops & low tops</p>
                 </div>
-                <a href="#" class="absolute inset-0 z-10"></a>
+                
+                {{-- [EDIT] Link to a specific product (e.g., ID = 1). Replace 1 with desired product ID. --}}
+                <a href="{{ route('products.show', ['product' => 1]) }}" class="absolute inset-0 z-10"></a>
             </div>
 
-            <!-- Category 2: One Star -->
-            <div class="relative bg-white rounded-xl shadow-lg overflow-hidden transition duration-300 hover:shadow-2xl">
+            <div class="relative bg-white rounded-xl shadow-lg overflow-hidden transition duration-300 hover:shadow-2xl group">
                 <div class="bg-gray-100 flex items-center justify-center h-80">
                     <img src="{{ asset('images/one_start1.jpg') }}" 
                          alt="One Star Shoes" 
-                         class="w-full h-full object-cover transition duration-200 hover:scale-105"
+                         class="w-full h-full object-cover transition duration-200 group-hover:scale-105"
                          onerror="this.onerror=null;this.src='https://placehold.co/400x320/E5E7EB/4B5563?text=One+Star';">
                 </div>
                 <div class="p-6 text-center">
                     <h3 class="font-bold text-lg uppercase">One Star</h3>
                     <p class="text-gray-500 text-sm">Retro basketball style</p>
                 </div>
-                <a href="#" class="absolute inset-0 z-10"></a>
+
+                {{-- [EDIT] Link to a specific product (e.g., ID = 2). Replace 2 with desired product ID. --}}
+                <a href="{{ route('products.show', ['product' => 2]) }}" class="absolute inset-0 z-10"></a>
             </div>
 
-            <!-- Category 3: All Star -->
-            <div class="relative bg-white rounded-xl shadow-lg overflow-hidden transition duration-300 hover:shadow-2xl">
+            <div class="relative bg-white rounded-xl shadow-lg overflow-hidden transition duration-300 hover:shadow-2xl group">
                 <div class="bg-gray-100 flex items-center justify-center h-80">
                     <img src="{{ asset('images/all_star1.jpg') }}" 
                          alt="All Star Shoes" 
-                         class="w-full h-full object-cover transition duration-200 hover:scale-105"
+                         class="w-full h-full object-cover transition duration-200 group-hover:scale-105"
                          onerror="this.onerror=null;this.src='https://placehold.co/400x320/E5E7EB/4B5563?text=All+Star';">
                 </div>
                 <div class="p-6 text-center">
                     <h3 class="font-bold text-lg uppercase">All Star</h3>
                     <p class="text-gray-500 text-sm">Heritage basketball sneakers</p>
                 </div>
-                <a href="#" class="absolute inset-0 z-10"></a>
+
+                {{-- [EDIT] Link to a specific product (e.g., ID = 3). Replace 3 with desired product ID. --}}
+                <a href="{{ route('products.show', ['product' => 3]) }}" class="absolute inset-0 z-10"></a>
             </div>
         </div>
     </section>
 
-    <!-- SECTION: NEW ARRIVALS -->
     <section class="mb-12">
         <h2 class="text-center mb-8 font-extrabold uppercase text-3xl md:text-4xl" 
             style="font-family: 'Oswald', sans-serif;">
             New Arrivals
         </h2>
+        
         <div id="new-arrivals-carousel" 
              class="flex overflow-x-auto whitespace-nowrap space-x-6 pb-4 scroll-smooth snap-x snap-mandatory">
+            
             @foreach($newArrivals as $product)
             <div class="inline-block w-64 min-w-64 snap-center group relative bg-white transition duration-300 hover:shadow-lg rounded-lg">
-                <div class="relative overflow-hidden h-64">
+                
+                {{-- [EDIT] Wrap the image in an <a> linking to the product detail page --}}
+                <a href="{{ route('products.show', $product->id) }}" class="block relative overflow-hidden h-64">
                     <img src="{{ asset($product->image ?? 'images/placeholder.jpg') }}" 
-                         class="w-full h-full object-cover rounded-t-lg transition duration-200 group-hover:opacity-90" 
+                         class="w-full h-full object-cover rounded-t-lg transition duration-200 group-hover:opacity-90 group-hover:scale-105" 
                          alt="{{ $product->name }} - {{ $product->color ?? '' }}"
                          onerror="this.onerror=null;this.src='https://placehold.co/400x400/000000/FFFFFF?text={{ urlencode($product->name ?? 'Product') }}';">
+                    
                     <span class="absolute top-2 left-2 bg-black text-white text-xs px-2 py-1 font-bold rounded-md">NEW</span>
-                </div>
+                </a>
+
                 <div class="p-4">
-                    <h5 class="font-bold uppercase text-base mb-1 truncate">{{ $product->name }}</h5>
+                    {{-- [EDIT] Product name links to the detail page --}}
+                    <a href="{{ route('products.show', $product->id) }}">
+                        <h5 class="font-bold uppercase text-base mb-1 truncate hover:text-gray-600 transition">{{ $product->name }}</h5>
+                    </a>
+                    
                     <p class="text-gray-500 text-sm mb-2 truncate">{{ $product->color ?? 'Multiple Colors' }}</p>
+                    
                     <div class="flex justify-between items-center mb-3">
                         <p class="font-bold text-lg">{{ number_format($product->price, 0, ',', '.') }} ₫</p>
-                        <button class="text-black-500 hover:text-red-600 transition duration-150" 
-                                title="Add to Wishlist">
-                            <svg xmlns="http://www.w3.org/2000/svg" 
-                                 class="w-6 h-6" 
-                                 fill="none" 
-                                 viewBox="0 0 24 24" 
-                                 stroke="currentColor" 
-                                 stroke-width="2">
-                                <path stroke-linecap="round" 
-                                      stroke-linejoin="round" 
-                                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-.318-.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
-                        </button>
+                        
+                        <form action="{{ route('wishlist.store') }}" method="POST" class="inline-block">
+                            @csrf
+                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+                            <button type="submit" class="text-black hover:text-red-600 transition duration-150" title="Add to Wishlist">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-.318-.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                            </button>
+                        </form>
                     </div>
-                    <a href="#" 
+
+                    <a href="{{ route('products.show', $product->id) }}" 
                        class="block border border-black text-black px-4 py-2 text-xs uppercase font-bold text-center hover:bg-black hover:text-white transition duration-200">
-                        Add to Cart
+                        View Details
                     </a>
                 </div>
             </div>
             @endforeach
         </div>
+        
         <div class="text-center text-sm text-gray-500 mt-4">
             ← Swipe or scroll to view more products →
         </div>
     </section>
 
-    <!-- SECTION: CUSTOMIZATION CALL TO ACTION -->
+    {{-- Other sections kept intact --}}
     <section class="bg-black text-white text-center py-16 mb-12 rounded-xl px-5">
-        <h2 class="font-extrabold uppercase mb-4 text-3xl md:text-4xl" 
-            style="font-family: 'Oswald', sans-serif;">
+        <h2 class="font-extrabold uppercase mb-4 text-3xl md:text-4xl" style="font-family: 'Oswald', sans-serif;">
             Custom Your Style
         </h2>
         <p class="mb-8 text-gray-400 text-lg">Design your own unique Converse sneakers.</p>
@@ -137,20 +148,15 @@
         </button>
     </section>
 
-    <!-- SECTION: NEWSLETTER SUBSCRIPTION -->
     <section class="text-center py-12 bg-gray-50 rounded-xl">
         <div class="max-w-xl mx-auto px-5">
-            <h2 class="font-extrabold uppercase mb-2 text-2xl md:text-3xl" 
-                style="font-family: 'Oswald', sans-serif;">
+            <h2 class="font-extrabold uppercase mb-2 text-2xl md:text-3xl" style="font-family: 'Oswald', sans-serif;">
                 Stay In The Loop
             </h2>
             <p class="text-gray-500 mb-6">Subscribe to get special offers and updates.</p>
             <div class="flex">
-                <input type="email" 
-                       class="flex-grow p-3 border border-gray-300 rounded-l-lg text-sm focus:ring-0 focus:border-black" 
-                       placeholder="Enter your email address">
-                <button class="bg-black text-white p-3 rounded-r-lg hover:bg-gray-800 transition duration-150 uppercase font-bold text-sm" 
-                        type="button">
+                <input type="email" class="flex-grow p-3 border border-gray-300 rounded-l-lg text-sm focus:ring-0 focus:border-black" placeholder="Enter your email address">
+                <button class="bg-black text-white p-3 rounded-r-lg hover:bg-gray-800 transition duration-150 uppercase font-bold text-sm" type="button">
                     Subscribe
                 </button>
             </div>
@@ -159,87 +165,51 @@
 </div>
 
 <style>
-/* Hide default browser horizontal scrollbar for the scroll container */
-#new-arrivals-carousel::-webkit-scrollbar {
-    display: none;
-}
-#new-arrivals-carousel {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-}
-
-/* Ensure text turns white when hovering over Add to Cart button */
-.hover\:bg-black:hover {
-    color: white !important;
-}
-
-/* Disable image hover scaling */
-.group:hover .group-hover\:opacity-90 {
-    opacity: 1 !important;
-}
+/* Hide default browser horizontal scrollbar */
+#new-arrivals-carousel::-webkit-scrollbar { display: none; }
+#new-arrivals-carousel { -ms-overflow-style: none; scrollbar-width: none; }
+.hover\:bg-black:hover { color: white !important; }
+/* Allow image scale on hover */
+.group:hover img { transform: scale(1.05); }
 </style>
 
 <script>
-// Auto-scroll functionality for the carousel
+// Auto-scroll functionality
 document.addEventListener('DOMContentLoaded', function() {
     const carousel = document.getElementById('new-arrivals-carousel');
     if (!carousel) return; 
 
-    const scrollDistance = 256 + 24; // Item width + gap
+    const scrollDistance = 256 + 24;
     let scrollPosition = 0;
-    let direction = 1; // 1: scroll right, -1: scroll left
+    let direction = 1;
     let scrollInterval;
 
     function autoScroll() {
-        if (carousel.scrollWidth <= carousel.clientWidth) {
-             clearInterval(scrollInterval);
-             return;
-        }
-
+        if (carousel.scrollWidth <= carousel.clientWidth) { clearInterval(scrollInterval); return; }
         const newScrollPosition = scrollPosition + (direction * scrollDistance);
         const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
 
         if (direction === 1) {
-            if (newScrollPosition >= maxScrollLeft) {
-                direction = -1;
-                scrollPosition = maxScrollLeft;
-            } else {
-                scrollPosition = newScrollPosition;
-            }
+            if (newScrollPosition >= maxScrollLeft) { direction = -1; scrollPosition = maxScrollLeft; } 
+            else { scrollPosition = newScrollPosition; }
         } else {
-            if (newScrollPosition <= 0) {
-                direction = 1;
-                scrollPosition = 0;
-            } else {
-                scrollPosition = newScrollPosition;
-            }
+            if (newScrollPosition <= 0) { direction = 1; scrollPosition = 0; } 
+            else { scrollPosition = newScrollPosition; }
         }
-
-        carousel.scrollTo({
-            left: scrollPosition,
-            behavior: 'smooth'
-        });
+        carousel.scrollTo({ left: scrollPosition, behavior: 'smooth' });
     }
 
     const startAutoScroll = () => {
-        if (carousel.scrollWidth > carousel.clientWidth) {
-            scrollInterval = setInterval(autoScroll, 4000);
-        }
+        if (carousel.scrollWidth > carousel.clientWidth) { scrollInterval = setInterval(autoScroll, 4000); }
     };
-
     startAutoScroll();
-
     const stopAutoScroll = () => clearInterval(scrollInterval);
     
     carousel.addEventListener('mouseenter', stopAutoScroll);
     carousel.addEventListener('touchstart', stopAutoScroll);
     carousel.addEventListener('mouseleave', startAutoScroll);
     carousel.addEventListener('touchend', startAutoScroll);
-
-    window.addEventListener('resize', () => {
-         stopAutoScroll();
-         startAutoScroll();
-    });
+    window.addEventListener('resize', () => { stopAutoScroll(); startAutoScroll(); });
 });
 </script>
 @endsection
