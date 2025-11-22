@@ -56,19 +56,4 @@ class ProductController extends Controller
 
         return view('products.search', compact('products', 'query')); 
     }
-
-    // Filter (Returns JSON response)
-    public function filter(Request $request)
-    {
-        $products = Product::query();
-
-        if ($request->has('price_min')) {
-            $products->where('price', '>=', $request->price_min);
-        }
-        if ($request->has('price_max')) {
-            $products->where('price', '<=', $request->price_max);
-        }
-
-        return response()->json($products->paginate(12));
-    }
 }
