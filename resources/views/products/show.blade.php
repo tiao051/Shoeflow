@@ -536,19 +536,19 @@
         btn.disabled = true;
         btn.style.opacity = "0.8";
 
-        try {
-            // Lấy dữ liệu form
+            try {
+            // Collect form data
             const formData = new FormData(form);
             
-            // 2. Send AJAX request (Fetch API)
-            const response = await fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                // Laravel yêu cầu header X-Requested-With để nhận biết là AJAX
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
+                // 2. Send AJAX request (Fetch API)
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    // Laravel expects the X-Requested-With header to detect AJAX
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
 
             const result = await response.json();
 
@@ -594,7 +594,7 @@
             resetCartButton();
         }
 
-        // Ngăn form submit truyền thống
+        // Prevent default form submission
         return false; 
     }
     
