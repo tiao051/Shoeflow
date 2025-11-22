@@ -14,14 +14,17 @@ return new class extends Migration
         Schema::create('addresses', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->string('address_line');
-            $table->string('city');
-            $table->string('state')->nullable();
-            $table->string('postal_code');
-            $table->string('country');
-            $table->string('phone')->nullable();
+            $table->string('full_name'); 
+            $table->string('phone'); 
+            $table->string('address_line'); 
+            $table->string('city');      
+            $table->string('district');   
+            $table->string('ward')->nullable(); 
+            $table->boolean('is_default')->default(false); 
+
             $table->timestamps();
 
+            // Forein key
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }

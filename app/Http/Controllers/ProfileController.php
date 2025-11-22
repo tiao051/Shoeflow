@@ -6,14 +6,29 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Order;
 
 class ProfileController extends Controller
-{
-    // Display the user profile
-    public function show()
+{   
+    public function index()
     {
         $user = Auth::user();
-        $orders = $user->orders()->limit(5)->get();
+
+        $addresses = $user->addresses()->orderBy('is_default', 'desc')->get();
+
+        $orders = $user->orders()->latest()->get(); 
+
+        return view('profile.profile', compact('user', 'addresses', 'orders'));
+    }
+    // Display the user profile
+    public function show()
+    {   
+        $user = Auth::user();
+        $orders = Order::where('user_id', $user->id)
+                        ->withCount('items') 
+                        ->orderBy('created_at', 'desc')
+                        ->take(5)
+                        ->get();
 
         return view('profile.profile', compact('user', 'orders'));
     }

@@ -12,8 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Thêm cột 'role' với các giá trị cho phép là admin, staff, customer
-            // Giá trị mặc định là 'customer'
             $table->enum('role', ['admin', 'staff', 'customer'])
                   ->default('customer')
                   ->after('password');

@@ -5,9 +5,10 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\DashboardController; 
-use App\Http\Controllers\OrderController; // Import Order controller for customer
+use App\Http\Controllers\OrderController; 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Staff\OrderController as StaffOrder;
+use App\Http\Controllers\AddressController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,15 +36,17 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 // This group is for all authenticated users
 Route::middleware('auth')->group(function () {
     
-    // --- User Profile Routes ---
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+   // --- User Profile Routes ---
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar.update');
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index'); 
 
     // --- Address & Contact Routes ---
-    Route::resource('addresses', App\Http\Controllers\AddressController::class);
-    Route::resource('contacts', App\Http\Controllers\ContactController::class);
+    Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
+    Route::delete('/addresses/{id}', [AddressController::class, 'destroy'])->name('addresses.destroy');
+    Route::put('/addresses/{id}', [AddressController::class, 'update'])->name('addresses.update');
+    Route::patch('/addresses/{id}/default', [AddressController::class, 'setDefault'])->name('addresses.default');
 
     // --- CART & CHECKOUT ROUTES ---
     Route::prefix('cart')->name('cart.')->group(function () {
