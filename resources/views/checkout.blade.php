@@ -4,7 +4,7 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
     @if ($errors->any())
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-            <strong class="font-bold">Lỗi nhập liệu!</strong>
+            <strong class="font-bold">Validation Error!</strong>
             <ul class="mt-2 list-disc list-inside">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -15,14 +15,14 @@
 
     @if (session('error'))
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-            <strong class="font-bold">Lỗi hệ thống:</strong>
+            <strong class="font-bold">System Error:</strong>
             <span class="block sm:inline">{{ session('error') }}</span>
         </div>
     @endif
 
     @if (session('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-            <strong class="font-bold">Thành công!</strong>
+            <strong class="font-bold">Success!</strong>
             <span class="block sm:inline">{{ session('success') }}</span>
         </div>
     @endif
@@ -290,14 +290,16 @@
         const finalTotalEl = document.getElementById('final-total');
         const appliedInput = document.getElementById('applied_coupon_input');
 
-        if (!code) return;
+        if (!code) {
+            return;
+        }
 
         // Loading UI
         btn.innerText = '...';
         btn.disabled = true;
         messageEl.classList.add('hidden');
 
-        // Call real API from Controller
+        // Call API endpoint to validate coupon
         fetch('{{ route("cart.check-coupon") }}', {
             method: 'POST',
             headers: {
@@ -309,11 +311,11 @@
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                // --- SUCCESS ---
+                // SUCCESS
                 messageEl.innerText = data.message;
                 messageEl.className = 'text-xs font-bold text-green-600 block';
 
-                // Show Discount row
+                // Show discount row
                 discountRow.classList.remove('hidden');
                 discountRow.classList.add('flex');
                 discountAmountEl.innerText = '-' + formatMoney(data.discount);
@@ -321,21 +323,20 @@
                 // Fill hidden input
                 appliedInput.value = data.code;
 
-                // Update Total (Client-side)
+                // Update total client-side
                 const originalTotal = parseFloat(finalTotalEl.getAttribute('data-original-total'));
                 const newTotal = originalTotal - data.discount;
                 finalTotalEl.innerText = formatMoney(newTotal > 0 ? newTotal : 0);
-
             } else {
-                // --- FAILURE ---
+                // FAILURE
                 messageEl.innerText = data.message;
                 messageEl.className = 'text-xs font-bold text-red-600 block';
 
                 // Hide discount row and reset total
                 discountRow.classList.add('hidden');
                 appliedInput.value = '';
-                
-                // Reset về giá gốc
+
+                // Reset to original total
                 const originalTotal = parseFloat(finalTotalEl.getAttribute('data-original-total'));
                 finalTotalEl.innerText = formatMoney(originalTotal);
             }
@@ -352,7 +353,9 @@
     }
 
     function formatMoney(amount) {
-        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount).replace('₫', '') + '₫';
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' })
+            .format(amount)
+            .replace('₫', '') + '₫';
     }
 </script>
 @endsection

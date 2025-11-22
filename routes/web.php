@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\DashboardController; 
+use App\Http\Controllers\OrderController; // Import Order controller for customer
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Staff\OrderController as StaffOrder;
 
@@ -23,7 +24,7 @@ Route::resource('products', ProductController::class)->only(['index', 'show']);
 
 /*
 |--------------------------------------------------------------------------
-| Authenticated Routes
+| Authenticated Routes (For Users & Admins)
 |--------------------------------------------------------------------------
 */
 
@@ -31,7 +32,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth']) 
     ->name('dashboard'); 
 
-// All authenticated routes grouped
+// This group is for all authenticated users
 Route::middleware('auth')->group(function () {
     
     // --- User Profile Routes ---
@@ -44,7 +45,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('addresses', App\Http\Controllers\AddressController::class);
     Route::resource('contacts', App\Http\Controllers\ContactController::class);
 
-    // --- CART ROUTES ---
+    // --- CART & CHECKOUT ROUTES ---
     Route::prefix('cart')->name('cart.')->group(function () {
         Route::get('/', [CartController::class, 'index'])->name('index');
         Route::post('add', [CartController::class, 'add'])->name('add');
@@ -56,11 +57,18 @@ Route::middleware('auth')->group(function () {
         Route::post('check-coupon', [CartController::class, 'checkCoupon'])->name('check-coupon');
         Route::post('/checkout', [CartController::class, 'processCheckout'])->name('checkout.process'); 
     });
+
+    // --- [FIX] Add thank-you and order view routes here ---
+    // This route should be accessible to users
+    Route::get('/checkout/success/{order}', [CartController::class, 'success'])->name('checkout.success');
+
+    // Route to view order details (customer view)
+    Route::get('/my-orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Admin Routes
+| Admin Routes (Admin only)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -78,11 +86,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 /*
 |--------------------------------------------------------------------------
-| Staff Routes (Admin & Staff)
+| Staff Routes (Admin & Staff manage orders)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:admin,staff'])->group(function () {
-    Route::resource('orders', App\Http\Controllers\OrderController::class);
+    // Controller for staff to manage orders (approve, cancel, etc.)
+    Route::resource('orders', StaffOrder::class);
     Route::resource('order-items', App\Http\Controllers\OrderItemController::class);
     Route::resource('reviews', App\Http\Controllers\ReviewController::class);
     Route::resource('comments', App\Http\Controllers\CommentController::class);

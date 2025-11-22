@@ -373,7 +373,7 @@ class CartController extends Controller
             DB::commit(); // Save all changes to DB
             // 4. Redirect to "Thank You" page or Order History
             // Temporarily redirect to home with a success message
-            return redirect()->route('home')->with('success', 'Order placed successfully! Order ID: #' . $order->id);
+            return redirect()->route('checkout.success', ['order' => $order->id]);
 
         } catch (\Exception $e) {
             DB::rollBack(); // If error, rollback all operations
@@ -381,5 +381,15 @@ class CartController extends Controller
             \Log::error('Checkout Error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'An error occurred while processing your order. Please try again.');
         }
+    }
+
+    public function success($orderId)
+    {
+        // Find (ensure the correct user owns the order for security)
+        $order = Order::where('id', $orderId)
+                      ->where('user_id', auth()->id())
+                      ->firstOrFail();
+
+        return view('checkout-success', compact('order'));
     }
 }

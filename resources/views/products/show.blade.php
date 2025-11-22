@@ -3,7 +3,7 @@
 @section('title', $product->name . ' | CONVERSE')
 
 @push('styles')
-<!-- ... (giữ nguyên phần CSS styles) ... -->
+<!-- ... (keep CSS styles as-is) ... -->
 <style>
     /* --- FONTS & BASICS --- */
     .font-oswald { font-family: 'Oswald', sans-serif; }
@@ -297,10 +297,10 @@
 @endpush
 
 @section('content')
-<!-- ... (giữ nguyên phần HTML body) ... -->
+<!-- ... (keep HTML body as-is) ... -->
 <div class="container product-container">
     
-    <!-- LƯU Ý: Đã ẩn thông báo success của Laravel vì chúng ta dùng AJAX. -->
+    <!-- NOTE: Laravel success messages hidden because we use AJAX. -->
     @if(session('success'))
         <div class="alert alert-success mb-4 text-center d-none" id="sessionSuccessMessage">
             {{ session('success') }}
@@ -325,7 +325,7 @@
                 @endif
                 
                 <div class="main-image-wrapper">
-                    <!-- Sử dụng ảnh chính từ DB -->
+                            <!-- Use main image from DB -->
                     <img src="{{ asset($product->image) }}" alt="{{ $product->name }}" id="mainImage">
                 </div>
             </div>
@@ -368,9 +368,9 @@
                             <div class="size-option" onclick="selectSize(this, '{{ $size }}')">{{ $size }}</div>
                         @endforeach
                     </div>
-                    <!-- Input này dùng cho giao diện JS, không submit trực tiếp form -->
+                    <!-- This input is used for the JS interface, not for direct form submission -->
                     <input type="hidden" id="selectedSize" name="size">
-                    <div id="sizeError" class="text-danger small d-none mb-2">Vui lòng chọn size!</div>
+                    <div id="sizeError" class="text-danger small d-none mb-2">Please select a size!</div>
                 </div>
 
                 <!-- ACTIONS -->
@@ -506,23 +506,23 @@
         document.querySelectorAll('.size-option').forEach(el => el.classList.remove('selected'));
         element.classList.add('selected');
         
-        // Cập nhật size vào input của UI và form ẩn
+        // Update size into the UI input and the hidden form field
         document.getElementById('selectedSize').value = size;
         document.getElementById('form_size').value = size;
         
         document.getElementById('sizeError').classList.add('d-none');
     }
 
-    // --- CART LOGIC (CẬP NHẬT AJAX) ---
+    // --- CART LOGIC (AJAX UPDATE) ---
     async function addToCart(event) {
-        // NGĂN CHẶN RELOAD TRANG
+        // PREVENT PAGE RELOAD
         event.preventDefault(); 
         
         const size = document.getElementById('selectedSize').value;
         const btn = document.getElementById('addToCartButton');
         const form = document.getElementById('addToCartForm');
 
-        // Validation: Phải chọn size trước
+        // Validation: must select a size first
         if (!size) {
             document.getElementById('sizeError').classList.remove('d-none');
             const grid = document.getElementById('sizeSelector');
@@ -531,7 +531,7 @@
             return;
         }
         
-        // 1. Trạng thái Loading (trước khi gửi request)
+        // 1. Loading state (before sending request)
         btn.innerHTML = 'ADDING...'; 
         btn.disabled = true;
         btn.style.opacity = "0.8";
@@ -540,7 +540,7 @@
             // Lấy dữ liệu form
             const formData = new FormData(form);
             
-            // 2. Gửi yêu cầu AJAX (Fetch API)
+            // 2. Send AJAX request (Fetch API)
             const response = await fetch(form.action, {
                 method: 'POST',
                 body: formData,
@@ -552,18 +552,18 @@
 
             const result = await response.json();
 
-            // 3. Xử lý phản hồi từ Server
+            // 3. Handle server response
             if (response.ok && result.status === 'success') {
-                // Hiệu ứng Flash thành công
+                // Success flash effect
                 flashCartSuccess();
                 
-                // --- [MỚI THÊM] Cập nhật số lượng giỏ hàng ở header ---
+                // --- [NEW] Update cart count in header ---
                 const cartBadge = document.getElementById('cart-count');
                 if (cartBadge) {
-                    // Cập nhật số mới từ server trả về
+                    // Update the count from the server response
                     cartBadge.innerText = result.cart_count;
-                    
-                    // (Tùy chọn) Thêm chút hiệu ứng "nảy" để người dùng chú ý
+
+                    // (Optional) Add a small pop animation to draw attention
                     cartBadge.classList.add('scale-150', 'transition-transform'); 
                     setTimeout(() => {
                         cartBadge.classList.remove('scale-150');
@@ -574,23 +574,23 @@
                 console.log('Product added successfully. Cart Count:', result.cart_count);
 
             } else {
-                // Xử lý lỗi từ server (ví dụ: product not found, out of stock, chưa login)
+                // Handle errors returned from server (e.g. product not found, out of stock, not logged in)
                 console.error('Error adding to cart:', result.message || 'Unknown error');
                 
-                if(response.status === 401) {
-                     alert('Bạn cần đăng nhập để thực hiện chức năng này!');
-                     window.location.href = '/login'; // Chuyển hướng nếu chưa đăng nhập
+                 if(response.status === 401) {
+                     alert('You need to log in to perform this action!');
+                     window.location.href = '/login'; // Redirect if not logged in
                 } else {
-                     alert('Có lỗi xảy ra: ' + (result.message || 'Lỗi không xác định.'));
+                     alert('An error occurred: ' + (result.message || 'Unknown error.'));
                 }
 
-                // Khôi phục nút
+                // Restore button
                 resetCartButton();
             }
         } catch (error) {
-            // Xử lý lỗi mạng hoặc lỗi Fetch
+            // Handle network / fetch errors
             console.error('Network Error:', error);
-            alert('Lỗi kết nối mạng hoặc server không phản hồi.');
+            alert('Network error or server not responding.');
             resetCartButton();
         }
 
@@ -598,7 +598,7 @@
         return false; 
     }
     
-    // Hàm khôi phục nút (Dùng khi lỗi)
+    // Reset button function (used on error)
     function resetCartButton() {
         const btn = document.getElementById('addToCartButton');
         btn.innerHTML = 'ADD TO CART';
@@ -607,28 +607,28 @@
     }
 
     /**
-     * Xử lý hiệu ứng flash cho nút sau khi thêm sản phẩm thành công 
+     * Handle flash effect for the button after a successful add-to-cart
      */
     function flashCartSuccess() {
         const btn = document.getElementById('addToCartButton');
         
-        // 1. Chuyển sang trạng thái thành công
+        // 1. Switch to success state
         btn.innerHTML = 'ADDED TO CART!';
-        btn.classList.add('btn-success-flash'); // Bạn nhớ định nghĩa class này trong CSS nhé
+        btn.classList.add('btn-success-flash'); // Ensure this class is defined in CSS
         btn.classList.remove('bg-black');
         btn.disabled = true; 
         btn.style.opacity = "1";
 
-        // 2. Thiết lập bộ đếm thời gian để khôi phục nút sau 2 giây
+        // 2. Set a timer to restore the button after 2 seconds
         setTimeout(() => {
             btn.innerHTML = 'ADD TO CART';
             btn.classList.remove('btn-success-flash');
             btn.classList.add('bg-black');
             btn.disabled = false;
-        }, 2000); // Flash trong 2 giây
+        }, 2000); // Flash for 2 seconds
     }
 
-    // --- SIZE GUIDE MODAL LOGIC (Giữ nguyên) ---
+    // --- SIZE GUIDE MODAL LOGIC (unchanged) ---
     function openSizeGuide() {
         document.getElementById('sizeGuideModal').style.display = 'flex';
         document.body.style.overflow = 'hidden';
