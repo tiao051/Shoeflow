@@ -8,12 +8,12 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    // Danh sách sản phẩm
+    // List of products
     public function index(Request $request)
     {
         $products = Product::query();
 
-        // Filter theo category
+        // Filter by category
         if ($request->has('category')) {
             $products->where('category_id', $request->category);
         }
@@ -30,11 +30,10 @@ class ProductController extends Controller
 
         $products = $products->paginate(12);
 
-        // SỬA Ở ĐÂY: Trỏ vào thư mục products, file index
         return view('products.index', compact('products')); 
     }
 
-    // Chi tiết sản phẩm
+    // Product details
     public function show($id)
     {
         $product = Product::findOrFail($id);
@@ -43,13 +42,10 @@ class ProductController extends Controller
             ->limit(4)
             ->get();
 
-        $product->increment('views');
-
-        // SỬA Ở ĐÂY: Trỏ vào thư mục products, file show
         return view('products.show', compact('product', 'relatedProducts')); 
     }
 
-    // Tìm kiếm
+    // Search
     public function search(Request $request)
     {
         $query = $request->input('q');
@@ -58,11 +54,10 @@ class ProductController extends Controller
             ->orWhere('description', 'LIKE', "%{$query}%")
             ->paginate(12);
 
-        // SỬA Ở ĐÂY: Trỏ vào thư mục products, file search (hoặc dùng chung index tùy bạn)
         return view('products.search', compact('products', 'query')); 
     }
 
-    // Filter (Giữ nguyên vì trả về JSON)
+    // Filter (Returns JSON response)
     public function filter(Request $request)
     {
         $products = Product::query();

@@ -29,10 +29,8 @@ Route::resource('products', ProductController::class)->only(['index', 'show']);
 |--------------------------------------------------------------------------
 */
 
-// Dùng chung DashboardController@index cho cả / (home) và /dashboard
-// Đặt dưới middleware 'auth' để đảm bảo việc truy cập /dashboard yêu cầu đăng nhập
 Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified']) // Thường có thêm 'verified'
+    ->middleware(['auth']) 
     ->name('dashboard'); 
 
 // All authenticated routes grouped

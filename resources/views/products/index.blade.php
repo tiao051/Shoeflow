@@ -113,7 +113,6 @@
         <div class="filter-bar row mt-4 mb-4">
             <div class="col-6">
                 <h1 class="m-0" style="font-size: 2.5rem;">All Sneakers</h1>
-                <span class="text-muted">{{ $products->total() }} products</span>
             </div>
             <div class="col-6 text-end">
                 <form action="{{ route('products.index') }}" method="GET" class="d-inline-block">
@@ -136,7 +135,7 @@
                                 <span class="badge-custom">NEW</span>
                             @endif
 
-                            <img src="{{ $product->image ?? 'https://images.unsplash.com/photo-1607522370275-f14206c14896?q=80&w=800&auto=format&fit=crop' }}" 
+                            <img src="{{ $product->image}}" 
                                  alt="{{ $product->name }}">
                         </div>
 
