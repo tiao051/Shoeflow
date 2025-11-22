@@ -51,8 +51,7 @@
         
         <div class="nav-center">
             <a href="#" class="font-bold hover:text-gray-600">Run Star Trainer</a>
-            <a href="#" class="font-bold hover:text-gray-600">Men</a>
-            <a href="#" class="font-bold hover:text-gray-600">Women</a>
+            <a href="#" class="font-bold hover:text-gray-600">Fits with Converse</a>
             <a href="#" class="font-bold hover:text-gray-600">Limited Edition</a>
             <a href="#" class="sale font-bold text-red-600 hover:text-red-800">Sale Up To 50%</a>
         </div>
