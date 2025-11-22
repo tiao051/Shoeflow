@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
 {
@@ -15,11 +16,10 @@ class ProductSeeder extends Seeder
      */
     public function run()
     {
-        // Define the data to be inserted
         $products = [
             [
-                'name' => 'Chuck 70 High Top - Classic Black',
-                'slug' => 'chuck-70-high-top-classic-black',
+                'name' => 'Chuck 70 Hi – Eclipse Blackout',
+                'slug' => Str::slug('Chuck 70 Hi – Eclipse Blackout'),
                 'brand' => 'Converse',
                 'category_id' => 1,
                 'price' => 1890000.00,
@@ -33,8 +33,8 @@ class ProductSeeder extends Seeder
                 'updated_at' => Carbon::now(),
             ],
             [
-                'name' => 'Run Star Motion CX - White/Black/Gum',
-                'slug' => 'run-star-motion-cx-white-black-gum',
+                'name' => 'Run Star Motion – Arctic Pulse',
+                'slug' => Str::slug('Run Star Motion – Arctic Pulse'),
                 'brand' => 'Converse',
                 'category_id' => 1,
                 'price' => 2550000.00,
@@ -48,8 +48,8 @@ class ProductSeeder extends Seeder
                 'updated_at' => Carbon::now(),
             ],
             [
-                'name' => 'Chuck Taylor All Star Lift - Pink Foam',
-                'slug' => 'chuck-taylor-all-star-lift-pink-foam',
+                'name' => 'All Star Lift – Sakura Mist',
+                'slug' => Str::slug('All Star Lift – Sakura Mist'),
                 'brand' => 'Converse',
                 'category_id' => 1,
                 'price' => 1790000.00,
@@ -63,8 +63,8 @@ class ProductSeeder extends Seeder
                 'updated_at' => Carbon::now(),
             ],
             [
-                'name' => 'Chuck 70 Hi Vintage - Ivory',
-                'slug' => 'chuck-70-hi-vintage-ivory',
+                'name' => 'Chuck 70 Hi – Bone Ivory Relic',
+                'slug' => Str::slug('Chuck 70 Hi – Bone Ivory Relic'),
                 'brand' => 'Converse',
                 'category_id' => 1,
                 'price' => 1990000.00,
@@ -78,13 +78,13 @@ class ProductSeeder extends Seeder
                 'updated_at' => Carbon::now(),
             ],
             [
-                'name' => 'One Star Mocha Pro Suede - Obsidian',
-                'slug' => 'one-star-mocha-pro-suede-obsidian',
+                'name' => 'One Star Pro – Midnight Abyss',
+                'slug' => Str::slug('One Star Pro – Midnight Abyss'),
                 'brand' => 'Converse',
                 'category_id' => 1,
                 'price' => 2200000.00,
                 'sale_price' => 1800000.00,
-                'description' => 'Design built for skateboarding, with durable suede and specialized cushioning for impact protection.',
+                'description' => 'Designed for skateboarding, with durable suede and specialized cushioning for impact protection.',
                 'image' => 'images/y2k_mocha.jpg',
                 'is_new' => 0,
                 'is_active' => 1,
@@ -93,8 +93,8 @@ class ProductSeeder extends Seeder
                 'updated_at' => Carbon::now(),
             ],
             [
-                'name' => 'All Star BB Shift - Volt Orange',
-                'slug' => 'all-star-bb-shift-volt-orange',
+                'name' => 'BB Shift – Hypervolt Neon',
+                'slug' => Str::slug('BB Shift – Hypervolt Neon'),
                 'brand' => 'Converse',
                 'category_id' => 1,
                 'price' => 2100000.00,
@@ -108,8 +108,8 @@ class ProductSeeder extends Seeder
                 'updated_at' => Carbon::now(),
             ],
             [
-                'name' => 'Chuck Taylor All Star Classic Low Top - White',
-                'slug' => 'chuck-taylor-all-star-classic-low-top-white',
+                'name' => 'All Star Low – White Mirage',
+                'slug' => Str::slug('All Star Low – White Mirage'),
                 'brand' => 'Converse',
                 'category_id' => 1,
                 'price' => 1450000.00,
@@ -123,23 +123,23 @@ class ProductSeeder extends Seeder
                 'updated_at' => Carbon::now(),
             ],
             [
-                'name' => 'Chuck 70 High Top - Seasonal Red',
-                'slug' => 'chuck-70-high-top-seasonal-red',
+                'name' => 'Chuck 70 Hi – Crimson Heat',
+                'slug' => Str::slug('Chuck 70 Hi – Crimson Heat'),
                 'brand' => 'Converse',
                 'category_id' => 1,
                 'price' => 1890000.00,
                 'sale_price' => null,
                 'description' => 'A seasonal color update for the Chuck 70 High Top featuring vibrant red canvas.',
                 'image' => 'images/red1.jpg',
-                'is_new' => 0, 
+                'is_new' => 0,
                 'is_active' => 1,
                 'stock' => 20,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
             [
-                'name' => 'Converse High-top Sneakers Navy Blue',
-                'slug' => 'converse-high-top-sneakers-navy-blue',
+                'name' => 'All Star Hi – Deep Navy Realm',
+                'slug' => Str::slug('All Star Hi – Deep Navy Realm'),
                 'brand' => 'Converse',
                 'category_id' => 1,
                 'price' => 1890000.00,
@@ -153,10 +153,10 @@ class ProductSeeder extends Seeder
                 'updated_at' => Carbon::now(),
             ],
             [
-                'name' => 'Converse Older Kids Star Player 76 Foundational Canvas (GS)',
-                'slug' => 'converse-older-kids-star-player-76-foundational-canvas-gs',
+                'name' => 'Star Player 76 – Urban Canvas GS',
+                'slug' => Str::slug('Star Player 76 – Urban Canvas GS'),
                 'brand' => 'Converse',
-                'category_id' => 2, 
+                'category_id' => 2,
                 'price' => 1550000.00,
                 'sale_price' => null,
                 'description' => 'The Star Player 76 low-top version for older kids, designed with durable and comfortable canvas.',
@@ -167,9 +167,53 @@ class ProductSeeder extends Seeder
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
+            [
+                'name' => 'All Star Low – Web Noir Edition',
+                'slug' => Str::slug('All Star Low – Web Noir Edition'),
+                'brand' => 'Custom',
+                'category_id' => 1,
+                'price' => 2300000.00,
+                'sale_price' => null,
+                'description' => 'Custom Chuck Taylor low-top in black and white, featuring a unique spider web pattern for a bold look.',
+                'image' => 'images/custom1.jpg',
+                'is_new' => 1,
+                'is_active' => 1,
+                'stock' => 10,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'name' => 'One Star Low – Checker Fade',
+                'slug' => Str::slug('One Star Low – Checker Fade'),
+                'brand' => 'Custom',
+                'category_id' => 1,
+                'price' => 2450000.00,
+                'sale_price' => null,
+                'description' => 'Custom low-top sneakers with bold black and white checkerboard patterns, perfect for rock or streetwear styles.',
+                'image' => 'images/custom2.jpg',
+                'is_new' => 1,
+                'is_active' => 1,
+                'stock' => 8,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'name' => 'Chuck Taylor Low – Heart Snowfall',
+                'slug' => Str::slug('Chuck Taylor Low – Heart Snowfall'),
+                'brand' => 'Custom',
+                'category_id' => 1,
+                'price' => 2150000.00,
+                'sale_price' => null,
+                'description' => 'Custom white low-top sneakers featuring a delicate embroidered heart patch. Feminine, lightweight, and versatile.',
+                'image' => 'images/custom3.jpg',
+                'is_new' => 1,
+                'is_active' => 1,
+                'stock' => 12,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
         ];
 
-        // Insert the data into the 'products' table
         DB::table('products')->insert($products);
     }
 }

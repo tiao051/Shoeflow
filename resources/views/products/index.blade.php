@@ -120,7 +120,6 @@
                         <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Newest</option>
                         <option value="price_low" {{ request('sort') == 'price_low' ? 'selected' : '' }}>Price: Low - High</option>
                         <option value="price_high" {{ request('sort') == 'price_high' ? 'selected' : '' }}>Price: High - Low</option>
-                        <option value="popular" {{ request('sort') == 'popular' ? 'selected' : '' }}>Top Rated</option>
                     </select>
                 </form>
             </div>
