@@ -9,10 +9,10 @@ class SaleController extends Controller
 {
     public function index()
     {
-        $products = Product::where('discount', '>', 0)
-            ->orderBy('discount', 'desc')
-            ->paginate(12);
+        // $products = Product::where('discount', '>', 0)
+        //     ->orderBy('discount', 'desc')
+        //     ->paginate(12);
 
-        return view('sale', compact('products'));
+        // return view('sale', compact('products'));
     }
 }

@@ -7,6 +7,7 @@ use App\Models\CartItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth; 
+use App\Models\Voucher;
 
 class CartController extends Controller
 {
@@ -215,13 +216,57 @@ class CartController extends Controller
 
         $cartItems = $cart->items()->with('product')->get();
         $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
-        
-        // Shipping logic: Free shipping > 1,000,000 VND
         $shipping = $subtotal > 1000000 ? 0 : 30000; 
-        
         $tax = $subtotal * 0.1;
         $total = $subtotal + $shipping + $tax;
 
-        return view('checkout', compact('cartItems', 'subtotal', 'shipping', 'tax', 'total'));
+        $vouchers = Voucher::where('is_active', true)
+            ->where('quantity', '>', 0)
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now())
+            ->get();
+
+        return view('checkout', compact('cartItems', 'subtotal', 'shipping', 'tax', 'total', 'vouchers'));
+    }
+
+    public function checkCoupon(Request $request)
+    {
+        $code = $request->input('code');
+        $user = auth()->user();
+
+        $cart = Cart::where('user_id', $user->id)->first();
+        if (!$cart) return response()->json(['status' => 'error', 'message' => 'Cart empty']);
+        
+        $subtotal = $cart->items->sum(fn($item) => $item->price * $item->quantity);
+
+        $voucher = Voucher::where('code', $code)
+            ->where('is_active', true)
+            ->where('quantity', '>', 0)
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now())
+            ->first();
+
+        if (!$voucher) {
+            return response()->json(['status' => 'error', 'message' => 'Invalid or expired voucher code.'], 404);
+        }
+        
+        $discountAmount = 0;
+
+        if ($voucher->discount_type == 'fixed') {
+            $discountAmount = $voucher->discount_value;
+        } else {
+            // Calculate percentage discount
+            $discountAmount = $subtotal * ($voucher->discount_value / 100);
+            // Check maximum discount limit
+            if ($voucher->max_discount_amount && $discountAmount > $voucher->max_discount_amount) {
+                $discountAmount = $voucher->max_discount_amount;
+            }
+        }
+        return response()->json([
+            'status' => 'success',
+            'discount' => $discountAmount,
+            'message' => 'Voucher applied successfully!',
+            'code' => $voucher->code
+        ]);
     }
 }
