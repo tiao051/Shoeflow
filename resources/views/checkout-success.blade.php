@@ -43,7 +43,7 @@
         </p>
 
         <div class="mt-8 space-y-3">
-            <a href="#" 
+            <a href="{{ route('profile.show') }}" 
                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition transform hover:-translate-y-0.5">
                 VIEW ORDER DETAILS
             </a>
