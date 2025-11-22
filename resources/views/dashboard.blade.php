@@ -31,7 +31,7 @@
             
             <div class="relative bg-white rounded-xl shadow-lg overflow-hidden transition duration-300 hover:shadow-2xl group">
                 <div class="bg-gray-100 flex items-center justify-center h-80">
-                    <img src="{{ asset('images/chuck_taylor1.jpg') }}" 
+                    <img src="{{ asset('images/cate1.jpg') }}" 
                          alt="Chuck Taylor Shoes" 
                          class="w-full h-full object-cover transition duration-200 group-hover:scale-105"
                          onerror="this.onerror=null;this.src='https://placehold.co/400x320/E5E7EB/4B5563?text=Chuck+Taylor';">
@@ -47,7 +47,7 @@
 
             <div class="relative bg-white rounded-xl shadow-lg overflow-hidden transition duration-300 hover:shadow-2xl group">
                 <div class="bg-gray-100 flex items-center justify-center h-80">
-                    <img src="{{ asset('images/one_start1.jpg') }}" 
+                    <img src="{{ asset('images/cate2.jpg') }}" 
                          alt="One Star Shoes" 
                          class="w-full h-full object-cover transition duration-200 group-hover:scale-105"
                          onerror="this.onerror=null;this.src='https://placehold.co/400x320/E5E7EB/4B5563?text=One+Star';">
@@ -63,7 +63,7 @@
 
             <div class="relative bg-white rounded-xl shadow-lg overflow-hidden transition duration-300 hover:shadow-2xl group">
                 <div class="bg-gray-100 flex items-center justify-center h-80">
-                    <img src="{{ asset('images/all_star1.jpg') }}" 
+                    <img src="{{ asset('images/cate3.jpg') }}" 
                          alt="All Star Shoes" 
                          class="w-full h-full object-cover transition duration-200 group-hover:scale-105"
                          onerror="this.onerror=null;this.src='https://placehold.co/400x320/E5E7EB/4B5563?text=All+Star';">

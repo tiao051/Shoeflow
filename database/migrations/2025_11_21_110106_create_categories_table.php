@@ -13,11 +13,19 @@ return new class extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
+            
+            // Category name (e.g., CHUCK TAYLOR)
             $table->string('name');
+
+            // SEO-friendly URL slug (e.g., chuck-taylor)
             $table->string('slug')->unique();
-            $table->text('description')->nullable();
-            $table->unsignedBigInteger('parent_id')->nullable();
-            $table->foreign('parent_id')->references('id')->on('categories')->onDelete('set null');
+
+            // Short description displayed under the name (optional)
+            $table->string('description')->nullable();
+
+            // Image path for the category (used on the dashboard)
+            $table->string('image')->nullable();
+            
             $table->timestamps();
         });
     }
