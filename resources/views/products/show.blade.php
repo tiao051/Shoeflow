@@ -3,34 +3,38 @@
 @section('title', $product->name . ' | CONVERSE')
 
 @push('styles')
+<!-- ... (giữ nguyên phần CSS styles) ... -->
 <style>
+    /* --- FONTS & BASICS --- */
     .font-oswald { font-family: 'Oswald', sans-serif; }
     .text-secondary-custom { color: #757575; }
-
+    
+    /* --- LAYOUT --- */
     .product-container { padding-top: 40px; padding-bottom: 60px; }
 
+    /* --- GALLERY SECTION --- */
     .product-gallery {
         position: relative;
-        background-color: #f6f6f6;
+        background-color: #f6f6f6; /* Converse light gray bg */
         margin-bottom: 20px;
     }
     .main-image-wrapper {
-        width: 90%;
+        width: 90%; /* Reduced width to make the image smaller */
         aspect-ratio: 1/1;
         overflow: hidden;
         display: flex;
         align-items: center;
         justify-content: center;
-        cursor: default;
+        cursor: default; /* Removed zoom-in cursor */
     }
     .main-image-wrapper img {
         width: 100%;
         height: auto;
         object-fit: cover;
-        transition: none;
+        transition: none; /* Removed zoom effect */
     }
     .main-image-wrapper:hover img {
-        transform: none;
+        transform: none; /* Removed zoom effect */
     }
     .badge-detail {
         position: absolute;
@@ -44,9 +48,10 @@
         z-index: 10;
     }
 
+    /* --- INFO SECTION (STICKY) --- */
     .product-info-sticky {
         position: sticky;
-        top: 100px;
+        top: 100px; /* Adjust based on your header height */
         height: fit-content;
     }
 
@@ -65,6 +70,7 @@
         margin-bottom: 20px;
     }
 
+    /* --- SIZE SELECTOR --- */
     .size-label {
         font-size: 0.9rem;
         font-weight: 700;
@@ -85,7 +91,7 @@
 
     .size-grid {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(5, 1fr); /* 5 sizes per row */
         gap: 10px;
         margin-bottom: 30px;
     }
@@ -114,6 +120,7 @@
         text-decoration: line-through;
     }
 
+    /* --- ACTIONS --- */
     .action-buttons {
         display: flex;
         gap: 15px;
@@ -129,10 +136,23 @@
         font-weight: 700;
         font-size: 1rem;
         transition: background 0.3s;
+        /* Custom styles for success flash */
+        border: 1px solid transparent; /* Ensure border exists for consistency */
     }
-    .btn-add-cart:hover {
+    .btn-add-cart:hover:not(:disabled) {
         background-color: #333;
     }
+    .btn-add-cart.btn-success-flash {
+        background-color: #4CAF50; /* Green color for success */
+        border-color: #4CAF50;
+        animation: flash-pulse 0.5s 3; /* Flash effect */
+    }
+    @keyframes flash-pulse {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+        50% { transform: scale(1.01); box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+    }
+
     .btn-wishlist-detail {
         width: 58px;
         display: flex;
@@ -154,6 +174,7 @@
         fill: #ff0000; stroke: #ff0000;
     }
 
+    /* --- ACCORDION (DETAILS) --- */
     .product-details-accordion details {
         border-top: 1px solid #e5e5e5;
     }
@@ -189,6 +210,7 @@
         color: #555;
     }
 
+    /* --- RELATED PRODUCTS --- */
     .related-section { margin-top: 80px; }
     .related-title {
         font-size: 1.8rem;
@@ -196,16 +218,17 @@
         text-transform: uppercase;
     }
 
+    /* --- SIZE GUIDE MODAL --- */
     .size-guide-modal {
-        display: none;
+        display: none; /* Hidden by default */
         position: fixed;
-        z-index: 1050;
+        z-index: 1050; /* Higher than sticky header */
         left: 0;
         top: 0;
         width: 100%;
         height: 100%;
         overflow: hidden;
-        background-color: rgba(0,0,0,0.6);
+        background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
         justify-content: center;
         align-items: center;
         animation: fadeIn 0.3s;
@@ -254,6 +277,15 @@
         to {opacity: 1;}
     }
 
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0); }
+    }
+
+    /* --- MOBILE ADJUSTMENTS --- */
     @media (max-width: 768px) {
         .product-container { padding-top: 0; }
         .product-info-sticky { position: static; padding-top: 20px; }
@@ -265,8 +297,16 @@
 @endpush
 
 @section('content')
+<!-- ... (giữ nguyên phần HTML body) ... -->
 <div class="container product-container">
     
+    <!-- LƯU Ý: Đã ẩn thông báo success của Laravel vì chúng ta dùng AJAX. -->
+    @if(session('success'))
+        <div class="alert alert-success mb-4 text-center d-none" id="sessionSuccessMessage">
+            {{ session('success') }}
+        </div>
+    @endif
+
     <!-- BREADCRUMB -->
     <nav aria-label="breadcrumb" class="mb-4 d-none d-md-block">
         <ol class="breadcrumb small text-uppercase">
@@ -319,7 +359,6 @@
                 <div class="mb-4">
                     <div class="size-label">
                         <span>SELECT SIZE (US)</span>
-                        <!-- SỬA TẠI ĐÂY: Thêm sự kiện onclick -->
                         <span class="size-guide-link" onclick="openSizeGuide()">Size Guide</span>
                     </div>
                     
@@ -329,14 +368,16 @@
                             <div class="size-option" onclick="selectSize(this, '{{ $size }}')">{{ $size }}</div>
                         @endforeach
                     </div>
+                    <!-- Input này dùng cho giao diện JS, không submit trực tiếp form -->
                     <input type="hidden" id="selectedSize" name="size">
-                    <div id="sizeError" class="text-danger small d-none mb-2">Please select a size.</div>
+                    <div id="sizeError" class="text-danger small d-none mb-2">Vui lòng chọn size!</div>
                 </div>
 
                 <!-- ACTIONS -->
                 <div class="action-buttons">
-                    <button class="btn-add-cart" onclick="addToCart()">
-                        Add to Cart
+                    <!-- Đã bỏ onclick() khỏi nút để lắng nghe sự kiện submit của form -->
+                    <button class="btn-add-cart" id="addToCartButton" type="submit" form="addToCartForm">
+                        ADD TO CART
                     </button>
                     <button class="btn-wishlist-detail" title="Add to Wishlist">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -447,6 +488,16 @@
             </div>
         </div>
     </div>
+
+    <!-- HIDDEN FORM FOR ADD TO CART -->
+    <!-- Đã thêm sự kiện onsubmit để kích hoạt JS thay vì submit truyền thống -->
+    <form id="addToCartForm" action="{{ route('cart.add') }}" method="POST" onsubmit="return addToCart(event);">
+        @csrf
+        <input type="hidden" name="product_id" value="{{ $product->id }}">
+        <input type="hidden" name="quantity" value="1">
+        <input type="hidden" name="size" id="form_size">
+    </form>
+
 </div>
 @endsection
 
@@ -456,12 +507,24 @@
     function selectSize(element, size) {
         document.querySelectorAll('.size-option').forEach(el => el.classList.remove('selected'));
         element.classList.add('selected');
+        
+        // Cập nhật size vào input của UI và form ẩn
         document.getElementById('selectedSize').value = size;
+        document.getElementById('form_size').value = size;
+        
         document.getElementById('sizeError').classList.add('d-none');
     }
 
-    function addToCart() {
+    // --- CART LOGIC (CẬP NHẬT AJAX) ---
+    async function addToCart(event) {
+        // NGĂN CHẶN RELOAD TRANG
+        event.preventDefault(); 
+        
         const size = document.getElementById('selectedSize').value;
+        const btn = document.getElementById('addToCartButton');
+        const form = document.getElementById('addToCartForm');
+
+        // Validation: Phải chọn size trước
         if (!size) {
             document.getElementById('sizeError').classList.remove('d-none');
             const grid = document.getElementById('sizeSelector');
@@ -469,28 +532,85 @@
             setTimeout(() => grid.style.animation = "", 500);
             return;
         }
-
-        const btn = document.querySelector('.btn-add-cart');
-        const originalText = btn.innerText;
         
-        btn.innerText = "ADDING...";
+        // 1. Trạng thái Loading (trước khi gửi request)
+        btn.innerHTML = 'ADDING...'; 
+        btn.disabled = true;
         btn.style.opacity = "0.8";
-        
-        setTimeout(() => {
-            btn.innerText = "ADDED TO CART";
-            btn.style.backgroundColor = "#4CAF50";
-            
-            setTimeout(() => {
-                btn.innerText = originalText;
-                btn.style.backgroundColor = "#000";
-                btn.style.opacity = "1";
-            }, 2000);
-        }, 800);
 
-        console.log(`Adding Product {{ $product->id }}, Size: ${size} to cart.`);
+        try {
+            // Lấy dữ liệu form
+            const formData = new FormData(form);
+            
+            // 2. Gửi yêu cầu AJAX (Fetch API)
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                // Laravel yêu cầu header X-Requested-With để nhận biết là AJAX
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const result = await response.json();
+
+            // 3. Xử lý phản hồi từ Server
+            if (response.ok && result.status === 'success') {
+                // Hiệu ứng Flash thành công
+                flashCartSuccess();
+                
+                // Tùy chọn: Cập nhật số lượng giỏ hàng ở header (nếu có)
+                console.log('Product added successfully. Cart Count:', result.cart_count);
+
+            } else {
+                // Xử lý lỗi từ server (ví dụ: product not found, out of stock)
+                console.error('Error adding to cart:', result.message || 'Unknown error');
+                alert('Có lỗi xảy ra khi thêm vào giỏ hàng: ' + (result.message || 'Lỗi không xác định.'));
+                // Khôi phục nút
+                resetCartButton();
+            }
+        } catch (error) {
+            // Xử lý lỗi mạng hoặc lỗi Fetch
+            console.error('Network Error:', error);
+            alert('Lỗi kết nối mạng hoặc server không phản hồi.');
+            resetCartButton();
+        }
+
+        // Ngăn form submit truyền thống
+        return false; 
+    }
+    
+    // Hàm khôi phục nút (Dùng khi lỗi)
+    function resetCartButton() {
+        const btn = document.getElementById('addToCartButton');
+        btn.innerHTML = 'ADD TO CART';
+        btn.disabled = false;
+        btn.style.opacity = "1";
     }
 
-    // --- SIZE GUIDE MODAL LOGIC ---
+    /**
+     * Xử lý hiệu ứng flash cho nút sau khi thêm sản phẩm thành công 
+     */
+    function flashCartSuccess() {
+        const btn = document.getElementById('addToCartButton');
+        
+        // 1. Chuyển sang trạng thái thành công
+        btn.innerHTML = 'ADDED TO CART!';
+        btn.classList.add('btn-success-flash');
+        btn.classList.remove('bg-black');
+        btn.disabled = true; 
+        btn.style.opacity = "1";
+
+        // 2. Thiết lập bộ đếm thời gian để khôi phục nút sau 2 giây
+        setTimeout(() => {
+            btn.innerHTML = 'ADD TO CART';
+            btn.classList.remove('btn-success-flash');
+            btn.classList.add('bg-black');
+            btn.disabled = false;
+        }, 2000); // Flash trong 2 giây
+    }
+
+    // --- SIZE GUIDE MODAL LOGIC (Giữ nguyên) ---
     function openSizeGuide() {
         document.getElementById('sizeGuideModal').style.display = 'flex';
         document.body.style.overflow = 'hidden';
@@ -508,14 +628,4 @@
         }
     }
 </script>
-
-<style>
-@keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  50% { transform: translateX(5px); }
-  75% { transform: translateX(-5px); }
-  100% { transform: translateX(0); }
-}
-</style>
 @endpush

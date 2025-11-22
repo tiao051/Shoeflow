@@ -6,6 +6,7 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; 
 
 class CartController extends Controller
 {
@@ -52,49 +53,70 @@ class CartController extends Controller
      */
     public function add(Request $request)
     {
-        $user = auth()->user();
-        
-        // Validate required fields (assuming product_id is required)
+        // 1. Validate the request data
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'quantity' => 'nullable|integer|min:1',
-            'size' => 'nullable|string|max:50',
-            'color' => 'nullable|string|max:50',
+            'quantity' => 'required|integer|min:1',
+            'size' => 'required|string|max:10', // Validate size is present
         ]);
-        
-        $product = Product::findOrFail($request->product_id);
 
-        // Find or create the user's cart
-        $cart = Cart::firstOrCreate(['user_id' => $user->id]);
+        $productId = $request->input('product_id');
+        $quantity = $request->input('quantity');
+        $size = $request->input('size');
+        $user = Auth::user();
 
-        // Check if an identical item (same product, size, and color) already exists
-        $cartItem = $cart->items()
-            ->where('product_id', $product->id)
-            ->where('size', $request->size ?? null)
-            ->where('color', $request->color ?? null)
-            ->first();
-            
-        $quantity = $request->quantity ?? 1;
-
-        if ($cartItem) {
-            // Update quantity if item exists
-            $cartItem->quantity += $quantity;
-            $cartItem->save();
-        } else {
-            // Create new cart item
-            CartItem::create([
-                'cart_id' => $cart->id,
-                'product_id' => $product->id,
-                'price' => $product->price,
-                'quantity' => $quantity,
-                'size' => $request->size,
-                'color' => $request->color,
-            ]);
+        if (!$user) {
+             return response()->json([
+                'status' => 'error', 
+                'message' => 'Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.'
+            ], 401); // 401 Unauthorized
         }
 
-        return redirect()->back()->with('success', 'Product added to cart successfully.');
-    }
+        // 2. Find or create the user's cart
+        $cart = Cart::firstOrCreate(['user_id' => $user->id]);
 
+        // 3. Find the product details
+        $product = Product::find($productId);
+        
+        if (!$product) {
+            // If product is not found, return an error response
+            return response()->json([
+                'status' => 'error', 
+                'message' => 'Sản phẩm không tồn tại.'
+            ], 404);
+        }
+
+        // 4. Check if the item already exists in the cart with the same size
+        $existingItem = $cart->items()
+            ->where('product_id', $productId)
+            ->where('size', $size)
+            ->first();
+
+        if ($existingItem) {
+            // Update quantity
+            $existingItem->quantity += $quantity;
+            $existingItem->save();
+        } else {
+            // Create new cart item
+            $cartItem = new CartItem([
+                'product_id' => $productId,
+                'price' => $product->sale_price ?? $product->price, // Use sale price if available
+                'quantity' => $quantity,
+                'size' => $size,
+            ]);
+            $cart->items()->save($cartItem);
+        }
+
+        // 5. Success: Return a JSON response
+        // Calculate total quantity of items to update header (optional)
+        $cartCount = $cart->items()->sum('quantity');
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Added to cart successfully!',
+            'cart_count' => $cartCount
+        ]);     
+    }
     /**
      * Update the quantity of a specific cart item.
      */
