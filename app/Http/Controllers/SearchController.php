@@ -2,39 +2,71 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
 use Illuminate\Http\Request;
+use App\Models\Product;
+use App\Models\Category;
 
 class SearchController extends Controller
 {
+    /**
+     * Handles the full search results page (when hitting Enter).
+     */
     public function index(Request $request)
     {
-        $query = $request->input('q', '');
+        $keyword = $request->input('q');
 
-        if (strlen($query) < 2) {
-            return view('search', ['products' => collect(), 'query' => $query]);
+        if (!$keyword) {
+            return redirect('/');
         }
 
-        $products = Product::where('name', 'LIKE', "%{$query}%")
-            ->orWhere('description', 'LIKE', "%{$query}%")
+        $products = Product::query()
+            // Eager Load the category information
+            ->with('category') 
+            
+            // Group search conditions
+            ->where(function ($query) use ($keyword) {
+                // 1. Search by product name
+                $query->where('name', 'LIKE', "%{$keyword}%");
+
+                // 2. Search by category name
+                $query->orWhereHas('category', function ($q) use ($keyword) {
+                    $q->where('name', 'LIKE', "%{$keyword}%");
+                });
+            })
+            
+            // FIX: Include the 'image' column here
+            ->select('id', 'name', 'price', 'color', 'category_id', 'image') 
             ->paginate(12);
 
-        return view('search', compact('products', 'query'));
+        return view('search.results', compact('products', 'keyword'));
     }
 
-    // AJAX search suggestions
+    /**
+     * Handles fast suggestions for the AJAX Live Search.
+     */
     public function suggestions(Request $request)
     {
-        $query = $request->input('q', '');
+        $keyword = $request->input('q');
 
-        if (strlen($query) < 2) {
+        if (strlen($keyword) < 2) {
             return response()->json([]);
         }
 
-        $suggestions = Product::where('name', 'LIKE', "%{$query}%")
+        $products = Product::query()
+            ->with('category') // Eager load category for quick suggestion
+            ->where(function ($query) use ($keyword) {
+                $query->where('name', 'LIKE', "%{$keyword}%");
+                
+                // Search by category name
+                $query->orWhereHas('category', function ($q) use ($keyword) {
+                    $q->where('name', 'LIKE', "%{$keyword}%");
+                });
+            })
+            // FIX: Include the 'image' column here
+            ->select('id', 'name', 'price', 'color', 'category_id', 'image') 
             ->limit(5)
-            ->pluck('name');
+            ->get();
 
-        return response()->json($suggestions);
+        return response()->json($products);
     }
 }
