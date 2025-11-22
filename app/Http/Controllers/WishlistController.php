@@ -10,16 +10,17 @@ class WishlistController extends Controller
 {
     public function index()
     {
-        // Retrieve the current user's wishlist items with product relation
         $wishlistItems = Auth::user()->wishlistItems()->with('product')->latest()->get();
-
         return view('wishlist.index', compact('wishlistItems'));
     }
 
     public function store(Request $request)
     {
-        // Ensure the user is authenticated (route may already have middleware)
+        // Check authentication
         if (!Auth::check()) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Please login first.'], 401);
+            }
             return redirect()->route('login')->with('error', 'Please login to add items to wishlist.');
         }
 
@@ -28,11 +29,26 @@ class WishlistController extends Controller
             'product_id' => $request->product_id,
         ];
 
-        // Prevent duplicates: only create if the entry doesn't already exist
+        // Check duplicates
         if (!Wishlist::where($data)->exists()) {
             Wishlist::create($data);
 
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'ITEM ADDED TO COLLECTION'
+                ]);
+            }
+
             return redirect()->back()->with('success', 'Product added to wishlist!');
+        }
+
+        // Already exists
+        if ($request->wantsJson()) {
+            return response()->json([
+                'status' => 'info',
+                'message' => 'ALREADY IN YOUR COLLECTION'
+            ]);
         }
 
         return redirect()->back()->with('info', 'This product is already in your wishlist.');

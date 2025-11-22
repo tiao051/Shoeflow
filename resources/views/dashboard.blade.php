@@ -5,6 +5,37 @@
 @section('content')
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Oswald:wght@200..700&display=swap" rel="stylesheet">
 
+<style>
+    /* Heartbeat animation */
+    @keyframes converse-pop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.4); }
+        100% { transform: scale(1); }
+    }
+    .heart-animate {
+        animation: converse-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    /* Converse Toast Style */
+    #converse-toast {
+        visibility: hidden;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    #converse-toast.show {
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    /* Scrollbar hiding */
+    #new-arrivals-carousel::-webkit-scrollbar { display: none; }
+    #new-arrivals-carousel { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    .group:hover img { transform: scale(1.05); }
+</style>
+
 <section class="flex items-center justify-center min-h-[500px] text-white py-20 px-5" 
          style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);">
     <div class="text-center">
@@ -28,7 +59,6 @@
             Shop By Category
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
             <div class="relative bg-white rounded-xl shadow-lg overflow-hidden transition duration-300 hover:shadow-2xl group">
                 <div class="bg-gray-100 flex items-center justify-center h-80">
                     <img src="{{ asset('images/cate1.jpg') }}" 
@@ -40,8 +70,7 @@
                     <h3 class="font-bold text-lg uppercase">Chuck Taylor</h3>
                     <p class="text-gray-500 text-sm">Classic high tops & low tops</p>
                 </div>
-                
-               <a href="{{ route('products.index', ['category' => 'chuck-taylor']) }}" class="absolute inset-0 z-10"></a>
+                <a href="{{ route('products.index', ['category' => 'chuck-taylor']) }}" class="absolute inset-0 z-10"></a>
             </div>
 
             <div class="relative bg-white rounded-xl shadow-lg overflow-hidden transition duration-300 hover:shadow-2xl group">
@@ -55,8 +84,7 @@
                     <h3 class="font-bold text-lg uppercase">One Star</h3>
                     <p class="text-gray-500 text-sm">Retro basketball style</p>
                 </div>
-
-               <a href="{{ route('products.index', ['category' => 'one-star']) }}" class="absolute inset-0 z-10"></a>
+                <a href="{{ route('products.index', ['category' => 'one-star']) }}" class="absolute inset-0 z-10"></a>
             </div>
 
             <div class="relative bg-white rounded-xl shadow-lg overflow-hidden transition duration-300 hover:shadow-2xl group">
@@ -70,8 +98,7 @@
                     <h3 class="font-bold text-lg uppercase">All Star</h3>
                     <p class="text-gray-500 text-sm">Heritage basketball sneakers</p>
                 </div>
-
-               <a href="{{ route('products.index', ['category' => 'all-star']) }}" class="absolute inset-0 z-10"></a>
+                <a href="{{ route('products.index', ['category' => 'all-star']) }}" class="absolute inset-0 z-10"></a>
             </div>
         </div>
     </section>
@@ -88,7 +115,6 @@
             @foreach($newArrivals as $product)
             <div class="inline-block w-64 min-w-64 snap-center group relative bg-white transition duration-300 hover:shadow-lg rounded-lg">
                 
-                {{-- [EDIT] Wrap the image in an <a> linking to the product detail page --}}
                 <a href="{{ route('products.show', $product->id) }}" class="block relative overflow-hidden h-64">
                     <img src="{{ asset($product->image ?? 'images/placeholder.jpg') }}" 
                          class="w-full h-full object-cover rounded-t-lg transition duration-200 group-hover:opacity-90 group-hover:scale-105" 
@@ -99,7 +125,6 @@
                 </a>
 
                 <div class="p-4">
-                    {{-- [EDIT] Product name links to the detail page --}}
                     <a href="{{ route('products.show', $product->id) }}">
                         <h5 class="font-bold uppercase text-base mb-1 truncate hover:text-gray-600 transition">{{ $product->name }}</h5>
                     </a>
@@ -109,11 +134,14 @@
                     <div class="flex justify-between items-center mb-3">
                         <p class="font-bold text-lg">{{ number_format($product->price, 0, ',', '.') }} ₫</p>
                         
-                        <form action="{{ route('wishlist.store') }}" method="POST" class="inline-block">
+                        <form action="{{ route('wishlist.store') }}" method="POST" class="inline-block relative js-wishlist-form">
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
-                            <button type="submit" class="text-black hover:text-red-600 transition duration-150" title="Add to Wishlist">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            
+                            <button type="submit" class="group/btn transition duration-150 ease-in-out" title="Add to Wishlist">
+                                <svg id="heart-icon-{{ $product->id }}" xmlns="http://www.w3.org/2000/svg" 
+                                     class="w-6 h-6 text-black group-hover/btn:text-red-600 transition-colors duration-200" 
+                                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-.318-.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
                             </button>
@@ -134,7 +162,6 @@
         </div>
     </section>
 
-    {{-- Other sections kept intact --}}
     <section class="bg-black text-white text-center py-16 mb-12 rounded-xl px-5">
         <h2 class="font-extrabold uppercase mb-4 text-3xl md:text-4xl" style="font-family: 'Oswald', sans-serif;">
             Custom Your Style
@@ -161,52 +188,107 @@
     </section>
 </div>
 
-<style>
-/* Hide default browser horizontal scrollbar */
-#new-arrivals-carousel::-webkit-scrollbar { display: none; }
-#new-arrivals-carousel { -ms-overflow-style: none; scrollbar-width: none; }
-.hover\:bg-black:hover { color: white !important; }
-/* Allow image scale on hover */
-.group:hover img { transform: scale(1.05); }
-</style>
+<div id="converse-toast" class="fixed bottom-5 right-5 z-50 bg-black text-white px-6 py-4 shadow-2xl flex items-center gap-3 border-l-4 border-red-600 font-bold tracking-wide font-sans">
+    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+    </svg>
+    <div>
+        <span class="block text-sm uppercase text-red-500" id="toast-title">WISHLIST UPDATED</span>
+        <span class="text-xs text-gray-300 font-normal uppercase" id="toast-message">Item added to your collection.</span>
+    </div>
+</div>
 
 <script>
-// Auto-scroll functionality
 document.addEventListener('DOMContentLoaded', function() {
+    // 1. Auto-scroll functionality
     const carousel = document.getElementById('new-arrivals-carousel');
-    if (!carousel) return; 
+    if (carousel) {
+        const scrollDistance = 256 + 24;
+        let scrollPosition = 0;
+        let direction = 1;
+        let scrollInterval;
 
-    const scrollDistance = 256 + 24;
-    let scrollPosition = 0;
-    let direction = 1;
-    let scrollInterval;
+        function autoScroll() {
+            if (carousel.scrollWidth <= carousel.clientWidth) { clearInterval(scrollInterval); return; }
+            const newScrollPosition = scrollPosition + (direction * scrollDistance);
+            const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
 
-    function autoScroll() {
-        if (carousel.scrollWidth <= carousel.clientWidth) { clearInterval(scrollInterval); return; }
-        const newScrollPosition = scrollPosition + (direction * scrollDistance);
-        const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
-
-        if (direction === 1) {
-            if (newScrollPosition >= maxScrollLeft) { direction = -1; scrollPosition = maxScrollLeft; } 
-            else { scrollPosition = newScrollPosition; }
-        } else {
-            if (newScrollPosition <= 0) { direction = 1; scrollPosition = 0; } 
-            else { scrollPosition = newScrollPosition; }
+            if (direction === 1) {
+                if (newScrollPosition >= maxScrollLeft) { direction = -1; scrollPosition = maxScrollLeft; } 
+                else { scrollPosition = newScrollPosition; }
+            } else {
+                if (newScrollPosition <= 0) { direction = 1; scrollPosition = 0; } 
+                else { scrollPosition = newScrollPosition; }
+            }
+            carousel.scrollTo({ left: scrollPosition, behavior: 'smooth' });
         }
-        carousel.scrollTo({ left: scrollPosition, behavior: 'smooth' });
+
+        const startAutoScroll = () => {
+            if (carousel.scrollWidth > carousel.clientWidth) { scrollInterval = setInterval(autoScroll, 4000); }
+        };
+        startAutoScroll();
+        const stopAutoScroll = () => clearInterval(scrollInterval);
+        
+        carousel.addEventListener('mouseenter', stopAutoScroll);
+        carousel.addEventListener('touchstart', stopAutoScroll);
+        carousel.addEventListener('mouseleave', startAutoScroll);
+        carousel.addEventListener('touchend', startAutoScroll);
+        window.addEventListener('resize', () => { stopAutoScroll(); startAutoScroll(); });
     }
 
-    const startAutoScroll = () => {
-        if (carousel.scrollWidth > carousel.clientWidth) { scrollInterval = setInterval(autoScroll, 4000); }
-    };
-    startAutoScroll();
-    const stopAutoScroll = () => clearInterval(scrollInterval);
-    
-    carousel.addEventListener('mouseenter', stopAutoScroll);
-    carousel.addEventListener('touchstart', stopAutoScroll);
-    carousel.addEventListener('mouseleave', startAutoScroll);
-    carousel.addEventListener('touchend', startAutoScroll);
-    window.addEventListener('resize', () => { stopAutoScroll(); startAutoScroll(); });
+    // 2. AJAX Wishlist Logic
+    const wishlistForms = document.querySelectorAll('.js-wishlist-form');
+    const toast = document.getElementById('converse-toast');
+    const toastTitle = document.getElementById('toast-title');
+    const toastMessage = document.getElementById('toast-message');
+
+    wishlistForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const productId = this.querySelector('input[name="product_id"]').value;
+            const heartIcon = document.getElementById(`heart-icon-${productId}`);
+
+            fetch(this.action, {
+                method: 'POST',
+                body: new FormData(this),
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest', // Important for Laravel to detect AJAX
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = "{{ route('login') }}";
+                    return;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data) return;
+
+                // Update Toast content
+                toastTitle.textContent = data.status === 'info' ? 'NOTE' : 'SUCCESS';
+                toastMessage.textContent = data.message;
+
+                // Show Toast
+                toast.classList.add('show');
+                setTimeout(() => { toast.classList.remove('show'); }, 3000);
+
+                // Animate Heart if success
+                if (data.status === 'success') {
+                    heartIcon.classList.remove('text-black');
+                    heartIcon.classList.add('text-red-600', 'fill-current', 'heart-animate');
+                    
+                    // Reset animation class for re-trigger
+                    setTimeout(() => {
+                        heartIcon.classList.remove('heart-animate');
+                    }, 400);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
 });
 </script>
 @endsection
