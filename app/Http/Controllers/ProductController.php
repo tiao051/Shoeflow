@@ -26,12 +26,22 @@ class ProductController extends Controller
                 'popular' => $products->orderBy('views', 'desc'),
                 default => $products->orderBy('created_at', 'desc'),
             };
+        } else {
+            $products->orderBy('created_at', 'desc');
         }
 
         $products = $products->paginate(12);
 
-        return view('products.index', compact('products')); 
+        if ($request->ajax()) {
+            return response()->json([
+                'products' => $products->items(),
+                'pagination' => (string) $products->links('pagination::bootstrap-5')
+            ]);
+        }
+
+        return view('products.index', compact('products'));
     }
+
 
     // Product details
     public function show($id)
