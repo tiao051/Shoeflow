@@ -15,7 +15,6 @@ class CartController extends Controller
      */
     public function index()
     {
-        // Assuming the user is authenticated via web middleware
         $user = auth()->user();
         $cart = Cart::where('user_id', $user->id)->first();
         
@@ -36,8 +35,8 @@ class CartController extends Controller
         // Calculate totals
         $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
         
-        // Shipping rule: Free shipping for orders over 2,000,000 VND
-        $shipping = $subtotal > 1000000 ? 0 : 30000;
+        // Shipping rule: Free shipping for orders over 1,000,000 VND
+        $shipping = $subtotal > 1000000 ? 0 : 30000; 
         
         // Tax calculation (e.g., 10% VAT)
         $tax = $subtotal * 0.1;
@@ -53,11 +52,10 @@ class CartController extends Controller
      */
     public function add(Request $request)
     {
-        // 1. Validate the request data
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
-            'size' => 'required|string|max:10', // Validate size is present
+            'size' => 'required|string|max:10',
         ]);
 
         $productId = $request->input('product_id');
@@ -68,47 +66,39 @@ class CartController extends Controller
         if (!$user) {
              return response()->json([
                 'status' => 'error', 
-                'message' => 'Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.'
-            ], 401); // 401 Unauthorized
+                'message' => 'You need to login to add products to the cart.'
+            ], 401);
         }
 
-        // 2. Find or create the user's cart
         $cart = Cart::firstOrCreate(['user_id' => $user->id]);
-
-        // 3. Find the product details
         $product = Product::find($productId);
         
         if (!$product) {
-            // If product is not found, return an error response
             return response()->json([
                 'status' => 'error', 
-                'message' => 'Sản phẩm không tồn tại.'
+                'message' => 'Product not found.'
             ], 404);
         }
 
-        // 4. Check if the item already exists in the cart with the same size
         $existingItem = $cart->items()
             ->where('product_id', $productId)
             ->where('size', $size)
             ->first();
 
         if ($existingItem) {
-            // Update quantity
             $existingItem->quantity += $quantity;
             $existingItem->save();
         } else {
-            // Create new cart item
             $cartItem = new CartItem([
                 'product_id' => $productId,
-                'price' => $product->sale_price ?? $product->price, // Use sale price if available
+                'price' => $product->sale_price ?? $product->price,
                 'quantity' => $quantity,
                 'size' => $size,
             ]);
             $cart->items()->save($cartItem);
         }
 
-        // 5. Success: Return a JSON response
-        // Calculate total quantity of items to update header (optional)
+        // Calculate total quantity for the badge
         $cartCount = $cart->items()->sum('quantity');
 
         return response()->json([
@@ -117,43 +107,79 @@ class CartController extends Controller
             'cart_count' => $cartCount
         ]);     
     }
+
     /**
-     * Update the quantity of a specific cart item.
+     * Update the quantity of a specific cart item (AJAX).
      */
     public function update(Request $request, $itemId)
     {
-        $cartItem = CartItem::findOrFail($itemId);
-        
+        // 1. Find the cart item
+        $cartItem = CartItem::find($itemId);
+        if (!$cartItem) return response()->json(['status' => 'error'], 404);
+
+        // 2. Validate input
         $request->validate([
-            'quantity' => 'required|integer|min:0',
+            'quantity' => 'required|integer|min:1',
         ]);
         
-        $newQuantity = $request->quantity;
+        // 3. Update quantity
+        $cartItem->update(['quantity' => $request->quantity]);
+        
+        // Recalculate cart totals
+        $totals = $this->calculateCartTotals($cartItem->cart);
 
-        if ($newQuantity <= 0) {
-            // Remove item if quantity is zero or less
-            $cartItem->delete();
-        } else {
-            // Update quantity
-            $cartItem->update(['quantity' => $newQuantity]);
-        }
-
-        return redirect()->back()->with('success', 'Cart updated successfully.');
+        // 4. Return JSON success response
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Cart updated',
+            'item_total' => $cartItem->price * $cartItem->quantity, 
+            'totals' => $totals 
+        ]);
     }
 
     /**
-     * Remove a product from the cart.
+     * Remove a product from the cart (AJAX).
      */
     public function remove($itemId)
     {
-        $cartItem = CartItem::findOrFail($itemId);
+        // 1. Find the cart item
+        $cartItem = CartItem::find($itemId);
+        if (!$cartItem) return response()->json(['status' => 'error'], 404);
+
+        // 2. Delete the item
+        $cart = $cartItem->cart;
         $cartItem->delete();
 
-        return redirect()->back()->with('success', 'Product removed from cart.');
+        // Recalculate cart totals
+        $totals = $this->calculateCartTotals($cart);
+
+        // 3. Return JSON success response
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Item removed',
+            'totals' => $totals
+        ]);
+    }
+
+    private function calculateCartTotals($cart)
+    {
+        $cartItems = $cart->items;
+        $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
+        $shipping = $subtotal > 1000000 ? 0 : 30000;
+        $tax = $subtotal * 0.1;
+        $total = $subtotal + $shipping + $tax;
+
+        return [
+            'subtotal' => $subtotal,
+            'shipping' => $shipping,
+            'tax' => $tax,
+            'total' => $total,
+            'cart_count' => $cartItems->sum('quantity')
+        ];
     }
 
     /**
-     * Clear the entire shopping cart for the current user.
+     * Clear the entire shopping cart.
      */
     public function clear()
     {
@@ -164,7 +190,7 @@ class CartController extends Controller
     }
 
     /**
-     * Get the total number of items in the cart (for AJAX calls).
+     * Get the total number of items in the cart.
      */
     public function count()
     {
@@ -174,18 +200,25 @@ class CartController extends Controller
 
         return response()->json(['count' => $count]);
     }
+
+    /**
+     * Display the checkout page.
+     */
     public function checkout()
     {
         $user = auth()->user();
         $cart = Cart::where('user_id', $user->id)->first();
         
         if (!$cart || $cart->items->isEmpty()) {
-            return redirect()->route('cart.index')->with('error', 'Giỏ hàng trống');
+            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
 
         $cartItems = $cart->items()->with('product')->get();
         $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
-        $shipping = $subtotal > 1000000 ? 0 : 30000;
+        
+        // Shipping logic: Free shipping > 1,000,000 VND
+        $shipping = $subtotal > 1000000 ? 0 : 30000; 
+        
         $tax = $subtotal * 0.1;
         $total = $subtotal + $shipping + $tax;
 
