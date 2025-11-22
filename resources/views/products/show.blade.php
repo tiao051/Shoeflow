@@ -158,7 +158,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid #e5e5e5;
+        border: 2px solid #e5e5e5;
         background: #fff;
         cursor: pointer;
         transition: all 0.3s;
@@ -285,6 +285,54 @@
       100% { transform: translateX(0); }
     }
 
+    /* --- CONVERSE ANIMATIONS & TOAST --- */
+    @keyframes converse-pop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.4); }
+        100% { transform: scale(1); }
+    }
+    
+    /* Apply animation to the SVG when active */
+    .btn-wishlist-detail.heart-animate svg {
+        animation: converse-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    /* --- NEW: Converse Toast Notification --- */
+    #converse-toast {
+        visibility: hidden;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 9999;
+        background-color: #000;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 24px;
+        border-left: 4px solid #dc3545; /* Red accent */
+        box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+    }
+    #converse-toast.show {
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0);
+    }
+    #converse-toast .toast-text div:first-child {
+        font-family: 'Oswald', sans-serif;
+        font-weight: 700;
+        text-transform: uppercase;
+        line-height: 1;
+    }
+    #converse-toast .toast-text div:last-child {
+        font-size: 0.75rem;
+        color: #d1d5db;
+        text-transform: uppercase;
+    }
+
     /* --- MOBILE ADJUSTMENTS --- */
     @media (max-width: 768px) {
         .product-container { padding-top: 0; }
@@ -378,11 +426,31 @@
                     <button class="btn-add-cart" id="addToCartButton" type="submit" form="addToCartForm">
                         ADD TO CART
                     </button>
-                    <button class="btn-wishlist-detail" title="Add to Wishlist">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                        </svg>
-                    </button>
+                    
+                    <form id="wishlistForm" action="{{ route('wishlist.store') }}" method="POST" style="display: flex;">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        
+                        @php
+                            $isInWishlist = Auth::check() && \App\Models\Wishlist::where('user_id', Auth::id())->where('product_id', $product->id)->exists();
+                        @endphp
+
+                        <button type="submit" id="wishlistBtn" class="btn-wishlist-detail {{ $isInWishlist ? 'active' : '' }}" title="Add to Wishlist">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+
+                <div id="converse-toast">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                    <div class="toast-text">
+                        <div id="toast-title">WISHLIST UPDATED</div>
+                        <div id="toast-message">Item added to your collection.</div>
+                    </div>
                 </div>
 
                 <!-- ACCORDION INFO -->
@@ -645,5 +713,59 @@
             closeSizeGuide();
         }
     }
+
+// --- WISHLIST AJAX LOGIC ---
+    document.addEventListener('DOMContentLoaded', function() {
+        const wishlistForm = document.getElementById('wishlistForm');
+        
+        if (wishlistForm) {
+            wishlistForm.addEventListener('submit', function(e) {
+                e.preventDefault(); // STOP REFRESH
+
+                const btn = document.getElementById('wishlistBtn');
+                const toast = document.getElementById('converse-toast');
+                const toastTitle = document.getElementById('toast-title');
+                const toastMessage = document.getElementById('toast-message');
+
+                fetch(this.action, {
+                    method: 'POST',
+                    body: new FormData(this),
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (response.status === 401) {
+                        window.location.href = "{{ route('login') }}"; // Redirect if not logged in
+                        return;
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data) return;
+
+                    // 1. Update Toast Text
+                    toastTitle.textContent = data.status === 'info' ? 'NOTE' : 'SUCCESS';
+                    toastMessage.textContent = data.message;
+
+                    // 2. Show Toast
+                    toast.classList.add('show');
+                    setTimeout(() => toast.classList.remove('show'), 3000);
+
+                    // 3. Visual Effects on Button
+                    if (data.status === 'success') {
+                        // Add 'active' class (Changes SVG fill/stroke to red based on your existing CSS)
+                        btn.classList.add('active');
+                        
+                        // Add animation class
+                        btn.classList.add('heart-animate');
+                        setTimeout(() => btn.classList.remove('heart-animate'), 400);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        }
+    });
 </script>
 @endpush
