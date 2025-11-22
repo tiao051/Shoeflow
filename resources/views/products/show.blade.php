@@ -375,7 +375,6 @@
 
                 <!-- ACTIONS -->
                 <div class="action-buttons">
-                    <!-- Đã bỏ onclick() khỏi nút để lắng nghe sự kiện submit của form -->
                     <button class="btn-add-cart" id="addToCartButton" type="submit" form="addToCartForm">
                         ADD TO CART
                     </button>
@@ -490,7 +489,6 @@
     </div>
 
     <!-- HIDDEN FORM FOR ADD TO CART -->
-    <!-- Đã thêm sự kiện onsubmit để kích hoạt JS thay vì submit truyền thống -->
     <form id="addToCartForm" action="{{ route('cart.add') }}" method="POST" onsubmit="return addToCart(event);">
         @csrf
         <input type="hidden" name="product_id" value="{{ $product->id }}">
@@ -559,13 +557,33 @@
                 // Hiệu ứng Flash thành công
                 flashCartSuccess();
                 
-                // Tùy chọn: Cập nhật số lượng giỏ hàng ở header (nếu có)
+                // --- [MỚI THÊM] Cập nhật số lượng giỏ hàng ở header ---
+                const cartBadge = document.getElementById('cart-count');
+                if (cartBadge) {
+                    // Cập nhật số mới từ server trả về
+                    cartBadge.innerText = result.cart_count;
+                    
+                    // (Tùy chọn) Thêm chút hiệu ứng "nảy" để người dùng chú ý
+                    cartBadge.classList.add('scale-150', 'transition-transform'); 
+                    setTimeout(() => {
+                        cartBadge.classList.remove('scale-150');
+                    }, 200);
+                }
+                // -------------------------------------------------------
+
                 console.log('Product added successfully. Cart Count:', result.cart_count);
 
             } else {
-                // Xử lý lỗi từ server (ví dụ: product not found, out of stock)
+                // Xử lý lỗi từ server (ví dụ: product not found, out of stock, chưa login)
                 console.error('Error adding to cart:', result.message || 'Unknown error');
-                alert('Có lỗi xảy ra khi thêm vào giỏ hàng: ' + (result.message || 'Lỗi không xác định.'));
+                
+                if(response.status === 401) {
+                     alert('Bạn cần đăng nhập để thực hiện chức năng này!');
+                     window.location.href = '/login'; // Chuyển hướng nếu chưa đăng nhập
+                } else {
+                     alert('Có lỗi xảy ra: ' + (result.message || 'Lỗi không xác định.'));
+                }
+
                 // Khôi phục nút
                 resetCartButton();
             }
@@ -596,7 +614,7 @@
         
         // 1. Chuyển sang trạng thái thành công
         btn.innerHTML = 'ADDED TO CART!';
-        btn.classList.add('btn-success-flash');
+        btn.classList.add('btn-success-flash'); // Bạn nhớ định nghĩa class này trong CSS nhé
         btn.classList.remove('bg-black');
         btn.disabled = true; 
         btn.style.opacity = "1";
