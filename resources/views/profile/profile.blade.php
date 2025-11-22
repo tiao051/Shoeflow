@@ -12,41 +12,7 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 class="text-4xl font-black text-gray-900 mb-8 tracking-tight uppercase">My Account</h1>
 
-        {{-- 1. ALERT SUCCESS --}}
-        @if (session('success'))
-            <div id="success-alert" 
-                class="fixed top-4 left-1/2 transform -translate-x-1/2 z-[9999] bg-green-100 border border-green-400 text-green-700 px-6 py-3 rounded-lg max-w-lg shadow-xl" 
-                role="alert">
-                <span class="block sm:inline">{{ session('success') }}</span>
-            </div>
-
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const alertElement = document.getElementById('success-alert');
-                    if (alertElement) {
-                        setTimeout(() => {
-                            alertElement.style.opacity = '0';
-                            alertElement.style.transition = 'opacity 0.5s ease-out';
-                            setTimeout(() => { alertElement.remove(); }, 500); 
-                        }, 2000);
-                    }
-                });
-            </script>
-        @endif
-
-        {{-- 2. ALERT ERROR --}}
-        @if($errors->any())
-            <div x-data="{ open: true }" x-show="open" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                <strong class="font-bold">Whoops!</strong>
-                <span class="block sm:inline">Please check the form below for errors.</span>
-                <span @click="open = false" class="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer">
-                    <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.303l-2.651 3.546a1.2 1.2 0 1 1-1.697-1.697l3.546-2.651-3.546-2.651a1.2 1.2 0 0 1 1.697-1.697l2.651 3.546 2.651-3.546a1.2 1.2 0 0 1 1.697 1.697l-3.546 2.651 3.546 2.651a1.2 1.2 0 0 1 0 1.697z"/></svg>
-                </span>
-            </div>
-        @endif
-
-        {{-- 3. MAIN LAYOUT --}}
-        {{-- Logic: Read the ?tab=... parameter from the URL; default to 'profile' if missing --}}
+        {{-- Main layout. Read the ?tab=... parameter from the URL; default to 'profile' --}}
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8" 
              x-data="{ currentTab: new URLSearchParams(window.location.search).get('tab') || 'profile' }">
             
@@ -116,10 +82,10 @@
                             @method('PATCH')
 
                             @php
-                                // Tách tên thành First/Last name để điền vào form
+                                // Split full name into first and last name for the form
                                 $nameParts = explode(' ', $user->name);
-                                $firstName = array_shift($nameParts); 
-                                $lastName = implode(' ', $nameParts); 
+                                $firstName = array_shift($nameParts);
+                                $lastName = implode(' ', $nameParts);
                             @endphp
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -219,9 +185,9 @@
                 {{-- TAB 3: ADDRESSES --}}
                 <div x-show="currentTab === 'addresses'" x-cloak>
                     
-                    {{-- QUAN TRỌNG: Đặt Script ở đây để Alpine đọc được ngay lập tức --}}
+                    {{-- IMPORTANT: Place the script here so Alpine can initialize immediately --}}
                     <script>
-                        // Định nghĩa hàm quản lý địa chỉ
+                        // Define the address manager function
                         window.addressManager = function() {
                             return {
                                 addressModalOpen: false,
@@ -238,7 +204,7 @@
                                     is_default: false
                                 },
 
-                                // Reset form và mở modal để THÊM MỚI
+                                // Reset form and open modal for adding a new address
                                 openModal() {
                                     this.isEditing = false;
                                     this.editId = null;
@@ -254,12 +220,12 @@
                                     this.addressModalOpen = true;
                                 },
 
-                                // Đổ dữ liệu vào form và mở modal để SỬA
+                                // Populate form and open modal for editing
                                 editAddress(address) {
                                     this.isEditing = true;
                                     this.editId = address.id;
                                     
-                                    // Clone object dữ liệu
+                                    // Clone data object
                                     this.formData = {
                                         full_name: address.full_name,
                                         phone: address.phone,
@@ -275,11 +241,11 @@
                                 async submitForm() {
                                     this.isLoading = true;
                                     
-                                    // Mặc định là thêm mới (POST)
+                                    // Default: create new (POST)
                                     let url = "{{ route('addresses.store') }}";
                                     let method = 'POST';
 
-                                    // Nếu đang sửa thì đổi thành cập nhật (PUT)
+                                    // If editing, switch to update (PUT)
                                     if (this.isEditing) {
                                         url = `/addresses/${this.editId}`; 
                                         method = 'PUT'; 
