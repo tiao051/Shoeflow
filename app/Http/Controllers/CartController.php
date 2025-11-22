@@ -6,8 +6,11 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use App\Models\Order;
+use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth; 
 use App\Models\Voucher;
+use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
@@ -268,5 +271,115 @@ class CartController extends Controller
             'message' => 'Voucher applied successfully!',
             'code' => $voucher->code
         ]);
+    }
+
+    public function processCheckout(Request $request)
+    {
+        // 1. Validate dữ liệu người dùng nhập
+        $request->validate([
+            'fullname' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'email' => 'required|email|max:255',
+            'address' => 'required|string|max:500',
+            'city' => 'required|string',
+            'payment_method' => 'required|in:cod,banking',
+        ]);
+
+        $user = auth()->user();
+        $cart = Cart::where('user_id', $user->id)->first();
+
+        // Check if cart is empty
+        if (!$cart || $cart->items->isEmpty()) {
+            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
+        }
+
+        // 2. Recalculate all totals on server side
+        $subtotal = $cart->items->sum(fn($item) => $item->price * $item->quantity);
+        $shipping = $subtotal > 1000000 ? 0 : 30000; 
+        $tax = $subtotal * 0.1;
+        
+        // Handle Voucher (if any)
+        $discount = 0;
+        $couponCode = $request->input('applied_coupon'); // Code taken from hidden input
+        
+        if ($couponCode) {
+            $voucher = Voucher::where('code', $couponCode)
+                ->where('is_active', true)
+                ->where('quantity', '>', 0)
+                ->where('start_date', '<=', now())
+                ->where('end_date', '>=', now())
+                ->first();
+
+            if ($voucher && $subtotal >= $voucher->min_order_value) {
+                // Calculate discount
+                if ($voucher->discount_type == 'fixed') {
+                    $discount = $voucher->discount_value;
+                } else {
+                    $discount = $subtotal * ($voucher->discount_value / 100);
+                    if ($voucher->max_discount_amount && $discount > $voucher->max_discount_amount) {
+                        $discount = $voucher->max_discount_amount;
+                    }
+                }
+                
+                // Decrement voucher quantity (Optional: Can decrement immediately or wait until successful payment)
+                $voucher->decrement('quantity');
+            }
+        }
+
+        $grandTotal = $subtotal + $shipping + $tax - $discount;
+        if ($grandTotal < 0) $grandTotal = 0;
+
+        // 3. Save to Database (Use Transaction to ensure data integrity)
+        DB::beginTransaction();
+        try {
+            // A. Create order
+            // Note: Check your `orders` migration file to ensure these columns exist
+            $order = Order::create([
+                'user_id' => $user->id,
+                'fullname' => $request->fullname,
+                'phone' => $request->phone,
+                'email' => $request->email,
+                'address' => $request->address . ', ' . $request->city, 
+                'note' => $request->note,
+                'payment_method' => $request->payment_method,
+                'status' => 'pending', // Default status: Pending
+                
+                // Money columns
+                'subtotal' => $subtotal,
+                'shipping_fee' => $shipping,
+                'tax' => $tax,
+                'coupon_code' => $couponCode,
+                'discount_amount' => $discount,
+                'total_amount' => $grandTotal,
+            ]);
+
+            // B. Convert CartItem to OrderItem
+            foreach ($cart->items as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item->product_id,
+                    'product_name' => $item->product->name, // Store name in case product name changes later
+                    'quantity' => $item->quantity,
+                    'price' => $item->price,
+                    'size' => $item->size,
+                    'total' => $item->price * $item->quantity,
+                ]);
+            }
+
+            // C. Delete cart after successful order
+            $cart->items()->delete();
+            // Or delete the entire cart: $cart->delete();
+
+            DB::commit(); // Save all changes to DB
+            // 4. Redirect to "Thank You" page or Order History
+            // Temporarily redirect to home with a success message
+            return redirect()->route('home')->with('success', 'Order placed successfully! Order ID: #' . $order->id);
+
+        } catch (\Exception $e) {
+            DB::rollBack(); // If error, rollback all operations
+            // dd($e->getMessage(), $e->getLine(), $e->getFile());
+            \Log::error('Checkout Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'An error occurred while processing your order. Please try again.');
+        }
     }
 }

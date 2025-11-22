@@ -54,6 +54,7 @@ Route::middleware('auth')->group(function () {
         Route::get('count', [CartController::class, 'count'])->name('count');
         Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');
         Route::post('check-coupon', [CartController::class, 'checkCoupon'])->name('check-coupon');
+        Route::post('/checkout', [CartController::class, 'processCheckout'])->name('checkout.process'); 
     });
 });
 
