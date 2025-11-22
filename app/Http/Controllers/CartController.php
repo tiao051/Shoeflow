@@ -37,7 +37,7 @@ class CartController extends Controller
         $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
         
         // Shipping rule: Free shipping for orders over 2,000,000 VND
-        $shipping = $subtotal > 2000000 ? 0 : 50000; 
+        $shipping = $subtotal > 1000000 ? 0 : 30000;
         
         // Tax calculation (e.g., 10% VAT)
         $tax = $subtotal * 0.1;
@@ -173,5 +173,22 @@ class CartController extends Controller
         $count = $cart ? $cart->items()->sum('quantity') : 0;
 
         return response()->json(['count' => $count]);
+    }
+    public function checkout()
+    {
+        $user = auth()->user();
+        $cart = Cart::where('user_id', $user->id)->first();
+        
+        if (!$cart || $cart->items->isEmpty()) {
+            return redirect()->route('cart.index')->with('error', 'Giỏ hàng trống');
+        }
+
+        $cartItems = $cart->items()->with('product')->get();
+        $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
+        $shipping = $subtotal > 1000000 ? 0 : 30000;
+        $tax = $subtotal * 0.1;
+        $total = $subtotal + $shipping + $tax;
+
+        return view('checkout', compact('cartItems', 'subtotal', 'shipping', 'tax', 'total'));
     }
 }

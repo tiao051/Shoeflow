@@ -68,10 +68,7 @@
                     <span>TOTAL</span>
                     <span>{{ number_format($total, 0, ',', '.') }}₫</span>
                 </div>
-                
-                <a href="{{ route('checkout') }}" class="block w-full bg-black text-white py-3 rounded-full font-bold text-center hover:bg-gray-800 transition mb-3">
-                    CHECKOUT
-                </a>
+            
                 <a href="/products" class="block w-full border-2 border-gray-900 text-gray-900 py-3 rounded-full font-bold text-center hover:bg-gray-50 transition">
                     CONTINUE SHOPPING
                 </a>

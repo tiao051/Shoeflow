@@ -4,10 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
-use App\Http\Controllers\DashboardController; // <<< ĐÃ THÊM: Import DashboardController
+use App\Http\Controllers\DashboardController; 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Staff\OrderController as StaffOrder;
-// Add other imports as needed for Category, Banner, etc.
 
 /*
 |--------------------------------------------------------------------------
@@ -15,7 +14,6 @@ use App\Http\Controllers\Staff\OrderController as StaffOrder;
 |--------------------------------------------------------------------------
 */
 
-// Trang chủ công khai (không cần auth) - Trỏ đến DashboardController để lấy dữ liệu sản phẩm mới
 Route::get('/', [DashboardController::class, 'index'])->name('home');
 
 // Product routes
@@ -54,6 +52,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('remove/{itemId}', [CartController::class, 'remove'])->name('remove');
         Route::post('clear', [CartController::class, 'clear'])->name('clear');
         Route::get('count', [CartController::class, 'count'])->name('count');
+        Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');
     });
 });
 
