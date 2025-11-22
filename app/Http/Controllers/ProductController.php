@@ -68,12 +68,6 @@ class ProductController extends Controller
         if ($request->has('price_max')) {
             $products->where('price', '<=', $request->price_max);
         }
-        if ($request->has('sizes')) {
-            $products->whereJsonContains('sizes', $request->sizes);
-        }
-        if ($request->has('colors')) {
-            $products->whereJsonContains('colors', $request->colors);
-        }
 
         return response()->json($products->paginate(12));
     }
