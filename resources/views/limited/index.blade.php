@@ -123,30 +123,13 @@
 
 </style>
 
-@php
-    // Mock data for CONVERSE CHUCK 70 RENEW x A-TRAK
-    $product = (object)[
-        'id' => 2001,
-        'name' => 'CONVERSE CHUCK 70 RENEW x A-TRAK',
-        'year' => 2025,
-        'price' => 3990000,
-        'resale_value' => 4500000,
-        'total_stock' => 500,
-        'current_number' => 241,
-        'release_type' => 'Drop',
-        'release_end_timestamp' => now()->addDays(7)->timestamp,
-        'current_status' => 'AVAILABLE'
-    ];
-@endphp
-
 {{-- HERO SECTION --}}
 <section class="limited-hero flex items-center justify-center p-8 md:p-16">
     <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center z-10">
 
-        {{-- Left: Text & Pressure --}}
+        {{-- Left: Content --}}
         <div>
-            <span class="limited-badge font-exclusive mb-4">🔥 LIMITED RELEASE: {{ $product->year }}</span>
-
+            <span class="limited-badge font-exclusive mb-4">🔥 LIMITED RELEASE: {{ $product->created_at->year ?? 'N/A' }}</span>
             <h1 class="font-exclusive text-massive my-4 leading-tight">
                 {{ $product->name }}
             </h1>
@@ -172,11 +155,11 @@
                     ADD TO CART
                 </button>
 
-                <p class="text-xs text-gray-400 mt-2">Estimated resale: ~ {{ number_format($product->resale_value, 0, ',', '.') }} ₫</p>
+                <p class="text-xs text-gray-400 mt-2">Estimated resale: ~ {{ number_format($resale_value, 0, ',', '.') }} ₫</p>
             </div>
         </div>
 
-        {{-- Right: Artistic Image --}}
+        {{-- Right: Image --}}
         <div class="relative flex justify-center items-center hero-shoe-container">
             <img
                 src="{{ asset('images/special-removebg.png') }}"
@@ -224,8 +207,7 @@
             <li>Exclusive collaboration between Converse and A-TRAK combining heritage and contemporary design.</li>
             <li>Constructed with Renew materials and limited-run components unique to this release.</li>
             <li>Special A-TRAK graphics and colorways not available on standard Chuck 70 models.</li>
-            <li>Low global quantity: only {{ number_format($product->total_stock, 0, ',', '.') }} pairs produced.</li>
-            <li><strong>No planned restock:</strong> this release is a one-time limited edition.</li>
+            <li>Low global quantity: only {{ number_format($product->stock, 0, ',', '.') }} pairs produced.</li>            <li><strong>No planned restock:</strong> this release is a one-time limited edition.</li>
         </ul>
     </div>
 </section>
@@ -236,9 +218,9 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const productData = {
-        releaseType: '{{ $product->release_type }}',
-        releaseEndTimestamp: {{ $product->release_end_timestamp }},
-        currentStatus: '{{ $product->current_status }}' // retrieve status from PHP
+        releaseType: 'Drop',
+        releaseEndTimestamp: {{ $release_end_timestamp }}, // provided by controller
+        currentStatus: '{{ $current_status }}' // provided by controller
     };
 
     const countdownDisplay = document.getElementById('countdown-display');

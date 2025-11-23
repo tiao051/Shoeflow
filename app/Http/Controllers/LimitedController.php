@@ -3,29 +3,37 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Product; // Đảm bảo bạn đã có Product Model
+use Carbon\Carbon; // Cần cho việc tính toán timestamp nếu bạn không lưu thời gian kết thúc release trong DB
 
 class LimitedController extends Controller
 {
-    /**
-     * Display the Limited Edition product page.
-     *
-     * @return \Illuminate\View\View
-     */
     public function index()
     {
-        // Dữ liệu giả lập cho sản phẩm Limited Edition
-        // Thực tế: Dữ liệu này sẽ được lấy từ database (ví dụ: Product::where('is_limited', true)->first())
-        $product = (object)[
-            'id' => 999,
-            'name' => 'CHUCK 70 RENEW x DRKSHDW',
-            'price' => 3990000,
-            'total_stock' => 500,
-            'current_number' => 241, // Số thứ tự hiện tại (nếu có)
-            'release_type' => 'End', // 'Drop' hoặc 'End'
-            // Đặt thời gian kết thúc (ví dụ: 3 ngày 21 giờ 14 phút 9 giây kể từ bây giờ)
-            'release_end_timestamp' => now()->addDays(3)->addHours(21)->addMinutes(14)->addSeconds(9)->timestamp,
-        ];
+        // 1. Tìm sản phẩm theo slug
+        $product = Product::where('slug', 'converse-chuck-70-renew-x-a-trak')->first();
+
+        // 2. Xử lý khi không tìm thấy sản phẩm (tùy chọn)
+        if (!$product) {
+            // Bạn có thể trả về 404 hoặc một view thông báo lỗi
+            abort(404, 'Limited edition product not found.');
+        }
+
+        // 3. Chuẩn bị dữ liệu bổ sung cho View (nếu cần thiết)
+        // Ví dụ: tính toán Release End Timestamp. Nếu bạn đã lưu trong DB thì không cần.
+        // Tôi thêm vào đây giả định 7 ngày sau khi sản phẩm được tạo (hoặc bạn có thể thêm cột release_ends_at trong DB)
+        $release_ends_at = Carbon::now()->addDays(7); 
         
-        return view('limited.index', compact('product'));
+        // Truyền dữ liệu sang View
+        return view('limited.index', [
+            'product' => $product,
+            // Thêm timestamp để dùng cho JS countdown. 
+            // Nếu bạn có cột `release_ends_at` trong DB, hãy dùng nó.
+            'release_end_timestamp' => $release_ends_at->timestamp,
+            // Giả định trạng thái (có thể lấy từ cột `stock` của DB)
+            'current_status' => ($product->stock > 0) ? 'AVAILABLE' : 'SOLD OUT',
+            // Giả định giá bán lại (nếu không có trong DB, bạn phải dùng mock hoặc thêm cột)
+            'resale_value' => 4500000, 
+        ]);
     }
 }
