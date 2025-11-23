@@ -8,58 +8,87 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    // List of products
+    // List of products 
     public function index(Request $request)
     {
         $products = Product::query();
-
-        // Default category name
         $categoryName = 'All Sneakers';
+        
+        $keyword = $request->input('q'); 
+        $isSearching = false; 
 
-        // 1. Filter by Category
+        // 1. Filter by Category 
         if ($request->has('category')) {
             $slug = $request->input('category');
             
-            // Find category first
             $category = Category::where('slug', $slug)->first();
 
             if ($category) {
-                // If found, assign name and filter by ID (faster than whereHas)
                 $categoryName = $category->name;
                 $products->where('category_id', $category->id);
             }
         }
+        
+        // 2. Search by Keyword 
+        if ($keyword) {
+            $isSearching = true;
+            
+            // If this is a search page (not a category page), set the title as search results
+            if (!$request->has('category')) {
+                // Set a special string so that products.index view can reformat
+                $categoryName = 'Search results for ' . $keyword; 
+            }
+            
+            // Lọc sản phẩm theo từ khóa 
+            $products->where(function ($query) use ($keyword) {
+                // Search by product name
+                $query->where('name', 'LIKE', "%{$keyword}%");
 
-        // 2. Sort
+                // Search by category name
+                $query->orWhereHas('category', function ($q) use ($keyword) {
+                    $q->where('name', 'LIKE', "%{$keyword}%");
+                });
+            });
+        }
+        
+        // 3. Sort 
         if ($request->has('sort')) {
             match($request->sort) {
                 'price_low'  => $products->orderBy('price', 'asc'),
                 'price_high' => $products->orderBy('price', 'desc'),
-                // 'popular'    => $products->orderBy('views', 'desc'), 
+                // 'popular'  => $products->orderBy('views', 'desc'), 
                 default      => $products->orderBy('created_at', 'desc'),
             };
         } else {
             $products->orderBy('created_at', 'desc');
         }
 
-        // 3. Pagination & Preserve URL parameters
+        // 4. Pagination & Preserve URL parameters
         $products = $products->paginate(12)->withQueryString();
 
-        // 4. Return JSON if AJAX (Load More / Filter without reload)
+        // 5. Return JSON if AJAX (Load More / Filter without reload)
         if ($request->ajax()) {
+            if ($products->isEmpty()) {
+                $noResultsHtml = view('partials.no-results', compact('keyword'))->render();
+                return response()->json([
+                    'product_list' => $noResultsHtml,
+                    'pagination' => '', 
+                ]);
+            }
+            
             $productCardsHtml = view('partials.product-cards', compact('products'))->render();
             $paginationHtml = $products->links('pagination::bootstrap-5')->toHtml();
 
             return response()->json([
                 'product_list' => $productCardsHtml,
-                'pagination' => $paginationHtml,   
+                'pagination' => $paginationHtml,    
             ]);
         }
 
         return view('products.index', compact('products', 'categoryName'));
     }
 
-    // Product details
+    // Product details 
     public function show($id)
     {
         $product = Product::findOrFail($id);
@@ -69,17 +98,5 @@ class ProductController extends Controller
             ->get();
 
         return view('products.show', compact('product', 'relatedProducts')); 
-    }
-
-    // Search
-    public function search(Request $request)
-    {
-        $query = $request->input('q');
-        
-        $products = Product::where('name', 'LIKE', "%{$query}%")
-            ->orWhere('description', 'LIKE', "%{$query}%")
-            ->paginate(12);
-
-        return view('products.search', compact('products', 'query')); 
     }
 }

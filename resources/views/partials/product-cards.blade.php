@@ -1,8 +1,8 @@
-{{-- XÓA: @extends('layouts.app') và @section('title') --}}
+{{-- REMOVE: do not include `@extends('layouts.app')` or `@section('title')` in a partial --}}
 
-{{-- Thêm thẻ <style> trực tiếp vào đây để đảm bảo kiểu dáng Wishlist/Toast luôn có mặt, 
-    nhưng lý tưởng nhất là chuyển chúng lên products/index.blade.php nếu không dùng AJAX
-    để cập nhật riêng biệt. Ở đây, tôi giữ nguyên để đảm bảo logic wishlist hoạt động ngay. --}}
+{{-- Add inline <style> here to ensure Wishlist/Toast styles are always available.
+    Ideally move these styles into `products/index.blade.php` when not updating via AJAX.
+    Keeping them here ensures the wishlist logic works immediately after partial loads. --}}
 <style>
     /* Heartbeat animation */
     @keyframes converse-pop {
@@ -31,7 +31,7 @@
         align-items: center;
         gap: 12px;
         padding: 16px 24px;
-        border-left: 4px solid #dc3545; /* Màu đỏ Converse */
+        border-left: 4px solid #dc3545; /* Converse red color */
         box-shadow: 0 10px 15px rgba(0,0,0,0.2);
     }
     
@@ -58,7 +58,7 @@
     }
 </style>
 
-{{-- XÓA: <div class="container py-5"> --}}
+{{-- REMOVE: <div class="container py-5"> --}}
 <div class="row">
     @foreach($products as $product)
         <div class="col-6 col-md-4 col-lg-3 mb-4">
@@ -66,7 +66,7 @@
                 
                 {{-- 2. IMAGE (click to view details) --}}
                 <div class="image-wrapper position-relative">
-                    {{-- Giữ lại logic hiển thị NEW badge --}}
+                    {{-- Keep existing NEW badge display logic --}}
                     @if($loop->index < 3 && $products->currentPage() == 1) 
                         <span class="badge-custom">NEW</span>
                     @endif
@@ -135,12 +135,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const toastTitle = document.getElementById('toast-title');
     const toastMessage = document.getElementById('toast-message');
 
-    // Chú ý: Cần unbind và rebind event listener cho các form nếu partial này được tải lại qua AJAX
-    // View products/index.blade.php đã xử lý việc này sau khi tải AJAX, nhưng ở đây
-    // ta vẫn thêm logic để đảm bảo form được thêm mới hoạt động.
+    // Note: need to unbind and rebind event listeners for forms when this partial is reloaded via AJAX
+    // The `products/index.blade.php` view takes care of this after an AJAX load, but we keep
+    // this logic here to ensure newly added forms function correctly.
 
     wishlistForms.forEach(form => {
-        // Loại bỏ event listener cũ nếu có để tránh nhân đôi (cho trường hợp AJAX)
+        // Remove any previous listener to avoid duplicate handlers (for AJAX reloads)
         form.removeEventListener('submit', handleWishlistSubmit);
         form.addEventListener('submit', handleWishlistSubmit);
     });
@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'POST',
             body: new FormData(form),
             headers: {
-                'X-Requested-With': 'XMLHttpRequest', // Báo cho Laravel biết đây là AJAX
+                'X-Requested-With': 'XMLHttpRequest', // Notify Laravel this is an AJAX request
                 'Accept': 'application/json'
             }
         })
@@ -200,4 +200,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-{{-- XÓA: @endsection --}}
+    {{-- REMOVE: @endsection (partials should not include section directives) --}}

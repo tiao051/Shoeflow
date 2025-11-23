@@ -102,6 +102,36 @@
     .pagination .page-item .page-link:hover {
         background-color: #eee;
     }
+    /* Add into the existing <style> block for this page */
+    .loading-indicator {
+        padding: 60px 0;
+        text-align: center;
+    }
+
+    .loading-text {
+        font-family: 'Oswald', sans-serif; /* Converse font */
+        font-size: 1.2rem;
+        font-weight: 500;
+        color: #121212; /* text color: black */
+        text-transform: uppercase;
+    }
+
+    /* Simple spinner effect */
+    .converse-spinner {
+        display: block;
+        width: 30px;
+        height: 30px;
+        margin: 15px auto;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #dc3545; /* accent red */
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 </style>
 @endpush
 
@@ -110,7 +140,17 @@
     <div class="filter-bar row mt-4 mb-4">
         <div class="col-6">
             <h1 class="m-0 text-uppercase" style="font-size: 2.5rem; font-weight: 900; font-family: 'Oswald', sans-serif;">
-                {{ $categoryName }}
+                @if (str_starts_with($categoryName, 'Search results for'))
+                    <?php
+                        // Split the string to highlight the keyword
+                        $parts = explode('Search results for ', $categoryName, 2);
+                        $keyword = count($parts) > 1 ? end($parts) : '';
+                    ?>
+                    SEARCH RESULTS FOR
+                    <span style="color: #dc3545;">"{{ $keyword }}"</span>
+                @else
+                    {{ $categoryName }}
+                @endif
             </h1>
         </div>
         
@@ -126,12 +166,18 @@
     </div>
     
     <div id="product-list-container">
-        @include('partials.product-cards')
+        @if($products->isEmpty())
+            @include('partials.no-results', ['keyword' => request('q')])
+        @else
+            @include('partials.product-cards')
+        @endif
     </div>
 
     <div class="d-flex justify-content-center my-5" id="pagination-container">
         <nav>
-            {{ $products->appends(request()->query())->links('pagination::bootstrap-5') }}
+            @if(!$products->isEmpty())
+                {{ $products->appends(request()->query())->links('pagination::bootstrap-5') }}
+            @endif
         </nav>
     </div>
 </div>
@@ -143,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const productListContainer = document.getElementById('product-list-container');
     const paginationContainer = document.getElementById('pagination-container');
     const sortSelect = document.getElementById('sort');
-    // Current products index path
+    // Current products index path (unused variable preserved if needed later)
     const productsIndexRoute = new URL(window.location.href).pathname;
 
     // Common function to fetch and update content
@@ -153,9 +199,21 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update browser URL (History API)
         history.pushState(null, '', fetchUrl.toString());
 
-        // Optional: show loading state
-        productListContainer.innerHTML = '<div class="row"><div class="col-12 text-center my-5"><p>Loading products...</p></div></div>';
-        paginationContainer.innerHTML = '';
+        // Show loading state
+        if (productListContainer) {
+            productListContainer.innerHTML = `
+                <div class="row">
+                    <div class="col-12 loading-indicator">
+                        <div class="converse-spinner"></div>
+                        <p class="loading-text">LOADING SNEAKERS...</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (paginationContainer) {
+            paginationContainer.innerHTML = '';
+        }
 
         fetch(fetchUrl.toString(), {
             headers: {
@@ -165,16 +223,17 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(res => res.json())
         .then(data => {
             // Update product list and pagination
-            productListContainer.innerHTML = data.product_list;
-            paginationContainer.innerHTML = `<nav>${data.pagination}</nav>`;
+            if (productListContainer) productListContainer.innerHTML = data.product_list;
+            if (paginationContainer) paginationContainer.innerHTML = `<nav>${data.pagination}</nav>`;
             // Rebind click events for new pagination links
             rebindPaginationLinks();
         })
         .catch(err => console.error('Error fetching products:', err));
     }
 
-    // Rebind click events for pagination links
+    // Rebind click events for pagination links (guard for missing container)
     function rebindPaginationLinks() {
+        if (!paginationContainer) return;
         paginationContainer.querySelectorAll('a.page-link').forEach(link => {
             link.removeEventListener('click', handlePaginationClick);
             link.addEventListener('click', handlePaginationClick);
@@ -189,23 +248,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Handle sort selection change
-    sortSelect.addEventListener('change', function() {
-        const sortValue = this.value;
-        const url = new URL(window.location.href);
-        // Add/update 'sort' parameter
-        url.searchParams.set('sort', sortValue);
-        // Reset to page 1 when sorting
-        url.searchParams.set('page', 1);
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            const sortValue = this.value;
+            const url = new URL(window.location.href);
+            // Add/update 'sort' parameter
+            url.searchParams.set('sort', sortValue);
+            // Reset to page 1 when sorting
+            url.searchParams.set('page', 1);
 
-        fetchProducts(url.toString());
-    });
-    
+            fetchProducts(url.toString());
+        });
+    }
+
     // Handle browser Back/Forward (popstate)
     window.addEventListener('popstate', function(e) {
         // Reload content from URL after back/forward
         fetchProducts(window.location.href);
     });
-    
+
     // Bind initial pagination events on first page load
     rebindPaginationLinks();
 });
