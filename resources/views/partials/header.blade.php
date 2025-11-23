@@ -45,7 +45,7 @@
             <a href="{{ route('products.run-star-trainer') }}" class="font-bold hover:text-gray-600 transition-colors">Run Star Trainer</a>
             <a href="{{ route('fits.index') }}" class="font-bold hover:text-gray-600 transition-colors">Fits with Converse</a>
             <a href="{{ route('limited.index') }}" class="font-bold hover:text-gray-600 transition-colors">Limited Edition</a>
-            <a href="#" class="sale font-bold text-red-600 hover:text-red-800 transition-colors">Sale Up To 50%</a>
+            <a href="{{ route('products.sale') }}" class="sale font-bold text-red-600 hover:text-red-800 transition-colors">Sale Up To 50%</a>
         </div>
 
         <div class="nav-right space-x-6 ml-auto relative flex items-center flex-shrink-0">

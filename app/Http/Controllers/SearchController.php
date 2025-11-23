@@ -11,60 +11,58 @@ class SearchController extends Controller
     /**
      * Handles the full search results page (when hitting Enter).
      */
-public function index(Request $request)
+    public function index(Request $request)
     {
         $keyword = $request->input('q');
-        $sort = $request->input('sort'); // Lấy tham số sort
-        
+        $sort = $request->input('sort');
+
         if (!$keyword) {
             return redirect('/');
         }
 
-        $productsQuery = Product::query() // Đổi thành $productsQuery để áp dụng sort
+        $productsQuery = Product::query()
             ->with('category')
             ->where(function ($query) use ($keyword) {
-                $query->where('name', 'LIKE', "%{$keyword}%");
-                $query->orWhereHas('category', function ($q) use ($keyword) {
-                    $q->where('name', 'LIKE', "%{$keyword}%");
-                });
+                $query->where('name', 'LIKE', "%{$keyword}%")
+                      ->orWhereHas('category', function ($q) use ($keyword) {
+                          $q->where('name', 'LIKE', "%{$keyword}%");
+                      });
             })
-            ->select('id', 'name', 'price', 'color', 'category_id', 'image'); 
-        
-        // 1. ÁP DỤNG LOGIC SORT
+            ->select('id', 'name', 'price', 'color', 'category_id', 'image');
+
+        // Apply sorting
         if ($sort) {
-            match($sort) {
+            match ($sort) {
                 'price_low'  => $productsQuery->orderBy('price', 'asc'),
                 'price_high' => $productsQuery->orderBy('price', 'desc'),
-                // 'popular'  => $productsQuery->orderBy('views', 'desc'),
                 default      => $productsQuery->orderBy('created_at', 'desc'),
             };
         } else {
-            // Sắp xếp mặc định
             $productsQuery->orderBy('created_at', 'desc');
         }
-        
-        // 2. PHÂN TRANG
-        $products = $productsQuery->paginate(12)->withQueryString();
-        
-        $categoryName = 'Search results for ' . $keyword; 
-        
-        // 3. XỬ LÝ AJAX (RẤT QUAN TRỌNG ĐỂ CẬP NHẬT DANH SÁCH SẢN PHẨM SAU SORT)
-        if ($request->ajax()) {
-             $productCardsHtml = view('partials.product-cards', compact('products'))->render();
-             $paginationHtml = $products->links('pagination::bootstrap-5')->toHtml();
 
-             return response()->json([
-                 'product_list' => $productCardsHtml,
-                 'pagination' => $paginationHtml,  
-             ]);
+        // Pagination
+        $products = $productsQuery->paginate(12)->withQueryString();
+
+        $categoryName = 'Search results for ' . $keyword;
+
+        // Handle AJAX requests (updating product list dynamically)
+        if ($request->ajax()) {
+            $productCardsHtml = view('partials.product-cards', compact('products'))->render();
+            $paginationHtml = $products->links('pagination::bootstrap-5')->toHtml();
+
+            return response()->json([
+                'product_list' => $productCardsHtml,
+                'pagination'   => $paginationHtml,
+            ]);
         }
 
-        // 4. Trả về view cho lần tải đầu tiên
+        // Initial page load
         return view('products.index', compact('products', 'categoryName'));
     }
 
     /**
-     * Handles fast suggestions for the AJAX Live Search.
+     * Handles fast suggestions for AJAX Live Search.
      */
     public function suggestions(Request $request)
     {
@@ -75,17 +73,14 @@ public function index(Request $request)
         }
 
         $products = Product::query()
-            ->with('category') // Eager load category for quick suggestion
+            ->with('category')
             ->where(function ($query) use ($keyword) {
-                $query->where('name', 'LIKE', "%{$keyword}%");
-                
-                // Search by category name
-                $query->orWhereHas('category', function ($q) use ($keyword) {
-                    $q->where('name', 'LIKE', "%{$keyword}%");
-                });
+                $query->where('name', 'LIKE', "%{$keyword}%")
+                      ->orWhereHas('category', function ($q) use ($keyword) {
+                          $q->where('name', 'LIKE', "%{$keyword}%");
+                      });
             })
-            // FIX: Include the 'image' column here
-            ->select('id', 'name', 'price', 'color', 'category_id', 'image') 
+            ->select('id', 'name', 'price', 'color', 'category_id', 'image')
             ->limit(5)
             ->get();
 

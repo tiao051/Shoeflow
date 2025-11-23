@@ -18,7 +18,7 @@ class ProductController extends Controller
         $isSearching = false; 
 
         // 1. Filter by Category 
-        if ($request->has('category')) {
+        if ($request->has('category') && !$keyword) {
             $slug = $request->input('category');
             
             $category = Category::where('slug', $slug)->first();
@@ -29,27 +29,23 @@ class ProductController extends Controller
             }
         }
         
-        // 2. Search by Keyword 
+        // 2. Search by Keyword
         if ($keyword) {
             $isSearching = true;
-            
-            // If this is a search page (not a category page), set the title as search results
-            if (!$request->has('category')) {
-                // Set a special string so that products.index view can reformat
-                $categoryName = 'Search results for ' . $keyword; 
-            }
-            
-            // Filter products by keyword
-            $products->where(function ($query) use ($keyword) {
-                // Search by product name
-                $query->where('name', 'LIKE', "%{$keyword}%");
 
-                // Search by category name
-                $query->orWhereHas('category', function ($q) use ($keyword) {
-                    $q->where('name', 'LIKE', "%{$keyword}%");
-                });
+            if (!$request->has('category')) {
+                $categoryName = 'Search results for ' . $keyword;
+            }
+
+            // Search by product name OR category name
+            $products->where(function ($query) use ($keyword) {
+                $query->where('name', 'LIKE', "%{$keyword}%")
+                      ->orWhereHas('category', function ($q) use ($keyword) {
+                          $q->where('name', 'LIKE', "%{$keyword}%");
+                      });
             });
         }
+
         
         // 3. Sort 
         if ($request->has('sort')) {
@@ -142,5 +138,54 @@ class ProductController extends Controller
         }
 
         return view('products.run-star-trainer', compact('products', 'categoryName'));
+    }
+
+    public function saleProducts(Request $request)
+    {
+        // Start query
+        $productsQuery = Product::query()
+                        ->where('is_active', 1)
+                        ->whereNotNull('sale_price') // Ensure the sale_price column has a value
+                        ->whereColumn('sale_price', '<', 'price'); // And sale price must be lower than original price
+
+        // 1. Sort logic (reusing logic from other pages)
+        if ($request->has('sort')) {
+            match($request->sort) {
+                'price_low'  => $productsQuery->orderBy('sale_price', 'asc'),
+                'price_high' => $productsQuery->orderBy('sale_price', 'desc'),
+                'newest'     => $productsQuery->orderBy('created_at', 'desc'),
+                default      => $productsQuery->orderBy('created_at', 'desc'),
+            };
+        } else {
+            $productsQuery->orderBy('created_at', 'desc');
+        }
+
+        // 2. Pagination
+        $products = $productsQuery->paginate(12)->withQueryString();
+
+        $categoryName = 'SALE UP TO 50%';
+
+        // 3. Handle AJAX (similar to Run Star logic)
+        if ($request->ajax()) {
+            if ($products->isEmpty()) {
+                // Partial view for no results
+                $noResultsHtml = view('partials.no-results', ['keyword' => 'Sale'])->render();
+                return response()->json([
+                    'product_list' => $noResultsHtml,
+                    'pagination' => '',
+                ]);
+            }
+
+            $productCardsHtml = view('partials.product-cards', ['products' => $products])->render();
+            $paginationHtml = $products->links('pagination::bootstrap-5')->toHtml();
+
+            return response()->json([
+                'product_list' => $productCardsHtml,
+                'pagination' => $paginationHtml,
+            ]);
+        }
+
+        // 4. Return initial view
+        return view('products.sale', compact('products', 'categoryName'));
     }
 }

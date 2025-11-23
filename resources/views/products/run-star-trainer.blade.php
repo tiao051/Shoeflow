@@ -98,12 +98,12 @@
         transition: transform 0.5s ease;
     }
 
-    /* Badge position (NEW) */
+    /* Badge position */
     .badge-custom {
         position: absolute;
         top: 10px; 
         left: 10px;
-        z-index: 10; /* Đảm bảo nằm trên ảnh */
+        z-index: 10; 
         background-color: #121212;
         color: white;
         padding: 4px 8px;
@@ -123,27 +123,23 @@
 
     /* 1. PRODUCT TITLE: Bold and Uppercase */
     .product-title {
-        font-size: 1rem; /* Kích thước tương đương */
-        font-weight: 700; /* Đảm bảo ĐẬM */
+        font-size: 1rem; 
+        font-weight: 700; 
         margin-bottom: 5px; 
         line-height: 1.4;
-        text-transform: uppercase; /* <--- KEY: IN HOA */
+        text-transform: uppercase; 
     }
     
-    /* 2. SUBTITLE / PRODUCT LINE (e.g., Chuck Taylor) */
+    /* 2. SUBTITLE / PRODUCT LINE*/
     .product-category {
-        font-size: 0.85rem; /* Hơi nhỏ hơn so với tiêu đề */
+        font-size: 0.85rem; 
         color: #757575;
         margin-bottom: 5px;
-        /* Có thể in hoa nếu cần thiết */
-        /* text-transform: uppercase; */ 
     }
 
     /* 3. PRICE: Use dedicated font and bolder weight */
     .product-price {
-        font-family: 'Oswald', sans-serif; /* <--- KEY: Sử dụng Font Oswald (Font đặc trưng của Converse) */
-        font-size: 1.1rem;
-        font-weight: 500; /* Có thể dùng 500 hoặc 600 */
+        font-family: 'Oswald', sans-serif;
         color: #121212;
     }
 

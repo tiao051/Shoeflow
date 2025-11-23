@@ -30,6 +30,7 @@ Route::get('products/filter', [ProductController::class, 'filter'])->name('produ
 Route::resource('products', ProductController::class)->only(['index', 'show']);
 Route::get('/fits', [FitsController::class, 'index'])->name('fits.index');
 Route::get('/limited-edition', [LimitedController::class, 'index'])->name('limited.index');
+Route::get('/sale', [App\Http\Controllers\ProductController::class, 'saleProducts'])->name('products.sale');
 
 /*
 |--------------------------------------------------------------------------
