@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 body: new FormData(this),
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest', // Báo cho Laravel biết đây là AJAX
+                    'X-Requested-With': 'XMLHttpRequest', 
                     'Accept': 'application/json'
                 }
             })

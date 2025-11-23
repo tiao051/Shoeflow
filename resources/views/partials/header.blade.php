@@ -126,12 +126,11 @@ document.addEventListener("DOMContentLoaded", function() {
     const suggestionsBox = document.getElementById('search-suggestions');
     let debounceTimer; // Debounce timer for live search
 
-    // --- A. SEARCH OPEN/CLOSE LOGIC ---
-
+    // search open/close logic
     function openSearch() {
         // Open the search form
         form.classList.remove('w-16');
-        form.classList.add('w-[350px]');
+        form.classList.add('w-[300px]');
 
         // Reveal the input
         input.classList.remove('opacity-0', 'pointer-events-none');
@@ -142,7 +141,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // Only close if the user is NOT typing (input is not focused)
         if (document.activeElement !== input) {
             // Close the form
-            form.classList.remove('w-[350px]');
+            form.classList.remove('w-[300px]');
             form.classList.add('w-16');
 
             // Hide input and suggestions box
@@ -162,8 +161,7 @@ document.addEventListener("DOMContentLoaded", function() {
         setTimeout(closeSearch, 200);
     });
 
-    // --- B. LIVE SEARCH LOGIC (AJAX + DEBOUNCE) ---
-
+    // Live search logic
     input.addEventListener('input', function () {
         const keyword = this.value.trim();
 
@@ -201,7 +199,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function renderSuggestions(products) {
         const html = products.map(product => {
-        // Kiểm tra và sử dụng ảnh placeholder nếu product.image là null/undefined
         const imagePath = product.image || 'images/placeholder.jpg'; 
         
         return `
