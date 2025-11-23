@@ -24,6 +24,7 @@ Route::get('/', [DashboardController::class, 'index'])->name('home');
 
 Route::get('/search/process', [SearchController::class, 'process'])->name('search.process');
 // Product routes
+Route::get('/run-star-trainer', [ProductController::class, 'runStarTrainer'])->name('products.run-star-trainer');
 Route::get('products/search', [ProductController::class, 'search'])->name('products.search');
 Route::get('products/filter', [ProductController::class, 'filter'])->name('products.filter');
 Route::resource('products', ProductController::class)->only(['index', 'show']);

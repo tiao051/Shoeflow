@@ -85,7 +85,7 @@
                     </div>
 
                     <div class="product-category text-muted small">
-                        {{ $product->category->name ?? 'Classic / Lifestyle' }}
+                        {{ $product->category?->name ?? 'Classic / Lifestyle' }}
                     </div>
 
                     {{-- 4. PRICE & WISHLIST (side-by-side; wishlist uses AJAX) --}}

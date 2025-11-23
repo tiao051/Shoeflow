@@ -56,6 +56,7 @@ class ProductController extends Controller
             match($request->sort) {
                 'price_low'  => $products->orderBy('price', 'asc'),
                 'price_high' => $products->orderBy('price', 'desc'),
+                'newest'     => $products->orderBy('created_at', 'desc'),
                 // 'popular'  => $products->orderBy('views', 'desc'), 
                 default      => $products->orderBy('created_at', 'desc'),
             };
@@ -98,5 +99,48 @@ class ProductController extends Controller
             ->get();
 
         return view('products.show', compact('product', 'relatedProducts')); 
+    }
+    
+    public function runStarTrainer(Request $request)
+    {
+        $products = Product::where('image', 'LIKE', '%run_star%')
+                           ->where('is_active', 1)
+                           ->orderBy('created_at', 'desc');
+
+        if ($request->has('sort')) {
+            match($request->sort) {
+                'price_low'  => $products->orderBy('price', 'asc'),
+                'price_high' => $products->orderBy('price', 'desc'),
+                'newest'     => $products->orderBy('created_at', 'desc'),
+                default      => $products->orderBy('created_at', 'desc'),
+            };
+        }
+        else {
+            $products->orderBy('created_at', 'desc');
+        }
+
+        $products = $products->paginate(12)->withQueryString();
+
+        $categoryName = 'RUN STAR TRAINER COLLECTION'; 
+        
+        if ($request->ajax()) {
+            if ($products->isEmpty()) {
+                $noResultsHtml = view('partials.no-results', ['keyword' => 'Run Star'])->render(); 
+                return response()->json([
+                    'product_list' => $noResultsHtml,
+                    'pagination' => '',
+                ]);
+            }
+            
+            $productCardsHtml = view('partials.product-cards', ['products' => $products])->render();
+            $paginationHtml = $products->links('pagination::bootstrap-5')->toHtml();
+
+            return response()->json([
+                'product_list' => $productCardsHtml,
+                'pagination' => $paginationHtml,  
+            ]);
+        }
+
+        return view('products.run-star-trainer', compact('products', 'categoryName'));
     }
 }
