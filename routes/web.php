@@ -20,6 +20,7 @@ use App\Http\Controllers\SearchController;
 
 Route::get('/', [DashboardController::class, 'index'])->name('home');
 
+Route::get('/search/process', [SearchController::class, 'process'])->name('search.process');
 // Product routes
 Route::get('products/search', [ProductController::class, 'search'])->name('products.search');
 Route::get('products/filter', [ProductController::class, 'filter'])->name('products.filter');
@@ -72,7 +73,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/checkout', [CartController::class, 'processCheckout'])->name('checkout.process'); 
     });
 
-    // --- [FIX] Add thank-you and order view routes here ---
     // This route should be accessible to users
     Route::get('/checkout/success/{order}', [CartController::class, 'success'])->name('checkout.success');
 
