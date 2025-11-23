@@ -39,7 +39,7 @@ class ProductController extends Controller
                 $categoryName = 'Search results for ' . $keyword; 
             }
             
-            // Lọc sản phẩm theo từ khóa 
+            // Filter products by keyword
             $products->where(function ($query) use ($keyword) {
                 // Search by product name
                 $query->where('name', 'LIKE', "%{$keyword}%");

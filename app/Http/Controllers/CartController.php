@@ -275,7 +275,7 @@ class CartController extends Controller
 
     public function processCheckout(Request $request)
     {
-        // 1. Validate dữ liệu người dùng nhập
+        // 1. Validate user input
         $request->validate([
             'fullname' => 'required|string|max:255',
             'phone' => 'required|string|max:20',

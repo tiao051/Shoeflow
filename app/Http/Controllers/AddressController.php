@@ -25,7 +25,7 @@ class AddressController extends Controller
 
         $address = Address::create($validated);
 
-        // Nếu là AJAX request, trả về JSON để JS xử lý
+        // If this is an AJAX request, return JSON for JS to handle
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,

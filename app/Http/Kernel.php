@@ -15,14 +15,14 @@ protected array $routeMiddleware = [
     'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
     'can' => \Illuminate\Auth\Middleware\Authorize::class,
     'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
-    'has_role' => \App\Http\Middleware\HasRole::class, // Thường là tên thay thế nếu dùng gói Spatie
+    'has_role' => \App\Http\Middleware\HasRole::class, // Common alias if using the Spatie package
     'password.confirm' => \Illuminate\Auth\Middleware\RequirePasswordConfirmation::class,
     'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
     'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
     'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
 
-    // Middleware Tùy chỉnh
-    'role' => \App\Http\Middleware\RoleMiddleware::class, // Middleware kiểm tra vai trò động
+    // Custom middleware
+    'role' => \App\Http\Middleware\RoleMiddleware::class, // Middleware for dynamic role checks
 ];
 
 // ...
