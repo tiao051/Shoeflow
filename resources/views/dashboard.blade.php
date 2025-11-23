@@ -210,43 +210,33 @@ document.addEventListener('DOMContentLoaded', function() {
     // 1. Auto-scroll functionality
     const carousel = document.getElementById('new-arrivals-carousel');
     if (carousel) {
-        const scrollDistance = 256 + 24;
+        let scrollDistance = 256;          
+        let scrollIntervalTime = 1000;    
         let scrollPosition = 0;
-        let direction = 1;
         let scrollInterval;
 
         function autoScroll() {
+            const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
+
             if (carousel.scrollWidth <= carousel.clientWidth) {
                 clearInterval(scrollInterval);
                 return;
             }
 
-            const newScrollPosition = scrollPosition + direction * scrollDistance;
-            const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
+            scrollPosition += scrollDistance;
 
-            if (direction === 1) {
-                if (newScrollPosition >= maxScrollLeft) {
-                    direction = -1;
-                    scrollPosition = maxScrollLeft;
-                } else {
-                    scrollPosition = newScrollPosition;
-                }
-            } else {
-                if (newScrollPosition <= 0) {
-                    direction = 1;
-                    scrollPosition = 0;
-                } else {
-                    scrollPosition = newScrollPosition;
-                }
+            if (scrollPosition >= maxScrollLeft) {
+                scrollPosition = 0;
             }
 
-            carousel.scrollTo({ left: scrollPosition, behavior: 'smooth' });
+            carousel.scrollTo({
+                left: scrollPosition,
+                behavior: 'auto'
+            });
         }
 
         const startAutoScroll = () => {
-            if (carousel.scrollWidth > carousel.clientWidth) {
-                scrollInterval = setInterval(autoScroll, 4000);
-            }
+            scrollInterval = setInterval(autoScroll, scrollIntervalTime);
         };
 
         const stopAutoScroll = () => clearInterval(scrollInterval);
