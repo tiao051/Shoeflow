@@ -44,7 +44,7 @@
         <div class="nav-center hidden lg:flex space-x-8 mx-12 text-sm">
             <a href="#" class="font-bold hover:text-gray-600 transition-colors">Run Star Trainer</a>
             <a href="{{ route('fits.index') }}" class="font-bold hover:text-gray-600 transition-colors">Fits with Converse</a>
-            <a href="#" class="font-bold hover:text-gray-600 transition-colors">Limited Edition</a>
+            <a href="{{ route('limited.index') }}" class="font-bold hover:text-gray-600 transition-colors">Limited Edition</a>
             <a href="#" class="sale font-bold text-red-600 hover:text-red-800 transition-colors">Sale Up To 50%</a>
         </div>
 

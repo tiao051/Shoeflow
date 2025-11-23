@@ -12,6 +12,7 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\FitsController;
+use App\Http\Controllers\LimitedController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +28,8 @@ Route::get('products/search', [ProductController::class, 'search'])->name('produ
 Route::get('products/filter', [ProductController::class, 'filter'])->name('products.filter');
 Route::resource('products', ProductController::class)->only(['index', 'show']);
 Route::get('/fits', [FitsController::class, 'index'])->name('fits.index');
+Route::get('/limited-edition', [LimitedController::class, 'index'])->name('limited.index');
+
 /*
 |--------------------------------------------------------------------------
 | Authenticated Routes (For Users & Admins)
