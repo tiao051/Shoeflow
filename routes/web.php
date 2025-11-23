@@ -11,6 +11,7 @@ use App\Http\Controllers\Staff\OrderController as StaffOrder;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\FitsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,7 +26,7 @@ Route::get('/search/process', [SearchController::class, 'process'])->name('searc
 Route::get('products/search', [ProductController::class, 'search'])->name('products.search');
 Route::get('products/filter', [ProductController::class, 'filter'])->name('products.filter');
 Route::resource('products', ProductController::class)->only(['index', 'show']);
-
+Route::get('/fits', [FitsController::class, 'index'])->name('fits.index');
 /*
 |--------------------------------------------------------------------------
 | Authenticated Routes (For Users & Admins)
