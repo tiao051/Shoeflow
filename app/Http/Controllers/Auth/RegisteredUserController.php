@@ -30,24 +30,19 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        // 1. Validate dữ liệu đầu vào
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'phone' => ['nullable', 'string', 'max:15'], // Thêm validate số điện thoại
+            'phone' => ['nullable', 'string', 'max:15'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // 2. Tạo User mới
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'phone' => $request->phone ?? null, // Lưu số điện thoại (nếu có)
+            'phone' => $request->phone ?? null,
             'password' => Hash::make($request->password),
             
-            // LƯU Ý QUAN TRỌNG: 
-            // role_id = 1 thường là Admin. 
-            // Nếu đây là khách hàng mua giày, bạn nên để role_id = 2 (hoặc ID tương ứng với role Customer trong DB của bạn)
             'role_id' => 2, 
         ]);
 
@@ -55,7 +50,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        // Chuyển hướng về trang Dashboard hoặc Trang chủ sau khi đăng ký
         return redirect(route('dashboard', absolute: false));
     }
 }
