@@ -25,7 +25,7 @@ class ProfileController extends Controller
     {   
         $user = Auth::user();
         $orders = Order::where('user_id', $user->id)
-                        ->withCount('items') 
+                        ->with('items') 
                         ->orderBy('created_at', 'desc')
                         ->take(5)
                         ->get();
@@ -95,5 +95,19 @@ class ProfileController extends Controller
         $user->save();
 
         return redirect()->route('profile.show')->with('success', 'Your profile picture has been updated successfully!');
+    }
+    
+    public function getOrderDetails($id)
+    {
+        $user = Auth::user();
+        
+        $order = Order::where('id', $id)
+                      ->where('user_id', $user->id)
+                      ->with(['items.product']) 
+                      ->firstOrFail(); 
+
+        return response()->json([
+            'order' => $order,
+        ]);
     }
 }

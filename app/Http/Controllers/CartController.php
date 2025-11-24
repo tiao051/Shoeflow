@@ -292,7 +292,7 @@ class CartController extends Controller
         return response()->json([
             'status' => 'success',
             'discount' => $discountAmount,
-            'message' => 'Mã giảm giá đã được áp dụng thành công!',
+            'message' => 'Voucher applied successfully!',
             'code' => $voucher->code
         ]);
     }

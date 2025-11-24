@@ -79,7 +79,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar.update');
-
+    Route::get('/profile/orders/{id}', [ProfileController::class, 'getOrderDetails'])->name('profile.orders.details');
+    
     // Address
     Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
     Route::delete('/addresses/{id}', [AddressController::class, 'destroy'])->name('addresses.destroy');
