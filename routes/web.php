@@ -18,7 +18,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
-
+use App\Http\Controllers\Admin\AdminAuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -123,16 +123,18 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
+Route::prefix('admin')->group(function () {
+    Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
+    Route::post('/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
 
-    Route::resource('products', ProductController::class)->except(['index', 'show']);
-    Route::resource('categories', CategoryController::class);
-    Route::resource('banners', BannerController::class);
-    Route::resource('news', NewsController::class);
-    Route::resource('vouchers', VoucherController::class);
-    Route::resource('faqs', FaqController::class);
-    Route::resource('users', UserController::class);
+    Route::middleware(['auth', 'admin'])->name('admin.')->group(function () {
+        
+        Route::get('/dashboard', function () {
+            return view('admin.dashboard');
+        })->name('dashboard');
+
+        Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+    });
 });
 
 /*
