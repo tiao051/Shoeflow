@@ -3,14 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cart;
-use App\Models\CartItem;
+use App\Models\CartItem; // Import CartItem cho tường minh
 use App\Models\Product;
-use Illuminate\Http\Request;
+use App\Models\Voucher; // Đã có
 use App\Models\Order;
 use App\Models\OrderItem;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth; 
-use App\Models\Voucher;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\JsonResponse; // Cần thiết cho các hàm AJAX như checkCoupon
 
 class CartController extends Controller
 {
@@ -69,9 +70,9 @@ class CartController extends Controller
 
         if (!$user) {
              return response()->json([
-                'status' => 'error', 
-                'message' => 'You need to login to add products to the cart.'
-            ], 401);
+                 'status' => 'error', 
+                 'message' => 'You need to login to add products to the cart.'
+             ], 401);
         }
 
         $cart = Cart::firstOrCreate(['user_id' => $user->id]);
@@ -223,6 +224,7 @@ class CartController extends Controller
         $tax = $subtotal * 0.1;
         $total = $subtotal + $shipping + $tax;
 
+        // Vouchers need to be filtered by user, min_order_value, etc. for a complete app
         $vouchers = Voucher::where('is_active', true)
             ->where('quantity', '>', 0)
             ->where('start_date', '<=', now())
@@ -232,16 +234,26 @@ class CartController extends Controller
         return view('checkout', compact('cartItems', 'subtotal', 'shipping', 'tax', 'total', 'vouchers'));
     }
 
-    public function checkCoupon(Request $request)
+    /**
+     * Check and apply a voucher code (Coupon).
+     * @return Illuminate\Http\JsonResponse
+     */
+    public function checkCoupon(Request $request): JsonResponse 
     {
+        // 1. Get voucher code from request
         $code = $request->input('code');
         $user = auth()->user();
 
+        // 2. Check cart
         $cart = Cart::where('user_id', $user->id)->first();
-        if (!$cart) return response()->json(['status' => 'error', 'message' => 'Cart empty']);
+        if (!$cart) {
+            return response()->json(['status' => 'error', 'message' => 'Your cart is empty. Please add products.'], 400);
+        }
         
+        // 3. Calculate subtotal
         $subtotal = $cart->items->sum(fn($item) => $item->price * $item->quantity);
 
+        // 4. Find and validate Voucher
         $voucher = Voucher::where('code', $code)
             ->where('is_active', true)
             ->where('quantity', '>', 0)
@@ -250,9 +262,16 @@ class CartController extends Controller
             ->first();
 
         if (!$voucher) {
+            // Case when voucher is invalid (expired, does not exist, out of quantity)
             return response()->json(['status' => 'error', 'message' => 'Invalid or expired voucher code.'], 404);
         }
         
+        // 5. Check minimum order value
+        if ($voucher->min_order_value && $subtotal < $voucher->min_order_value) {
+            return response()->json(['status' => 'error', 'message' => 'Order has not reached the minimum value of: ' . number_format($voucher->min_order_value) . ' VND.'], 400);
+        }
+
+        // 6. Calculate Discount
         $discountAmount = 0;
 
         if ($voucher->discount_type == 'fixed') {
@@ -265,17 +284,24 @@ class CartController extends Controller
                 $discountAmount = $voucher->max_discount_amount;
             }
         }
+
+        // Ensure discount does not exceed subtotal
+        $discountAmount = min($discountAmount, $subtotal);
+
+        // 7. Return success JSON response
         return response()->json([
             'status' => 'success',
             'discount' => $discountAmount,
-            'message' => 'Voucher applied successfully!',
+            'message' => 'Mã giảm giá đã được áp dụng thành công!',
             'code' => $voucher->code
         ]);
     }
 
+    /**
+     * Process the order creation and finalize checkout.
+     */
     public function processCheckout(Request $request)
     {
-        // 1. Validate user input
         $request->validate([
             'fullname' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
@@ -283,6 +309,8 @@ class CartController extends Controller
             'address' => 'required|string|max:500',
             'city' => 'required|string',
             'payment_method' => 'required|in:cod,banking',
+            'note' => 'nullable|string',
+            'applied_coupon' => 'nullable|string',
         ]);
 
         $user = auth()->user();
@@ -321,7 +349,10 @@ class CartController extends Controller
                     }
                 }
                 
-                // Decrement voucher quantity (Optional: Can decrement immediately or wait until successful payment)
+                // Ensure discount does not exceed subtotal
+                $discount = min($discount, $subtotal);
+                
+                // Decrement voucher quantity 
                 $voucher->decrement('quantity');
             }
         }
@@ -348,7 +379,7 @@ class CartController extends Controller
                 'subtotal' => $subtotal,
                 'shipping_fee' => $shipping,
                 'tax' => $tax,
-                'coupon_code' => $couponCode,
+                'coupon_code' => $couponCode && isset($voucher) ? $couponCode : null,
                 'discount_amount' => $discount,
                 'total_amount' => $grandTotal,
             ]);
@@ -368,18 +399,16 @@ class CartController extends Controller
 
             // C. Delete cart after successful order
             $cart->items()->delete();
-            // Or delete the entire cart: $cart->delete();
+            // Or $cart->delete(); if you want to delete the entire Cart record
 
             DB::commit(); // Save all changes to DB
             // 4. Redirect to "Thank You" page or Order History
-            // Temporarily redirect to home with a success message
             return redirect()->route('checkout.success', ['order' => $order->id]);
 
         } catch (\Exception $e) {
             DB::rollBack(); // If error, rollback all operations
-            // dd($e->getMessage(), $e->getLine(), $e->getFile());
-            \Log::error('Checkout Error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'An error occurred while processing your order. Please try again.');
+            \Log::error('Checkout Error: ' . $e->getMessage()); 
+            return redirect()->back()->with('error', 'There was an error processing your order. Please try again.');
         }
     }
 
