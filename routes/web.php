@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController; 
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\BrandController;
 
 /*
 |--------------------------------------------------------------------------
@@ -142,6 +143,7 @@ Route::prefix('admin')->group(function () {
         Route::resource('products', AdminProductController::class)->except(['create', 'show', 'edit']);
         Route::get('orders/export', [AdminOrderController::class, 'export'])->name('orders.export');
         Route::resource('orders', AdminOrderController::class)->only(['index', 'show', 'update', 'destroy']);
+        Route::resource('brands', BrandController::class)->except(['create', 'show', 'edit']);
     });
 });
 

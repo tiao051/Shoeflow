@@ -55,7 +55,9 @@
                            Categories
                         </a>
 
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-800 rounded-md transition-colors">
+                        <a href="{{ route('admin.brands.index') }}" 
+                        class="block px-4 py-2 text-sm rounded-md transition-colors 
+                        {{ request()->routeIs('admin.brands.*') ? 'text-yellow-500 bg-gray-800 font-bold' : 'text-gray-400 hover:text-white hover:bg-gray-800' }}">
                             Brands
                         </a>
                     </div>
