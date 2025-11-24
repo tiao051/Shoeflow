@@ -29,6 +29,7 @@ class User extends Authenticatable
         'avatar',
         'role_id', 
         'is_verified',
+        'is_active',
     ];
 
     /**
@@ -50,6 +51,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'is_verified' => 'boolean',
+        'is_active' => 'boolean',
     ];
     
     public function role(): BelongsTo
