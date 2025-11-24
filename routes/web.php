@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController; 
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -139,6 +140,8 @@ Route::prefix('admin')->group(function () {
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
         Route::resource('categories', AdminCategoryController::class)->except(['create', 'show', 'edit']);
         Route::resource('products', AdminProductController::class)->except(['create', 'show', 'edit']);
+        Route::get('orders/export', [AdminOrderController::class, 'export'])->name('orders.export');
+        Route::resource('orders', AdminOrderController::class)->only(['index', 'show', 'update', 'destroy']);
     });
 });
 

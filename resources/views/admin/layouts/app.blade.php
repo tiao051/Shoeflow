@@ -61,11 +61,12 @@
                     </div>
                 </div>
 
-                <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-400 rounded-lg hover:bg-gray-800 hover:text-white transition-colors">
+                <a href="{{ route('admin.orders.index') }}" 
+                    class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors 
+                    {{ request()->routeIs('admin.orders.*') ? 'bg-yellow-500 text-black' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
                     <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                     Orders
                 </a>
-
             </nav>
         </aside>
 
