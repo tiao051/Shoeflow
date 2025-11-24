@@ -121,7 +121,7 @@
 
                             <div>
                                 <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
-                                <input type="tel" name="phone" id="phone" value="{{ old('phone', $user->phone) }}" placeholder="e.g., 0901234567" 
+                                <input type="tel" name="phone" id="phone" value="{{ old('phone', $user->phone) }}"
                                        class="mt-1 w-full px-4 py-3 border border-gray-300 rounded hover:border-gray-900 focus:outline-none focus:ring-black focus:border-black">
                                 @error('phone')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                             </div>
