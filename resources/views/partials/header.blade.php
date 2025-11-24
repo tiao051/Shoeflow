@@ -166,8 +166,11 @@
     </div>
 </header>
 <script>
+
 const BASE_URL = '{{ asset('/') }}';
-    
+const CHAT_HISTORY_KEY = 'chatHistory';
+const CHAT_STATE_KEY = 'chatPopupState';
+
 document.addEventListener("DOMContentLoaded", function() {
     // Declare required variables
     const container = document.getElementById('search-container');
@@ -183,6 +186,48 @@ document.addEventListener("DOMContentLoaded", function() {
     const sendBtn = document.getElementById('chat-send-btn');
     const chatHistory = document.getElementById('chat-history');
 
+    function saveChatData() {
+        const historyHTML = chatHistory.innerHTML;
+        localStorage.setItem(CHAT_HISTORY_KEY, historyHTML);
+
+        const isChatOpen = chatPopup.classList.contains('opacity-100');
+        localStorage.setItem(CHAT_STATE_KEY, isChatOpen ? 'open' : 'closed');
+    }
+
+    function loadChatData() {
+        const historyHTML = localStorage.getItem(CHAT_HISTORY_KEY);
+        const state = localStorage.getItem(CHAT_STATE_KEY);
+
+        if (historyHTML) {
+            chatHistory.innerHTML = historyHTML;
+        }
+        else {
+            chatHistory.innerHTML = `
+                <div class="flex justify-start">
+                    <div class="bg-gray-200 text-gray-800 p-3 rounded-xl rounded-tl-none max-w-[80%] text-sm shadow-sm break-words">
+                        Hi there! How can Converse help you today?
+                    </div>
+                </div>
+                <div class="flex justify-end"> 
+                    <div id="faq-options" class="flex flex-col items-end space-y-2 max-w-[80%]"> 
+                    </div>
+                </div>`;
+            saveChatData();
+        }
+        if (state === 'open') {
+            chatPopup.classList.remove('invisible', 'opacity-0', 'translate-y-4', 'scale-95', 'pointer-events-none');
+            chatPopup.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+        }
+        else {
+            chatPopup.classList.add('invisible', 'opacity-0', 'translate-y-4', 'scale-95', 'pointer-events-none');
+            chatPopup.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
+        }
+
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    loadChatData();
+
     function openChat() {
         chatPopup.classList.remove('invisible'); 
         
@@ -190,13 +235,16 @@ document.addEventListener("DOMContentLoaded", function() {
             chatPopup.classList.remove('opacity-0', 'translate-y-4', 'scale-95', 'pointer-events-none');
             chatPopup.classList.add('opacity-100', 'translate-y-0', 'scale-100');
             chatHistory.scrollTop = chatHistory.scrollHeight; // Scroll to the bottom
+
+            saveChatData();
         }, 10);
     }
 
     function closeChat() {
         chatPopup.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
         chatPopup.classList.add('opacity-0', 'translate-y-4', 'scale-95', 'pointer-events-none');
-        
+
+        saveChatData();
         setTimeout(() => {
             chatPopup.classList.add('invisible'); 
         }, 300);
@@ -209,7 +257,7 @@ document.addEventListener("DOMContentLoaded", function() {
         
         const messageBody = document.createElement('div');
         messageBody.classList.add(
-            'p-3', 'rounded-xl', 'max-w-[80%]', 'text-sm', 'shadow-sm', 'break-words', // <--- Đã thêm 'break-words'
+            'p-3', 'rounded-xl', 'max-w-[80%]', 'text-sm', 'shadow-sm', 'break-words',
             isUser ? 'bg-red-600' : 'bg-gray-200',
             isUser ? 'text-white' : 'text-gray-800',
             isUser ? 'rounded-br-none' : 'rounded-tl-none'
@@ -218,7 +266,9 @@ document.addEventListener("DOMContentLoaded", function() {
         
         messageWrapper.appendChild(messageBody);
         chatHistory.appendChild(messageWrapper);
-        chatHistory.scrollTop = chatHistory.scrollHeight; // Scroll to the bottom
+        chatHistory.scrollTop = chatHistory.scrollHeight; 
+
+        saveChatData();
     }
 
     function sendMessage() {
