@@ -22,7 +22,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\UserController;
-
+use App\Http\Controllers\Auth\SocialiteController; 
 /*
 |--------------------------------------------------------------------------
 | Public Routes
@@ -30,17 +30,24 @@ use App\Http\Controllers\UserController;
 */
 
 Route::get('/', [DashboardController::class, 'index'])->name('home');
-
 Route::get('/search/process', [SearchController::class, 'process'])->name('search.process');
-
 Route::get('/run-star-trainer', [ProductController::class, 'runStarTrainer'])->name('products.run-star-trainer');
 Route::get('products/search', [ProductController::class, 'search'])->name('products.search');
 Route::get('products/filter', [ProductController::class, 'filter'])->name('products.filter');
 Route::get('/sale', [ProductController::class, 'saleProducts'])->name('products.sale');
 Route::resource('products', ProductController::class)->only(['index', 'show']);
-
 Route::get('/fits', [FitsController::class, 'index'])->name('fits.index');
 Route::get('/limited-edition', [LimitedController::class, 'index'])->name('limited.index');
+
+/*
+|--------------------------------------------------------------------------
+| Socialite Routes (Google Login)
+|--------------------------------------------------------------------------
+*/
+
+Route::get('auth/google', [SocialiteController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('auth/google/callback', [SocialiteController::class, 'handleGoogleCallback']);
+
 
 /*
 |--------------------------------------------------------------------------
