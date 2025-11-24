@@ -180,24 +180,65 @@
     </section>
 
     <section class="text-center py-12 bg-gray-50 rounded-xl">
-        <div class="max-w-xl mx-auto px-5">
-            <h2 class="font-extrabold uppercase mb-2 text-2xl md:text-3xl" style="font-family: 'Oswald', sans-serif;">
-                Stay In The Loop
-            </h2>
-            <p class="text-gray-500 mb-6">Subscribe to get special offers and updates.</p>
-            
-            <form class="flex" method="POST" action="{{ route('verification.send.code') }}"> 
-                @csrf 
-                <input type="email" name="email" required
-                    class="flex-grow p-3 border border-gray-300 rounded-l-lg text-sm focus:ring-0 focus:border-black" 
-                    placeholder="Enter your email address">
-                <button class="bg-black text-white p-3 rounded-r-lg hover:bg-gray-800 transition duration-150 uppercase font-bold text-sm" type="submit">
-                    Send Code
-                </button>
-            </form>
-            @error('email')
-                <p class="text-red-500 text-sm mt-2 text-left">{{ $message }}</p>
-            @enderror
+        <div class="max-w-xl mx-auto px-5">        
+            @auth
+                @if (auth()->user()->is_verified)
+                    <div class="text-green-600">
+                        <svg class="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h2 class="font-extrabold uppercase mb-2 text-2xl md:text-3xl" style="font-family: 'Oswald', sans-serif;">
+                            You're In The Loop!
+                        </h2>
+                        <p class="text-gray-600 mb-6">
+                            Thank you! You are already subscribed and will receive special offers and updates.
+                        </p>
+                    </div>
+                @else
+                    <h2 class="font-extrabold uppercase mb-2 text-2xl md:text-3xl" style="font-family: 'Oswald', sans-serif;">
+                        Complete Your Subscription
+                    </h2>
+                    <p class="text-red-500 font-bold mb-3">
+                        Your email ({{ auth()->user()->email }}) is not yet verified.
+                    </p>
+                    
+                    <form class="flex" method="POST" action="{{ route('verification.send.code') }}"> 
+                        @csrf 
+                        <input type="email" name="email" required value="{{ auth()->user()->email }}" readonly
+                            class="flex-grow p-3 border border-gray-300 bg-gray-200 rounded-l-lg text-sm focus:ring-0 focus:border-black" 
+                            placeholder="Enter your email address">
+                        <button class="bg-black text-white p-3 rounded-r-lg hover:bg-gray-800 transition duration-150 uppercase font-bold text-sm" type="submit">
+                            Send Code
+                        </button>
+                    </form>
+                    
+                    @error('email')
+                        <p class="text-red-500 text-sm mt-2 text-left">{{ $message }}</p>
+                    @enderror
+
+                    <p class="text-gray-500 mt-4 text-sm">
+                        Verify your email to unlock exclusive member benefits.
+                    </p>              
+                @endif
+            @else
+                <h2 class="font-extrabold uppercase mb-2 text-2xl md:text-3xl" style="font-family: 'Oswald', sans-serif;">
+                    Stay In The Loop
+                </h2>
+                <p class="text-gray-500 mb-6">Subscribe to get special offers and updates.</p>
+                
+                <form class="flex" method="POST" action="{{ route('verification.send.code') }}"> 
+                    @csrf 
+                    <input type="email" name="email" required
+                        class="flex-grow p-3 border border-gray-300 rounded-l-lg text-sm focus:ring-0 focus:border-black" 
+                        placeholder="Enter your email address">
+                    <button class="bg-black text-white p-3 rounded-r-lg hover:bg-gray-800 transition duration-150 uppercase font-bold text-sm" type="submit">
+                        Send Code
+                    </button>
+                </form>
+                @error('email')
+                    <p class="text-red-500 text-sm mt-2 text-left">{{ $message }}</p>
+                @enderror     
+            @endauth
         </div>
     </section>
 </div>

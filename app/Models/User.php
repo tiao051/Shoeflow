@@ -28,6 +28,7 @@ class User extends Authenticatable
         'bio',
         'avatar',
         'role_id', 
+        'is_verified',
     ];
 
     /**
@@ -48,6 +49,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_verified' => 'boolean',
     ];
     
     public function role(): BelongsTo

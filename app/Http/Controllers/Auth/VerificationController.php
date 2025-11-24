@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use App\Mail\VerificationCodeMail; 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 
 class VerificationController extends Controller
 {
@@ -57,7 +58,7 @@ class VerificationController extends Controller
     /**
      * Verify the code submitted by the user.
      */
-    public function verifyCode(Request $request)
+   public function verifyCode(Request $request)
     {
         // 1. Validate Email + Code
         $request->validate([
@@ -67,24 +68,60 @@ class VerificationController extends Controller
 
         $email = $request->input('email');
         $submittedCode = $request->input('code');
-
-        // 2. Get code from cache
         $cachedCode = Cache::get('verification_code_' . $email);
 
-        // 3. Compare
+        // 2. Compare
         if ($cachedCode && $submittedCode == $cachedCode) {
 
             Cache::forget('verification_code_' . $email);
+            $user = User::where('email', $email)->first();
 
-            // --- SUCCESS LOGIC HERE ---
-            // Example: Save user subscription, create record, etc.
+            // 3. Update user status if found
+            if ($user) {
+                // Update status
+                $user->is_verified = true;
+                $user->save();
 
-            return redirect()->route('home')
-                ->with('success', 'Verification successful! Thank you for signing up.');
+                // If AJAX, return success JSON
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'status' => 200, 
+                        'message' => $successMessage,
+                    ]);
+                }
+
+                // If not AJAX, redirect to Dashboard
+                return redirect()->route('dashboard')->with('success', $successMessage);
+            }
+            
+            // Case where code is correct but user NOT found
+            // If AJAX, return error (e.g., 404 Not Found)
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Verification successful, but user not found. Please log in.'
+                ], 404);
+            }
+
+            // If not AJAX, redirect to Login
+            return redirect()->route('login')->with('error', 'User not found. Please try logging in.');
+
 
         } else {
+            // Case where code is incorrect or expired
+            $errorMessage = 'Invalid or expired verification code.';
+
+            // If AJAX, return error JSON
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status' => 422,
+                    'message' => $errorMessage
+                ], 422);
+            }
+
+            // If not AJAX, redirect back with errors
             return back()
-                ->withErrors(['code' => 'Invalid or expired verification code.'])
+                ->withErrors(['code' => $errorMessage])
                 ->withInput();
         }
     }
