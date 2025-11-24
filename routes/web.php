@@ -11,14 +11,14 @@ use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\FitsController;
 use App\Http\Controllers\LimitedController;
-use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
-use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\AdminAuthController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController; 
 
 /*
 |--------------------------------------------------------------------------
@@ -35,6 +35,8 @@ Route::get('/sale', [ProductController::class, 'saleProducts'])->name('products.
 Route::resource('products', ProductController::class)->only(['index', 'show']);
 Route::get('/fits', [FitsController::class, 'index'])->name('fits.index');
 Route::get('/limited-edition', [LimitedController::class, 'index'])->name('limited.index');
+
+// Forgot Password
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
 Route::post('/forgot-password/send', [ForgotPasswordController::class, 'sendResetCode'])->name('password.email');
 Route::get('/forgot-password/verify', [ForgotPasswordController::class, 'showCodeForm'])->name('password.code.verify');
@@ -132,8 +134,9 @@ Route::prefix('admin')->group(function () {
         Route::get('/dashboard', function () {
             return view('admin.dashboard');
         })->name('dashboard');
-
+        
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+        Route::resource('categories', AdminCategoryController::class)->except(['create', 'show', 'edit']);
     });
 });
 
@@ -144,10 +147,10 @@ Route::prefix('admin')->group(function () {
 */
 
 Route::middleware(['auth', 'role:admin,staff'])->group(function () {
-    Route::resource('orders', StaffOrder::class);
-    Route::resource('order-items', OrderItemController::class);
-    Route::resource('reviews', ReviewController::class);
-    Route::resource('comments', CommentController::class);
+    // Route::resource('orders', StaffOrder::class);
+    // Route::resource('order-items', OrderItemController::class);
+    // Route::resource('reviews', ReviewController::class);
+    // Route::resource('comments', CommentController::class);
 });
 
 require __DIR__.'/auth.php';
