@@ -17,13 +17,7 @@ use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\Auth\VerificationController;
-use App\Http\Controllers\BannerController;
-use App\Http\Controllers\NewsController;
-use App\Http\Controllers\OrderItemController;
-use App\Http\Controllers\ReviewController;
-use App\Http\Controllers\CommentController;
-use App\Http\Controllers\FaqController;
-use App\Http\Controllers\Staff\OrderController as StaffOrder;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 
 
 /*
@@ -41,6 +35,12 @@ Route::get('/sale', [ProductController::class, 'saleProducts'])->name('products.
 Route::resource('products', ProductController::class)->only(['index', 'show']);
 Route::get('/fits', [FitsController::class, 'index'])->name('fits.index');
 Route::get('/limited-edition', [LimitedController::class, 'index'])->name('limited.index');
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/forgot-password/send', [ForgotPasswordController::class, 'sendResetCode'])->name('password.email');
+Route::get('/forgot-password/verify', [ForgotPasswordController::class, 'showCodeForm'])->name('password.code.verify');
+Route::post('/forgot-password/verify', [ForgotPasswordController::class, 'verifyCode'])->name('password.code.check');
+Route::get('/reset-password', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset.form');
+Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('password.reset.update');
 
 /*
 |--------------------------------------------------------------------------
