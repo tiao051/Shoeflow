@@ -19,6 +19,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController; 
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -137,6 +138,7 @@ Route::prefix('admin')->group(function () {
         
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
         Route::resource('categories', AdminCategoryController::class)->except(['create', 'show', 'edit']);
+        Route::resource('products', AdminProductController::class)->except(['create', 'show', 'edit']);
     });
 });
 

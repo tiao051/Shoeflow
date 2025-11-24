@@ -46,7 +46,7 @@
                     </button>
 
                     <div x-show="open" x-cloak x-transition.origin.top class="pl-12 mt-1 space-y-1">
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-800 rounded-md transition-colors">
+                        <a href="{{ route('admin.products.index') }}" class="block px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-800 rounded-md transition-colors">
                             Products
                         </a>
                         

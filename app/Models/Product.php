@@ -10,24 +10,19 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'slug',        
-        'brand',      
-        'price',
-        'sale_price', 
-        'description',  
-        'color',
-        'image',        
-        'category_id',
-        'is_new',      
-        'is_active',    
-        'stock',        
+        'name', 'slug', 'brand', 'price', 'sale_price', 
+        'description', 'color', 'image', 'category_id', 
+        'is_new', 'is_active', 'stock',
     ];
 
-    /**
-     * @param int $price
-     * @return string
-     */
+    protected $casts = [
+        'is_new' => 'boolean',
+        'is_active' => 'boolean',
+        'price' => 'integer',
+        'sale_price' => 'integer',
+        'stock' => 'integer',
+    ];
+
     public static function formatPrice(int $price): string
     {
         return number_format($price, 0, ',', '.') . ' ₫';
