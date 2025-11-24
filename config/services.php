@@ -6,4 +6,7 @@ return [
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_CALLBACK_URL', 'http://localhost:8000/auth/google/callback'), 
     ],
+    'sendgrid' => [
+        'api_key' => env('SENDGRID_API_KEY'),
+    ],
 ];

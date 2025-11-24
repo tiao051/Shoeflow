@@ -185,12 +185,19 @@
                 Stay In The Loop
             </h2>
             <p class="text-gray-500 mb-6">Subscribe to get special offers and updates.</p>
-            <div class="flex">
-                <input type="email" class="flex-grow p-3 border border-gray-300 rounded-l-lg text-sm focus:ring-0 focus:border-black" placeholder="Enter your email address">
-                <button class="bg-black text-white p-3 rounded-r-lg hover:bg-gray-800 transition duration-150 uppercase font-bold text-sm" type="button">
-                    Subscribe
+            
+            <form class="flex" method="POST" action="{{ route('verification.send.code') }}"> 
+                @csrf 
+                <input type="email" name="email" required
+                    class="flex-grow p-3 border border-gray-300 rounded-l-lg text-sm focus:ring-0 focus:border-black" 
+                    placeholder="Enter your email address">
+                <button class="bg-black text-white p-3 rounded-r-lg hover:bg-gray-800 transition duration-150 uppercase font-bold text-sm" type="submit">
+                    Send Code
                 </button>
-            </div>
+            </form>
+            @error('email')
+                <p class="text-red-500 text-sm mt-2 text-left">{{ $message }}</p>
+            @enderror
         </div>
     </section>
 </div>
@@ -207,104 +214,212 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Auto-scroll functionality
-    const carousel = document.getElementById('new-arrivals-carousel');
-    if (carousel) {
-        let scrollDistance = 256;          
-        let scrollIntervalTime = 1000;    
-        let scrollPosition = 0;
-        let scrollInterval;
-
-        function autoScroll() {
-            const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
-
-            if (carousel.scrollWidth <= carousel.clientWidth) {
-                clearInterval(scrollInterval);
-                return;
-            }
-
-            scrollPosition += scrollDistance;
-
-            if (scrollPosition >= maxScrollLeft) {
-                scrollPosition = 0;
-            }
-
-            carousel.scrollTo({
-                left: scrollPosition,
-                behavior: 'auto'
-            });
-        }
-
-        const startAutoScroll = () => {
-            scrollInterval = setInterval(autoScroll, scrollIntervalTime);
-        };
-
-        const stopAutoScroll = () => clearInterval(scrollInterval);
-
-        startAutoScroll();
-
-        carousel.addEventListener('mouseenter', stopAutoScroll);
-        carousel.addEventListener('touchstart', stopAutoScroll);
-        carousel.addEventListener('mouseleave', startAutoScroll);
-        carousel.addEventListener('touchend', startAutoScroll);
-        window.addEventListener('resize', () => { stopAutoScroll(); startAutoScroll(); });
+    const sendCodeForm = document.querySelector('form[action="{{ route('verification.send.code') }}"]');
+    const emailInput = sendCodeForm.querySelector('input[name="email"]');
+    
+    const modal = document.getElementById('verification-modal');
+    const modalContent = document.getElementById('verification-content');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const modalEmailInput = document.getElementById('modal-email-input');
+    const modalStatusMessage = document.getElementById('modal-status-message');
+    const verifyCodeForm = document.getElementById('verify-code-form');
+    const codeErrorDisplay = document.getElementById('code-error');
+    const resendLink = document.getElementById('resend-link');
+    
+    // Function to open/close Modal
+    function openModal() {
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        // Trigger animation
+        setTimeout(() => {
+            modalContent.classList.remove('opacity-0', 'scale-95');
+            modalContent.classList.add('opacity-100', 'scale-100');
+        }, 10);
+    }
+    
+    function closeModal() {
+        modalContent.classList.add('opacity-0', 'scale-95');
+        modalContent.classList.remove('opacity-100', 'scale-100');
+        // Hide after animation completes
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
     }
 
-    // 2. AJAX Wishlist Logic
-    const wishlistForms = document.querySelectorAll('.js-wishlist-form');
-    const toast = document.getElementById('converse-toast');
-    const toastTitle = document.getElementById('toast-title');
-    const toastMessage = document.getElementById('toast-message');
+    closeModalBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
 
-    wishlistForms.forEach((form) => {
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
+    // 1. Handle Send Code Form
+    sendCodeForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Disable button to prevent duplicate sending
+        const submitButton = this.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.textContent = 'Sending...';
 
-            const productId = this.querySelector('input[name="product_id"]').value;
-            const heartIcon = document.getElementById(`heart-icon-${productId}`);
+        const errorDisplay = document.querySelector('.text-red-500'); 
+        if(errorDisplay) errorDisplay.textContent = '';
 
-            fetch(this.action, {
-                method: 'POST',
-                body: new FormData(this),
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest', // Important for Laravel to detect AJAX
-                    'Accept': 'application/json'
-                }
-            })
-                .then((response) => {
-                    if (response.status === 401) {
-                        window.location.href = "{{ route('login') }}";
-                        return;
-                    }
-                    return response.json();
-                })
-                .then((data) => {
-                    if (!data) return;
+        fetch(this.action, {
+            method: 'POST',
+            body: new FormData(this),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response =>{
+            return response.json().then(data => {
+                        if (!response.ok) {
+                            // Throw error to be handled in catch
+                            throw new Error(data.message || 'Server Error');
+                        }
+                        return data;
+                    });
+        })
+        .then(data => {
+            submitButton.disabled = false;
+            submitButton.textContent = 'Send Code';
 
-                    // Update toast content
-                    toastTitle.textContent = data.status === 'info' ? 'NOTE' : 'SUCCESS';
-                    toastMessage.textContent = data.message;
-
-                    // Show toast
-                    toast.classList.add('show');
-                    setTimeout(() => {
-                        toast.classList.remove('show');
-                    }, 3000);
-
-                    // Animate heart if success
-                    if (data.status === 'success') {
-                        heartIcon.classList.remove('text-black');
-                        heartIcon.classList.add('text-red-600', 'fill-current', 'heart-animate');
-
-                        // Reset animation class for re-trigger
-                        setTimeout(() => {
-                            heartIcon.classList.remove('heart-animate');
-                        }, 400);
-                    }
-                })
-                .catch((error) => console.error('Error:', error));
+            if (data.status === 200) {
+                // Code sent successfully: open Modal
+                modalEmailInput.value = emailInput.value;
+                modalStatusMessage.textContent = data.message || 'The code has been sent to your email.';
+                openModal();
+            } else {
+                // Handle validation errors
+                alert(res.body.message || 'Validation failed. Check your email format.');
+            }
+        })
+        .catch(error => {
+            submitButton.disabled = false;
+            submitButton.textContent = 'Send Code';
+            console.error('Error:', error);
+            alert('An error occurred while sending the email.');
         });
     });
+    
+    // 2. Handle Verification Code Form
+    verifyCodeForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Clear old errors
+        codeErrorDisplay.classList.add('hidden');
+        
+        // Send verification code via AJAX
+        fetch(this.action, {
+            method: 'POST',
+            body: new FormData(this),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json().then(data => ({ status: response.status, body: data })))
+        .then(res => {
+            if (res.status === 200) {
+                // Success: close modal and redirect home
+                alert(res.body.message || 'Verification successful!');
+                window.location.href = "{{ route('home') }}"; 
+            } else if (res.status === 422) {
+                // Server validation error (invalid/expired code)
+                const errorMessage = res.body.errors && res.body.errors.code ? res.body.errors.code[0] : 'Invalid or expired code.';
+                codeErrorDisplay.textContent = errorMessage;
+                codeErrorDisplay.classList.remove('hidden');
+            } else {
+                alert('An error occurred: ' + (res.body.message || 'Unknown error.'));
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+    
+    // 3. Handle Resend Code
+    resendLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const currentEmail = modalEmailInput.value;
+        if (!currentEmail) return alert('Email missing.');
+
+        modalStatusMessage.textContent = 'Resending code...';
+        
+        // FormData for resend
+        const formData = new FormData();
+        formData.append('_token', document.querySelector('input[name="_token"]').value);
+        formData.append('email', currentEmail);
+        
+        fetch("{{ route('verification.send.code') }}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json().then(data => ({ status: response.status, body: data })))
+        .then(res => {
+            if (res.status === 200) {
+                modalStatusMessage.textContent = 'A new code has been sent!';
+            } else {
+                modalStatusMessage.textContent = 'Failed to resend code. Please check your email.';
+            }
+        })
+        .catch(error => {
+            console.error('Resend Error:', error);
+            modalStatusMessage.textContent = 'Connection error.';
+        });
+    });
+
 });
+
 </script>
+
+<div id="verification-modal" class="fixed inset-0 z-[9999] bg-black bg-opacity-70 hidden items-center justify-center transition-opacity" style="backdrop-filter: blur(5px);">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm mx-4 transform transition-all duration-300 scale-95 opacity-0" id="verification-content">
+        
+        <div class="p-6 border-b text-center relative">
+            <h3 class="text-xl font-bold uppercase tracking-wide" style="font-family: 'Oswald', sans-serif;">
+                Verify Your Email
+            </h3>
+            <button id="close-modal-btn" type="button" class="absolute top-4 right-4 text-gray-400 hover:text-black">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <div class="p-6">
+            <p class="text-sm text-gray-600 mb-4 text-center" id="modal-status-message">
+                A 6-digit verification code has been sent. Please check your email.
+            </p>
+
+            <form id="verify-code-form" method="POST" action="{{ route('verification.verify') }}" class="space-y-4">
+                @csrf
+                
+                <input type="hidden" name="email" id="modal-email-input" value="">
+                
+                <div>
+                    <label for="verification_code" class="block text-sm font-medium text-gray-700">
+                        Verification Code (6 digits)
+                    </label>
+                    <input id="verification_code" name="code" type="text" required maxlength="6"
+                        class="mt-1 block w-full px-3 py-3 text-2xl text-center border-2 border-gray-400 rounded-lg shadow-inner focus:ring-black focus:border-black tracking-[0.25em]">
+                    <p class="mt-2 text-xs text-red-500 hidden" id="code-error"></p>
+                </div>
+
+                <button type="submit" id="verify-submit-btn" class="w-full bg-black text-white px-4 py-3 font-bold uppercase rounded-lg hover:bg-gray-800 transition duration-300">
+                    Verify Now
+                </button>
+            </form>
+
+            <div class="text-center mt-4 pt-4 border-t border-gray-100">
+                <span class="text-sm text-gray-500">Didn't receive the code? 
+                    <a href="#" id="resend-link" class="font-bold text-black hover:text-red-600 transition">Resend</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection

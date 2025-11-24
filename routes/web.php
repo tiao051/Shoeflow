@@ -12,17 +12,20 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\FitsController;
 use App\Http\Controllers\LimitedController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
-use App\Http\Controllers\Staff\OrderController as StaffOrder;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\VoucherController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\Auth\SocialiteController;
+use App\Http\Controllers\Auth\VerificationController;
+use App\Http\Controllers\BannerController;
+use App\Http\Controllers\NewsController;
 use App\Http\Controllers\OrderItemController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\CommentController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\BannerController;
-use App\Http\Controllers\NewsController;
-use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\FaqController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\Auth\SocialiteController; 
+use App\Http\Controllers\Staff\OrderController as StaffOrder;
+
+
 /*
 |--------------------------------------------------------------------------
 | Public Routes
@@ -48,6 +51,18 @@ Route::get('/limited-edition', [LimitedController::class, 'index'])->name('limit
 Route::get('auth/google', [SocialiteController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('auth/google/callback', [SocialiteController::class, 'handleGoogleCallback']);
 
+
+/*
+|--------------------------------------------------------------------------
+| Verification Routes (Public Access to send code)
+|--------------------------------------------------------------------------
+*/
+
+Route::post('/send-verification-code', [VerificationController::class, 'sendCode'])
+    ->name('verification.send.code')
+    ->withoutMiddleware([
+        \App\Http\Middleware\VerifyCsrfToken::class,
+    ]);
 
 /*
 |--------------------------------------------------------------------------
@@ -89,12 +104,16 @@ Route::middleware('auth')->group(function () {
         Route::post('clear', [CartController::class, 'clear'])->name('clear');
         Route::get('count', [CartController::class, 'count'])->name('count');
         Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');
-        Route::post('check-coupon', [CartController::class, 'checkCoupon'])->name('check-coupon');
+        Route::post('check-coupon', [CartController::class, 'check-coupon'])->name('check-coupon');
         Route::post('/checkout', [CartController::class, 'processCheckout'])->name('checkout.process'); 
     });
 
     Route::get('/checkout/success/{order}', [CartController::class, 'success'])->name('checkout.success');
     Route::get('/my-orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+
+    // Email Verification (Form & Verify Logic)
+    Route::get('/verify-code-form', [VerificationController::class, 'showVerificationForm'])->name('verification.form');
+    Route::post('/verify-code', [VerificationController::class, 'verifyCode'])->name('verification.verify');
 });
 
 /*
