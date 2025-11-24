@@ -66,6 +66,15 @@
                             class="w-full text-left px-4 py-3 rounded font-bold transition uppercase">
                         Password & Security
                     </button>
+                    <div class="pt-4 mt-2 border-t border-gray-100 !p-0">
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" 
+                                    class="w-full text-left px-4 py-3 rounded font-bold transition uppercase text-red-600 hover:bg-red-50 hover:text-red-700">
+                                Log Out
+                            </button>
+                        </form>
+                    </div>
                 </nav>
             </div>
 
