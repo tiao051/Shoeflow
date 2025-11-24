@@ -36,7 +36,7 @@ class WishlistController extends Controller
             if ($request->wantsJson()) {
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'ITEM ADDED TO COLLECTION'
+                    'message' => 'Item added to wishlist.'
                 ]);
             }
 
@@ -47,11 +47,11 @@ class WishlistController extends Controller
         if ($request->wantsJson()) {
             return response()->json([
                 'status' => 'info',
-                'message' => 'ALREADY IN YOUR COLLECTION'
+                'message' => 'Already in your wishlist.'
             ]);
         }
 
-        return redirect()->back()->with('info', 'This product is already in your wishlist.');
+        return redirect()->back()->with('info', 'This shoes is already in your wishlist.');
     }
 
     public function destroy(Request $request, $id)

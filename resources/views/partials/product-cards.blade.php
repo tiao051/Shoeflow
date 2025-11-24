@@ -4,7 +4,7 @@
         50% { transform: scale(1.4); }
         100% { transform: scale(1); }
     }
-    
+
     .heart-animate {
         animation: converse-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     }
@@ -14,10 +14,12 @@
         opacity: 0;
         transform: translateY(20px);
         transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
         position: fixed;
         bottom: 20px;
         right: 20px;
         z-index: 9999;
+
         background-color: #000;
         color: #fff;
         display: flex;
@@ -26,12 +28,31 @@
         padding: 16px 24px;
         border-left: 4px solid #dc3545;
         box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+
+        max-width: 350px;
+        border-radius: 6px;
     }
-    
+
     #converse-toast.show {
         visibility: visible;
         opacity: 1;
         transform: translateY(0);
+    }
+
+    @media (max-width: 640px) {
+        #converse-toast {
+            bottom: 10px;
+            right: 10px;
+            left: 10px;
+            max-width: none;
+            padding: 12px 18px;
+            gap: 8px;
+        }
+
+        #converse-toast svg {
+            width: 20px;
+            height: 20px;
+        }
     }
 
     #toast-title {
@@ -41,27 +62,42 @@
         text-transform: uppercase;
         line-height: 1;
         margin-bottom: 4px;
+        font-size: 0.875rem;
     }
+
+    @media (max-width: 640px) {
+        #toast-title {
+            font-size: 0.8125rem;
+        }
+    }
+
     #toast-message {
         display: block;
         font-size: 0.75rem;
         color: #d1d5db;
         text-transform: uppercase;
     }
+
+    @media (max-width: 640px) {
+        #toast-message {
+            font-size: 0.6875rem;
+        }
+    }
 </style>
+
+
 
 <div class="row">
     @foreach($products as $product)
         <div class="col-6 col-md-4 col-lg-3 mb-4">
             <div class="product-card position-relative h-100">
-                
                 <div class="image-wrapper position-relative">
-                    @if($loop->index < 3 && $products->currentPage() == 1) 
+                    @if($loop->index < 3 && $products->currentPage() == 1)
                         <span class="badge-custom">NEW</span>
                     @endif
-                    
+
                     @if ($product->sale_price && $product->sale_price < $product->price)
-                         @php
+                        @php
                             $percent = round(($product->price - $product->sale_price) / $product->price * 100);
                         @endphp
                         <span class="badge-custom bg-danger border-danger text-white">SALE -{{ $percent }}%</span>
@@ -71,7 +107,7 @@
                         <img src="{{ asset($product->image) }}" alt="{{ $product->name }}" class="img-fluid transition duration-300 hover:opacity-90">
                     </a>
                 </div>
-                
+
                 <div class="card-info mt-2">
                     <div class="product-title font-weight-bold">
                         <a href="{{ route('products.show', $product->id) }}" class="text-black text-decoration-none hover:text-gray-600 transition">
@@ -101,13 +137,13 @@
                             @endif
                         </div>
 
-                        <form action="{{ route('wishlist.store') }}" method="POST" class="js-wishlist-form"> 
+                        <form action="{{ route('wishlist.store') }}" method="POST" class="js-wishlist-form">
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                
+
                             <button type="submit" class="group/btn transition duration-150 ease-in-out d-flex align-items-center p-1 border-0 bg-transparent" title="Add to Wishlist">
-                                <svg id="heart-icon-{{ $product->id }}" xmlns="http://www.w3.org/2000/svg" 
-                                    class="w-6 h-6 text-black group-hover/btn:text-red-600 transition-colors duration-200" 
+                                <svg id="heart-icon-{{ $product->id }}" xmlns="http://www.w3.org/2000/svg"
+                                    class="w-6 h-6 text-black group-hover/btn:text-red-600 transition-colors duration-200"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-.318-.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
@@ -126,7 +162,7 @@
     </svg>
     <div>
         <span id="toast-title">WISHLIST UPDATED</span>
-        <span id="toast-message">Item added to your collection.</span>
+        <span id="toast-message">Added to Wishlist.</span>
     </div>
 </div>
 
@@ -173,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (data.status === 'success') {
                 heartIcon.classList.remove('text-black');
-                heartIcon.classList.add('text-red-600', 'fill-current'); 
+                heartIcon.classList.add('text-red-600', 'fill-current');
 
                 heartIcon.parentNode.classList.add('heart-animate');
                 setTimeout(() => {

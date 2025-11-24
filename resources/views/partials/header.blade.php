@@ -127,43 +127,50 @@
         </svg>
     </button>
     <div id="chat-popup" 
-        class="fixed bottom-[100px] right-6 z-[49] w-[350px] h-[400px] bg-white rounded-xl shadow-2xl border border-gray-200 
-                transform translate-y-4 opacity-0 scale-95 transition-all duration-300 pointer-events-none **invisible** flex flex-col">
+     class="fixed bottom-[100px] right-6 z-[49] bg-white rounded-xl shadow-2xl border border-gray-200 
+            transform translate-y-4 opacity-0 scale-95 transition-all duration-300 pointer-events-none invisible flex flex-col
 
-        <div class="p-4 bg-black text-white rounded-t-xl flex justify-between items-center flex-shrink-0">
-            <h4 class="font-bold text-base uppercase">Customer Support</h4>
-            <button id="chat-close-btn" class="text-gray-300 hover:text-white transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
+            /* Thay đổi Responsive */
+            w-[calc(100vw-24px)] h-[calc(100vh-120px)] /* Kích thước trên Mobile: Gần full màn hình */
+            max-w-full bottom-3 right-3                   /* Vị trí trên Mobile */
+            sm:w-[350px] sm:h-[400px]                     /* Kích thước trên Desktop: Quay về 350x400 */
+            sm:bottom-[100px] sm:right-6                  /* Vị trí trên Desktop */
+            sm:max-w-sm">
 
-        <div class="flex-grow p-4 overflow-y-auto bg-gray-50 space-y-3" id="chat-history">
-    
-        <div class="flex justify-start">
-            <div class="bg-gray-200 text-gray-800 p-3 rounded-xl rounded-tl-none max-w-[80%] text-sm shadow-sm break-words">
-                Hi there! How can Converse help you today?
-            </div>
-        </div>
-        
-        <div class="flex justify-end"> 
-            <div id="faq-options" class="flex flex-col items-end space-y-2 max-w-[80%]"> 
-                </div>
-            </div>
-        </div>
+    <div class="p-4 bg-black text-white rounded-t-xl flex justify-between items-center flex-shrink-0">
+        <h4 class="font-bold text-base uppercase">Customer Support</h4>
+        <button id="chat-close-btn" class="text-gray-300 hover:text-white transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
 
-        <div class="p-3 border-t flex items-center flex-shrink-0">
-            <input type="text" placeholder="Type a message..." id="chat-input"
-                    class="flex-grow p-2 border border-gray-300 rounded-l-lg text-sm focus:border-black focus:ring-0 outline-none">
-            
-            <button id="chat-send-btn" class="bg-black text-white p-2 rounded-r-lg hover:bg-red-600 transition duration-200 ml-[-1px]">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
-            </button>
+    <div class="flex-grow p-4 overflow-y-auto bg-gray-50 space-y-3" id="chat-history">
+
+    <div class="flex justify-start">
+        <div class="bg-gray-200 text-gray-800 p-3 rounded-xl rounded-tl-none max-w-[80%] text-sm shadow-sm break-words">
+            Hi there! How can Converse help you today?
         </div>
     </div>
+    
+    <div class="flex justify-end"> 
+        <div id="faq-options" class="flex flex-col items-end space-y-2 max-w-[80%]"> 
+            </div>
+        </div>
+    </div>
+
+    <div class="p-3 border-t flex items-center flex-shrink-0">
+        <input type="text" placeholder="Type a message..." id="chat-input"
+                class="flex-grow p-2 border border-gray-300 rounded-l-lg text-sm focus:border-black focus:ring-0 outline-none">
+        
+        <button id="chat-send-btn" class="bg-black text-white p-2 rounded-r-lg hover:bg-red-600 transition duration-200 ml-[-1px]">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+        </button>
+    </div>
+</div>
 </header>
 <script>
 

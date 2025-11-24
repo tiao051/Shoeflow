@@ -3,7 +3,6 @@
 @section('title', 'My Profile')
 
 @section('content')
-{{-- CSS to prevent tab flicker on initial page load --}}
 <style>
     [x-cloak] { display: none !important; }
 </style>
