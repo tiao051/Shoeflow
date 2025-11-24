@@ -129,12 +129,10 @@
     <div id="chat-popup" 
      class="fixed bottom-[100px] right-6 z-[49] bg-white rounded-xl shadow-2xl border border-gray-200 
             transform translate-y-4 opacity-0 scale-95 transition-all duration-300 pointer-events-none invisible flex flex-col
-
-            /* Thay đổi Responsive */
-            w-[calc(100vw-24px)] h-[calc(100vh-120px)] /* Kích thước trên Mobile: Gần full màn hình */
-            max-w-full bottom-3 right-3                   /* Vị trí trên Mobile */
-            sm:w-[350px] sm:h-[400px]                     /* Kích thước trên Desktop: Quay về 350x400 */
-            sm:bottom-[100px] sm:right-6                  /* Vị trí trên Desktop */
+            w-[calc(100vw-24px)] h-[calc(100vh-120px)] 
+            max-w-full bottom-3 right-3                 
+            sm:w-[350px] sm:h-[400px]               
+            sm:bottom-[100px] sm:right-6             
             sm:max-w-sm">
 
     <div class="p-4 bg-black text-white rounded-t-xl flex justify-between items-center flex-shrink-0">
