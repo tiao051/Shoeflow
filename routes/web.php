@@ -4,15 +4,24 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
-use App\Http\Controllers\DashboardController; 
-use App\Http\Controllers\OrderController; 
-use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
-use App\Http\Controllers\Staff\OrderController as StaffOrder;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\FitsController;
 use App\Http\Controllers\LimitedController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
+use App\Http\Controllers\Staff\OrderController as StaffOrder;
+use App\Http\Controllers\OrderItemController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\BannerController;
+use App\Http\Controllers\NewsController;
+use App\Http\Controllers\VoucherController;
+use App\Http\Controllers\FaqController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,50 +32,48 @@ use App\Http\Controllers\LimitedController;
 Route::get('/', [DashboardController::class, 'index'])->name('home');
 
 Route::get('/search/process', [SearchController::class, 'process'])->name('search.process');
-// Product routes
+
 Route::get('/run-star-trainer', [ProductController::class, 'runStarTrainer'])->name('products.run-star-trainer');
 Route::get('products/search', [ProductController::class, 'search'])->name('products.search');
 Route::get('products/filter', [ProductController::class, 'filter'])->name('products.filter');
+Route::get('/sale', [ProductController::class, 'saleProducts'])->name('products.sale');
 Route::resource('products', ProductController::class)->only(['index', 'show']);
+
 Route::get('/fits', [FitsController::class, 'index'])->name('fits.index');
 Route::get('/limited-edition', [LimitedController::class, 'index'])->name('limited.index');
-Route::get('/sale', [App\Http\Controllers\ProductController::class, 'saleProducts'])->name('products.sale');
 
 /*
 |--------------------------------------------------------------------------
-| Authenticated Routes (For Users & Admins)
+| Authenticated Routes
 |--------------------------------------------------------------------------
 */
 
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth']) 
-    ->name('dashboard'); 
-
-// This group is for all authenticated users
 Route::middleware('auth')->group(function () {
     
-   // --- User Profile Routes ---
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Profile
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar.update');
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index'); 
 
-    // --- Address & Contact Routes ---
+    // Address
     Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
     Route::delete('/addresses/{id}', [AddressController::class, 'destroy'])->name('addresses.destroy');
     Route::put('/addresses/{id}', [AddressController::class, 'update'])->name('addresses.update');
     Route::patch('/addresses/{id}/default', [AddressController::class, 'setDefault'])->name('addresses.default');
 
-    // Wishlist Routes
+    // Wishlist
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist', [WishlistController::class, 'store'])->name('wishlist.store');
     Route::delete('/wishlist/{id}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
 
-    // Search Routes
+    // Search
     Route::get('/search', [SearchController::class, 'index'])->name('search.index');
     Route::get('/search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
 
-    // --- CART & CHECKOUT ROUTES ---
+    // Cart & Checkout
     Route::prefix('cart')->name('cart.')->group(function () {
         Route::get('/', [CartController::class, 'index'])->name('index');
         Route::post('add', [CartController::class, 'add'])->name('add');
@@ -79,42 +86,39 @@ Route::middleware('auth')->group(function () {
         Route::post('/checkout', [CartController::class, 'processCheckout'])->name('checkout.process'); 
     });
 
-    // This route should be accessible to users
     Route::get('/checkout/success/{order}', [CartController::class, 'success'])->name('checkout.success');
-
-    // Route to view order details (customer view)
     Route::get('/my-orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Admin Routes (Admin only)
+| Admin Routes
 |--------------------------------------------------------------------------
 */
+
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
 
-    // Management Resources
-    Route::resource('products', App\Http\Controllers\ProductController::class)->except(['index', 'show']);
-    Route::resource('categories', App\Http\Controllers\CategoryController::class);
-    Route::resource('banners', App\Http\Controllers\BannerController::class);
-    Route::resource('news', App\Http\Controllers\NewsController::class);
-    Route::resource('vouchers', App\Http\Controllers\VoucherController::class);
-    Route::resource('faqs', App\Http\Controllers\FaqController::class);
-    Route::resource('users', App\Http\Controllers\UserController::class);
+    Route::resource('products', ProductController::class)->except(['index', 'show']);
+    Route::resource('categories', CategoryController::class);
+    Route::resource('banners', BannerController::class);
+    Route::resource('news', NewsController::class);
+    Route::resource('vouchers', VoucherController::class);
+    Route::resource('faqs', FaqController::class);
+    Route::resource('users', UserController::class);
 });
 
 /*
 |--------------------------------------------------------------------------
-| Staff Routes (Admin & Staff manage orders)
+| Staff Routes
 |--------------------------------------------------------------------------
 */
+
 Route::middleware(['auth', 'role:admin,staff'])->group(function () {
-    // Controller for staff to manage orders (approve, cancel, etc.)
     Route::resource('orders', StaffOrder::class);
-    Route::resource('order-items', App\Http\Controllers\OrderItemController::class);
-    Route::resource('reviews', App\Http\Controllers\ReviewController::class);
-    Route::resource('comments', App\Http\Controllers\CommentController::class);
+    Route::resource('order-items', OrderItemController::class);
+    Route::resource('reviews', ReviewController::class);
+    Route::resource('comments', CommentController::class);
 });
 
 require __DIR__.'/auth.php';
