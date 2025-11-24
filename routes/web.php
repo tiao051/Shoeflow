@@ -135,10 +135,7 @@ Route::prefix('admin')->group(function () {
 
     Route::middleware(['auth', 'admin'])->name('admin.')->group(function () {
         
-        Route::get('/dashboard', function () {
-            return view('admin.dashboard');
-        })->name('dashboard');
-        
+        Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard'); 
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
         Route::resource('categories', AdminCategoryController::class)->except(['create', 'show', 'edit']);
         Route::resource('products', AdminProductController::class)->except(['create', 'show', 'edit']);
