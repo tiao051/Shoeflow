@@ -294,56 +294,57 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 1. Handle Send Code Form
-    sendCodeForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Disable button to prevent duplicate sending
-        const submitButton = this.querySelector('button[type="submit"]');
-        submitButton.disabled = true;
-        submitButton.textContent = 'Sending...';
+    if (sendCodeForm) {
+        // 1. Handle Send Code Form
+        sendCodeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Disable button to prevent duplicate sending
+            const submitButton = this.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Sending...';
 
-        const errorDisplay = document.querySelector('.text-red-500'); 
-        if(errorDisplay) errorDisplay.textContent = '';
+            const errorDisplay = document.querySelector('.text-red-500'); 
+            if(errorDisplay) errorDisplay.textContent = '';
 
-        fetch(this.action, {
-            method: 'POST',
-            body: new FormData(this),
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response =>{
-            return response.json().then(data => {
-                        if (!response.ok) {
-                            // Throw error to be handled in catch
-                            throw new Error(data.message || 'Server Error');
-                        }
-                        return data;
-                    });
-        })
-        .then(data => {
-            submitButton.disabled = false;
-            submitButton.textContent = 'Send Code';
+            fetch(this.action, {
+                method: 'POST',
+                body: new FormData(this),
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response =>{
+                return response.json().then(data => {
+                            if (!response.ok) {
+                                // Throw error to be handled in catch
+                                throw new Error(data.message || 'Server Error');
+                            }
+                            return data;
+                        });
+            })
+            .then(data => {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Send Code';
 
-            if (data.status === 200) {
-                // Code sent successfully: open Modal
-                modalEmailInput.value = emailInput.value;
-                modalStatusMessage.textContent = data.message || 'The code has been sent to your email.';
-                openModal();
-            } else {
-                // Handle validation errors
-                alert(res.body.message || 'Validation failed. Check your email format.');
-            }
-        })
-        .catch(error => {
-            submitButton.disabled = false;
-            submitButton.textContent = 'Send Code';
-            console.error('Error:', error);
-            alert('An error occurred while sending the email.');
+                if (data.status === 200) {
+                    // Code sent successfully: open Modal
+                    modalEmailInput.value = emailInput.value;
+                    modalStatusMessage.textContent = data.message || 'The code has been sent to your email.';
+                    openModal();
+                } else {
+                    // Handle validation errors
+                    alert(res.body.message || 'Validation failed. Check your email format.');
+                }
+            })
+            .catch(error => {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Send Code';
+                console.error('Error:', error);
+                alert('An error occurred while sending the email.');
+            });
         });
-    });
     
     // 2. Handle Verification Code Form
     verifyCodeForm.addEventListener('submit', function(e) {

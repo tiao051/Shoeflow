@@ -26,9 +26,9 @@
                 <span>Track Order</span>
             </a>
             <a href="#" class="top-bar-item hover:text-black hidden lg:flex items-center space-x-1">
-                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 4v-4z" />
-                 </svg>
+                </svg>
                 <span>Help</span>
             </a>
         </div>
@@ -75,15 +75,15 @@
             <div id="search-container" class="relative z-50 h-16 w-16 -mr-8 -my-6 flex-shrink-0">
                 
                 <form action="{{ route('search.index') }}" method="GET" 
-                      id="search-form"
-                      class="absolute right-0 top-0 h-full bg-white flex items-center shadow-2xl border border-black transition-all duration-500 ease-in-out w-16 overflow-visible">
+                    id="search-form"
+                    class="absolute right-0 top-0 h-full bg-white flex items-center shadow-2xl border border-black transition-all duration-500 ease-in-out w-16 overflow-visible">
                     
                     <input type="text" 
-                           name="q"
-                           id="search-input"
-                           placeholder="Search something..." 
-                           class="w-full h-full bg-transparent outline-none border-none text-base font-medium text-black placeholder-gray-500 pl-6 pr-16 opacity-0 pointer-events-none transition-opacity duration-300"
-                           autocomplete="off">
+                            name="q"
+                            id="search-input"
+                            placeholder="Search something..." 
+                            class="w-full h-full bg-transparent outline-none border-none text-base font-medium text-black placeholder-gray-500 pl-6 pr-16 opacity-0 pointer-events-none transition-opacity duration-300"
+                            autocomplete="off">
 
                     <button type="submit" 
                             class="absolute right-0 top-0 h-16 w-16 bg-black text-white border-l border-black flex items-center justify-center hover:bg-gray-800 transition-colors cursor-pointer z-10">
@@ -93,7 +93,7 @@
                     </button>
 
                     <div id="search-suggestions" 
-                         class="absolute top-full left-0 w-full max-h-80 overflow-y-auto bg-white border border-t-0 border-black shadow-xl hidden z-40">
+                        class="absolute top-full left-0 w-full max-h-80 overflow-y-auto bg-white border border-t-0 border-black shadow-xl hidden z-40">
                     </div>
                 </form>
             </div>
@@ -114,9 +114,9 @@
         <a href="#" class="block px-4 py-2 hover:bg-gray-100 sale text-red-600">Sale Up To 50%</a>
         <a href="#" class="block px-4 py-2 hover:bg-gray-100 border-t mt-2">Sign In</a>
     </div>
-    <a href="https://m.me/conversevn" target="_blank" 
+    <button id="chat-open-btn"
     class="fixed bottom-6 right-6 z-50 bg-black text-white p-3 rounded-full shadow-2xl hover:bg-red-600 transition duration-300 transform hover:scale-110"
-    title="Chat with us via Facebook Messenger">
+    title="Open Chat Box">
         <svg xmlns="http://www.w3.org/2000/svg" 
             class="h-8 w-8" 
             fill="none" 
@@ -124,8 +124,46 @@
             stroke="currentColor" 
             stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 4v-4z" />
-        </svg> 
-    </a>
+        </svg>
+    </button>
+    <div id="chat-popup" 
+        class="fixed bottom-[100px] right-6 z-[49] w-[350px] h-[400px] bg-white rounded-xl shadow-2xl border border-gray-200 
+                transform translate-y-4 opacity-0 scale-95 transition-all duration-300 pointer-events-none **invisible** flex flex-col">
+
+        <div class="p-4 bg-black text-white rounded-t-xl flex justify-between items-center flex-shrink-0">
+            <h4 class="font-bold text-base uppercase">Customer Support</h4>
+            <button id="chat-close-btn" class="text-gray-300 hover:text-white transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="flex-grow p-4 overflow-y-auto bg-gray-50 space-y-3" id="chat-history">
+    
+        <div class="flex justify-start">
+            <div class="bg-gray-200 text-gray-800 p-3 rounded-xl rounded-tl-none max-w-[80%] text-sm shadow-sm break-words">
+                Hi there! How can Converse help you today?
+            </div>
+        </div>
+        
+        <div class="flex justify-end"> 
+            <div id="faq-options" class="flex flex-col items-end space-y-2 max-w-[80%]"> 
+                </div>
+            </div>
+        </div>
+
+        <div class="p-3 border-t flex items-center flex-shrink-0">
+            <input type="text" placeholder="Type a message..." id="chat-input"
+                    class="flex-grow p-2 border border-gray-300 rounded-l-lg text-sm focus:border-black focus:ring-0 outline-none">
+            
+            <button id="chat-send-btn" class="bg-black text-white p-2 rounded-r-lg hover:bg-red-600 transition duration-200 ml-[-1px]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+            </button>
+        </div>
+    </div>
 </header>
 <script>
 const BASE_URL = '{{ asset('/') }}';
@@ -136,9 +174,89 @@ document.addEventListener("DOMContentLoaded", function() {
     const form = document.getElementById('search-form');
     const input = document.getElementById('search-input');
     const suggestionsBox = document.getElementById('search-suggestions');
-    let debounceTimer; // Debounce timer for live search
+    let debounceTimer; 
 
-    // search open/close logic
+    const openBtn = document.getElementById('chat-open-btn');
+    const closeBtn = document.getElementById('chat-close-btn');
+    const chatPopup = document.getElementById('chat-popup');
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('chat-send-btn');
+    const chatHistory = document.getElementById('chat-history');
+
+    function openChat() {
+        chatPopup.classList.remove('invisible'); 
+        
+        setTimeout(() => {
+            chatPopup.classList.remove('opacity-0', 'translate-y-4', 'scale-95', 'pointer-events-none');
+            chatPopup.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+            chatHistory.scrollTop = chatHistory.scrollHeight; // Scroll to the bottom
+        }, 10);
+    }
+
+    function closeChat() {
+        chatPopup.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
+        chatPopup.classList.add('opacity-0', 'translate-y-4', 'scale-95', 'pointer-events-none');
+        
+        setTimeout(() => {
+            chatPopup.classList.add('invisible'); 
+        }, 300);
+    }
+
+    // Function to create a new message bubble
+    function createMessage(text, isUser = true) {
+        const messageWrapper = document.createElement('div');
+        messageWrapper.classList.add('flex', isUser ? 'justify-end' : 'justify-start');
+        
+        const messageBody = document.createElement('div');
+        messageBody.classList.add(
+            'p-3', 'rounded-xl', 'max-w-[80%]', 'text-sm', 'shadow-sm', 'break-words', // <--- Đã thêm 'break-words'
+            isUser ? 'bg-red-600' : 'bg-gray-200',
+            isUser ? 'text-white' : 'text-gray-800',
+            isUser ? 'rounded-br-none' : 'rounded-tl-none'
+        );
+        messageBody.textContent = text;
+        
+        messageWrapper.appendChild(messageBody);
+        chatHistory.appendChild(messageWrapper);
+        chatHistory.scrollTop = chatHistory.scrollHeight; // Scroll to the bottom
+    }
+
+    function sendMessage() {
+        const messageText = chatInput.value.trim();
+        if (messageText !== "") {
+            // 1. Send the user's message
+            createMessage(messageText, true);
+            
+            // 2. Clear the input
+            chatInput.value = '';
+            chatInput.focus();
+
+            // 3. Automated response (Simulation)
+            setTimeout(() => {
+                createMessage("Thank you for your question. Please wait a moment, a support agent will respond shortly.", false);
+            }, 1500);
+        }
+    }
+
+    openBtn.addEventListener('click', function() {
+        if (chatPopup.classList.contains('invisible')) {
+            openChat();
+        } else {
+            closeChat();
+        }
+    });
+    closeBtn.addEventListener('click', closeChat);
+    sendBtn.addEventListener('click', sendMessage);
+    
+    // Send message on Enter keypress
+    chatInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    // Search open/close logic
     function openSearch() {
         // Open the search form
         form.classList.remove('w-16');
@@ -216,15 +334,15 @@ document.addEventListener("DOMContentLoaded", function() {
         return `
             <a href="/product/${product.slug || product.id}" class="flex items-center p-3 hover:bg-gray-100 border-b last:border-b-0 transition-colors">
                 <img src="${BASE_URL}${imagePath}" 
-                     alt="${product.name}" 
-                     class="w-10 h-10 object-cover mr-3 border border-gray-200"
-                     onerror="this.onerror=null;this.src='${BASE_URL}images/placeholder.jpg';"> 
+                    alt="${product.name}" 
+                    class="w-10 h-10 object-cover mr-3 border border-gray-200"
+                    onerror="this.onerror=null;this.src='${BASE_URL}images/placeholder.jpg';"> 
                 <div>
                     <div class="text-sm font-bold text-black line-clamp-1">${product.name}</div>
                     
                     ${product.category ? `<div class="text-xs text-gray-500">Category: ${product.category.name}</div>` : ''} 
                     
-                    <div class="text-xs text-red-600 font-semibold">${product.price ? new Intl.NumberFormat('vi-VN').format(product.price) + ' ₫' : 'Contact for price'}</div>
+                    <div class="text-xs text-red-600 font-semibold">${product.price ? new Intl.NumberFormat('en-US').format(product.price) + ' VND' : 'Contact for price'}</div>
                 </div>
             </a>
         `;
