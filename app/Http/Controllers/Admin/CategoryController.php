@@ -10,10 +10,17 @@ use Illuminate\Support\Facades\File;
 
 class CategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::with('parent')->latest()->get();
+        $query = Category::with('parent')->latest();
+
+        if ($search = $request->search) {
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        $categories = $query->get();
         $parentCategories = Category::whereNull('parent_id')->get();
+        
         return view('admin.categories.index', compact('categories', 'parentCategories'));
     }
 

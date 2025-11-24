@@ -11,10 +11,23 @@ use Illuminate\Support\Facades\File;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request) 
     {
-        $products = Product::with('category')->latest()->get();
+        $query = Product::with('category')->latest();
+
+        if ($search = $request->search) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                ->orWhere('brand', 'like', "%{$search}%")
+                ->orWhereHas('category', function($cat) use ($search) {
+                    $cat->where('name', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        $products = $query->get(); 
         $categories = Category::all();
+        
         return view('admin.products.index', compact('products', 'categories'));
     }
 

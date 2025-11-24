@@ -9,11 +9,17 @@
 <div x-data="brandManager()">
     
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <div class="relative w-full md:w-64">
-            <input type="text" x-model="search" placeholder="Search brands..." 
-                   class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black text-sm">
-            <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"></path></svg>
-        </div>
+        <form method="GET" action="" class="relative w-full md:w-72">
+            <input type="text" 
+                name="search" 
+                value="{{ request('search') }}"
+                placeholder="Type & Hit Enter..." 
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black text-sm">
+            
+            <button type="submit" class="absolute left-3 top-2.5 text-gray-400 hover:text-black">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"></path></svg>
+            </button>
+        </form>
         <button @click="openModal()" 
                 class="bg-black text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-gray-800 transition flex items-center shadow-lg transform hover:-translate-y-0.5">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -23,7 +29,7 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         @foreach($brands as $brand)
-        <div x-show="matchesSearch('{{ strtolower($brand->name) }}')" class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col items-center text-center hover:shadow-md transition group relative" id="brand-{{ $brand->id }}">
+        <div id="brand-{{ $brand->id }}" class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col items-center text-center hover:shadow-md transition group relative" id="brand-{{ $brand->id }}">
             <div class="h-24 w-24 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center mb-4 overflow-hidden p-2">
                 @if($brand->logo)
                     <img src="{{ asset($brand->logo) }}" class="max-h-full max-w-full object-contain">

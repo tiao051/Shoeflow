@@ -9,11 +9,17 @@
 <div x-data="categoryManager()">
     
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <div class="relative w-full md:w-64">
-            <input type="text" x-model="search" placeholder="Search categories..." 
-                   class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black text-sm">
-            <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"></path></svg>
-        </div>
+        <form method="GET" action="" class="relative w-full md:w-72">
+            <input type="text" 
+                name="search" 
+                value="{{ request('search') }}"
+                placeholder="Type & Hit Enter..." 
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black text-sm">
+            
+            <button type="submit" class="absolute left-3 top-2.5 text-gray-400 hover:text-black">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"></path></svg>
+            </button>
+        </form>
         <button @click="openModal()" 
                 class="bg-black text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-gray-800 transition flex items-center shadow-lg transform hover:-translate-y-0.5">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -34,7 +40,7 @@
             </thead>
             <tbody class="divide-y divide-gray-100 text-sm text-gray-700">
                 @foreach($categories as $category)
-                <tr x-show="matchesSearch('{{ strtolower($category->name) }}')" class="hover:bg-gray-50 transition" id="row-{{ $category->id }}">
+                <tr id="row-{{ $category->id }}" class="hover:bg-gray-50 transition">
                     <td class="px-6 py-4">
                         <div class="h-10 w-10 rounded-lg bg-gray-100 border border-gray-200 overflow-hidden">
                             @if($category->image)
@@ -45,7 +51,6 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 font-bold text-gray-900">{{ $category->name }}</td>
-                    {{-- Đã xóa ô dữ liệu Parent --}}
                     <td class="px-6 py-4 text-gray-500 italic">{{ $category->slug }}</td>
                     <td class="px-6 py-4 text-right space-x-2">
                         <button @click='editCategory(@json($category))' class="text-blue-600 hover:text-blue-800 font-semibold text-xs uppercase tracking-wide">Edit</button>

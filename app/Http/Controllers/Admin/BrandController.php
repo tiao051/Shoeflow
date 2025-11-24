@@ -10,9 +10,15 @@ use Illuminate\Support\Facades\File;
 
 class BrandController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $brands = Brand::latest()->get();
+        $query = Brand::latest();
+
+        if ($search = $request->search) {
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        $brands = $query->get();
         return view('admin.brands.index', compact('brands'));
     }
 
@@ -29,7 +35,7 @@ class BrandController extends Controller
         if ($request->hasFile('logo')) {
             $file = $request->file('logo');
             $filename = time() . '_' . $file->getClientOriginalName();
-            
+
             if (!File::exists(public_path('images/brands'))) {
                 File::makeDirectory(public_path('images/brands'), 0755, true);
             }

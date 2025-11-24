@@ -10,10 +10,21 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Get list of orders, newest first
-        $orders = Order::latest()->paginate(10); // Paginate 10 orders per page
+        $query = Order::latest();
+
+        if ($search = $request->search) {
+            $query->where(function($q) use ($search) {
+                $q->where('id', $search) 
+                ->orWhere('fullname', 'like', "%{$search}%")
+                ->orWhere('phone', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $orders = $query->paginate(10)->withQueryString(); 
+        
         return view('admin.orders.index', compact('orders'));
     }
 
