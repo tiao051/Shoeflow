@@ -11,7 +11,6 @@ use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\FitsController;
 use App\Http\Controllers\LimitedController;
-use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\Auth\VerificationController;
@@ -24,6 +23,7 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\Admin\VoucherController;
 
 /*
 |--------------------------------------------------------------------------
@@ -142,17 +142,20 @@ Route::prefix('admin')->group(function () {
         
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard'); 
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
-        Route::resource('categories', AdminCategoryController::class)->except(['create', 'show', 'edit']);
-        Route::resource('products', AdminProductController::class)->except(['create', 'show', 'edit']);
+        Route::resource('categories', AdminCategoryController::class);
+        Route::resource('products', AdminProductController::class);
         Route::get('orders/export', [AdminOrderController::class, 'export'])->name('orders.export');
         Route::resource('orders', AdminOrderController::class)->only(['index', 'show', 'update', 'destroy']);
-        Route::resource('brands', BrandController::class)->except(['create', 'show', 'edit']);
+        Route::resource('brands', BrandController::class);
         Route::resource('customers', CustomerController::class)->only(['index', 'show', 'update']);
 
         // Chat Admin
         Route::get('/chat', [ChatController::class, 'adminIndex'])->name('chat');
         Route::get('/chat/conversations', [ChatController::class, 'adminConversations']);
         Route::get('/chat/messages/{userId}', [ChatController::class, 'adminFetchMessages']);
+
+        // Vouchers
+        Route::resource('vouchers', VoucherController::class);
     });
 });
 

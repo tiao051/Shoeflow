@@ -6,6 +6,18 @@
 @section('content')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<style>
+    /* CSS to hide arrows in number inputs */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none; 
+        margin: 0; 
+    }
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+</style>
+
 <div x-data="productManager()">
     
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
@@ -15,7 +27,6 @@
                 value="{{ request('search') }}"
                 placeholder="Type & Hit Enter..." 
                 class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black text-sm">
-            
             <button type="submit" class="absolute left-3 top-2.5 text-gray-400 hover:text-black">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"></path></svg>
             </button>
@@ -104,23 +115,33 @@
                     <h3 class="text-lg font-bold text-gray-900 mb-4" x-text="isEdit ? 'Edit Product' : 'Add New Product'"></h3>
                     
                     <form @submit.prevent="submitForm" enctype="multipart/form-data">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             
-                            <div class="space-y-4">
+                            <div class="md:col-span-2 space-y-4">
                                 <div>
                                     <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Product Name</label>
                                     <input type="text" x-model="formData.name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black text-sm" required>
                                 </div>
                                 
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="relative">
                                         <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Category</label>
-                                        <select x-model="formData.category_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black text-sm" required>
-                                            <option value="">Select</option>
-                                            @foreach($categories as $cat)
-                                                <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                                            @endforeach
-                                        </select>
+                                        <div class="relative">
+                                            <select x-model="formData.category_id" 
+                                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:border-gray-400 text-sm pr-10" 
+                                                    required>
+                                                <option value="">Select Category</option>
+                                                @foreach($categories as $cat)
+                                                    <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                                @endforeach
+                                            </select>
+                                            
+                                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-600">
+                                                <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                                    <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+                                                </svg>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div>
                                         <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Brand</label>
@@ -128,12 +149,18 @@
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Color</label>
-                                    <input type="text" x-model="formData.color" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black text-sm" placeholder="e.g. Black, White" required>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Color</label>
+                                        <input type="text" x-model="formData.color" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black text-sm" placeholder="e.g. Black" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Stock</label>
+                                        <input type="number" x-model="formData.stock" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black text-sm" placeholder="Quantity" required>
+                                    </div>
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-2">
+                                <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Price</label>
                                         <input type="number" x-model="formData.price" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black text-sm" required>
@@ -143,45 +170,60 @@
                                         <input type="number" x-model="formData.sale_price" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black text-sm">
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Stock</label>
-                                    <input type="number" x-model="formData.stock" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black text-sm" required>
-                                </div>
 
                                 <div>
                                     <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Description</label>
                                     <textarea x-model="formData.description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black text-sm"></textarea>
                                 </div>
+                            </div>
 
+                            <div class="space-y-4">
                                 <div>
-                                    <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Image</label>
-                                    <div class="flex items-start gap-3">
-                                        <div class="h-20 w-20 rounded-lg bg-gray-100 border border-gray-300 overflow-hidden flex-shrink-0">
+                                    <label class="block text-gray-700 text-xs font-bold mb-2 uppercase">Product Image</label>
+                                    <label class="block cursor-pointer group">
+                                        <input type="file" class="hidden" @change="handleFileUpload" accept="image/*">
+                                        <div class="h-48 w-full rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:border-black hover:text-black hover:bg-gray-50 transition relative overflow-hidden bg-white">
                                             <template x-if="imagePreview">
-                                                <img :src="imagePreview" class="h-full w-full object-cover">
+                                                <div class="h-full w-full relative">
+                                                    <img :src="imagePreview" class="h-full w-full object-cover">
+                                                    <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200">
+                                                        <span class="text-white text-xs font-bold uppercase tracking-wider">Change Image</span>
+                                                    </div>
+                                                </div>
                                             </template>
                                             <template x-if="!imagePreview">
-                                                <div class="h-full w-full flex items-center justify-center text-gray-400 text-xs">No Img</div>
+                                                <div class="text-center p-4">
+                                                    <svg class="mx-auto h-10 w-10 mb-2" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                    </svg>
+                                                    <span class="text-xs font-semibold">Click to upload</span>
+                                                </div>
                                             </template>
                                         </div>
-                                        <input type="file" @change="handleFileUpload" accept="image/*" class="block w-full text-xs text-gray-500">
-                                    </div>
+                                    </label>
                                 </div>
 
-                                <div class="flex gap-6 pt-2">
-                                    <div class="flex items-center">
-                                        <input type="checkbox" id="is_active" x-model="formData.is_active" class="h-4 w-4 text-black focus:ring-black border-gray-300 rounded">
-                                        <label for="is_active" class="ml-2 block text-sm text-gray-900">Active</label>
+                                <div class="bg-gray-50 p-4 rounded-lg space-y-3 border border-gray-100">
+                                    <div class="flex items-center justify-between">
+                                        <label for="is_active" class="text-sm font-medium text-gray-900 cursor-pointer">Active Status</label>
+                                        <input type="checkbox" 
+                                            id="is_active" 
+                                            x-model="formData.is_active" 
+                                            @change="if(formData.is_active) formData.is_new = false"
+                                            class="h-5 w-5 text-black border-gray-300 rounded cursor-pointer focus:ring-0 focus:outline-none">
                                     </div>
-                                    <div class="flex items-center">
-                                        <input type="checkbox" id="is_new" x-model="formData.is_new" class="h-4 w-4 text-black focus:ring-black border-gray-300 rounded">
-                                        <label for="is_new" class="ml-2 block text-sm text-gray-900">New Arrival</label>
+
+                                    <div class="flex items-center justify-between">
+                                        <label for="is_new" class="text-sm font-medium text-gray-900 cursor-pointer">New Arrival</label>
+                                        <input type="checkbox" 
+                                            id="is_new" 
+                                            x-model="formData.is_new" 
+                                            @change="if(formData.is_new) formData.is_active = false"
+                                            class="h-5 w-5 text-black border-gray-300 rounded cursor-pointer focus:ring-0 focus:outline-none">
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                         
                         <div class="flex justify-end pt-6 border-t border-gray-100 mt-6">
@@ -205,22 +247,17 @@
             editId: null,
             formData: { 
                 name: '', category_id: '', brand: '', color: '', 
-                price: '', sale_price: '', stock: 0, 
+                price: '', sale_price: '', stock: '', // Stock default is empty string
                 description: '', is_active: true, is_new: false 
             },
             imageFile: null,
             imagePreview: null,
 
-            matchesSearch(name) {
-                if (this.search === '') return true;
-                return name.includes(this.search.toLowerCase());
-            },
-
             openModal() {
                 this.isEdit = false;
                 this.formData = { 
                     name: '', category_id: '', brand: '', color: '', 
-                    price: '', sale_price: '', stock: 0, 
+                    price: '', sale_price: '', stock: '', 
                     description: '', is_active: true, is_new: false 
                 };
                 this.imageFile = null;
@@ -290,7 +327,10 @@
                 try {
                     const response = await fetch(url, {
                         method: 'POST',
-                        headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" },
+                        headers: { 
+                            'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                            'Accept': 'application/json' 
+                        },
                         body: data
                     });
                     
@@ -322,8 +362,12 @@
                         try {
                             const response = await fetch(`/admin/products/${id}`, {
                                 method: 'DELETE',
-                                headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }
+                                headers: { 
+                                    'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                                    'Accept': 'application/json' 
+                                }
                             });
+                            
                             if (response.ok) {
                                 document.getElementById(`row-${id}`).remove();
                                 Swal.fire('Deleted!', 'Product has been deleted.', 'success');
