@@ -118,7 +118,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/checkout/success/{order}', [CartController::class, 'success'])->name('checkout.success');
     Route::get('/my-orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-
+    Route::get('/checkout/vnpay-return', [CartController::class, 'vnpayReturn'])->name('vnpay.return');
+    
     // Email Verification (Form & Verify Logic)
     Route::get('/verify-code-form', [VerificationController::class, 'showVerificationForm'])->name('verification.form');
     Route::post('/verify-code', [VerificationController::class, 'verifyCode'])->name('verification.verify');

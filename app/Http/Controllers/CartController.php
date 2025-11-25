@@ -302,13 +302,14 @@ class CartController extends Controller
      */
     public function processCheckout(Request $request)
     {
+        // 1. Validate
         $request->validate([
             'fullname' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'email' => 'required|email|max:255',
             'address' => 'required|string|max:500',
             'city' => 'required|string',
-            'payment_method' => 'required|in:cod,banking',
+            'payment_method' => 'required|in:cod,vnpay', // Thêm vnpay vào validate
             'note' => 'nullable|string',
             'applied_coupon' => 'nullable|string',
         ]);
@@ -316,30 +317,25 @@ class CartController extends Controller
         $user = auth()->user();
         $cart = Cart::where('user_id', $user->id)->first();
 
-        // Check if cart is empty
         if (!$cart || $cart->items->isEmpty()) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
 
-        // 2. Recalculate all totals on server side
+        // 2. Calculate Totals
         $subtotal = $cart->items->sum(fn($item) => $item->price * $item->quantity);
-        $shipping = $subtotal > 1000000 ? 0 : 30000; 
+        $shipping = $subtotal > 1000000 ? 0 : 30000;
         $tax = $subtotal * 0.1;
         
-        // Handle Voucher (if any)
         $discount = 0;
-        $couponCode = $request->input('applied_coupon'); // Code taken from hidden input
+        $couponCode = $request->input('applied_coupon');
         
         if ($couponCode) {
             $voucher = Voucher::where('code', $couponCode)
-                ->where('is_active', true)
-                ->where('quantity', '>', 0)
-                ->where('start_date', '<=', now())
-                ->where('end_date', '>=', now())
+                ->where('is_active', true)->where('quantity', '>', 0)
+                ->where('start_date', '<=', now())->where('end_date', '>=', now())
                 ->first();
 
             if ($voucher && $subtotal >= $voucher->min_order_value) {
-                // Calculate discount
                 if ($voucher->discount_type == 'fixed') {
                     $discount = $voucher->discount_value;
                 } else {
@@ -348,11 +344,8 @@ class CartController extends Controller
                         $discount = $voucher->max_discount_amount;
                     }
                 }
-                
-                // Ensure discount does not exceed subtotal
                 $discount = min($discount, $subtotal);
-                
-                // Decrement voucher quantity 
+                // Decrease voucher quantity
                 $voucher->decrement('quantity');
             }
         }
@@ -360,36 +353,32 @@ class CartController extends Controller
         $grandTotal = $subtotal + $shipping + $tax - $discount;
         if ($grandTotal < 0) $grandTotal = 0;
 
-        // 3. Save to Database (Use Transaction to ensure data integrity)
         DB::beginTransaction();
         try {
-            // A. Create order
-            // Note: Check your `orders` migration file to ensure these columns exist
+            // 3. Create Order
             $order = Order::create([
                 'user_id' => $user->id,
                 'fullname' => $request->fullname,
                 'phone' => $request->phone,
                 'email' => $request->email,
-                'address' => $request->address . ', ' . $request->city, 
+                'address' => $request->address . ', ' . $request->city,
                 'note' => $request->note,
                 'payment_method' => $request->payment_method,
-                'status' => 'pending', // Default status: Pending
-                
-                // Money columns
+                'status' => 'pending', 
                 'subtotal' => $subtotal,
                 'shipping_fee' => $shipping,
                 'tax' => $tax,
-                'coupon_code' => $couponCode && isset($voucher) ? $couponCode : null,
+                'coupon_code' => $couponCode ?? null,
                 'discount_amount' => $discount,
                 'total_amount' => $grandTotal,
             ]);
 
-            // B. Convert CartItem to OrderItem
+            // 4. Create Order Items
             foreach ($cart->items as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item->product_id,
-                    'product_name' => $item->product->name, // Store name in case product name changes later
+                    'product_name' => $item->product->name,
                     'quantity' => $item->quantity,
                     'price' => $item->price,
                     'size' => $item->size,
@@ -397,18 +386,137 @@ class CartController extends Controller
                 ]);
             }
 
-            // C. Delete cart after successful order
-            $cart->items()->delete();
-            // Or $cart->delete(); if you want to delete the entire Cart record
-
-            DB::commit(); // Save all changes to DB
-            // 4. Redirect to "Thank You" page or Order History
-            return redirect()->route('checkout.success', ['order' => $order->id]);
+            // Process payment based on selected method
+            if ($request->payment_method == 'vnpay') {
+                DB::commit(); // Save order first
+                // Redirect to VNPAY, don't clear cart yet (in case of failure, user can retry)
+                return $this->createVnpayUrl($order);
+            } 
+            else {
+                // COD: Clear cart and complete order
+                $cart->items()->delete();
+                DB::commit();
+                return redirect()->route('checkout.success', ['order' => $order->id]);
+            }
 
         } catch (\Exception $e) {
-            DB::rollBack(); // If error, rollback all operations
-            \Log::error('Checkout Error: ' . $e->getMessage()); 
-            return redirect()->back()->with('error', 'There was an error processing your order. Please try again.');
+            DB::rollBack();
+            \Log::error('Checkout Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error processing order: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Create URL to redirect to VNPAY
+     */
+    private function createVnpayUrl($order)
+    {
+        $vnp_TmnCode = config('services.vnpay.tmn_code');
+        $vnp_HashSecret = config('services.vnpay.hash_secret');
+        $vnp_Url = config('services.vnpay.url');
+        $vnp_Returnurl = config('services.vnpay.return_url');
+
+        $vnp_TxnRef = $order->id; 
+        $vnp_OrderInfo = "Thanh toan don hang #" . $order->id;
+        $vnp_OrderType = "billpayment";
+        $vnp_Amount = $order->total_amount * 100; 
+        $vnp_Locale = 'vn';
+        $vnp_IpAddr = request()->ip();
+
+        $inputData = array(
+            "vnp_Version" => "2.1.0",
+            "vnp_TmnCode" => $vnp_TmnCode,
+            "vnp_Amount" => $vnp_Amount,
+            "vnp_Command" => "pay",
+            "vnp_CreateDate" => date('YmdHis'),
+            "vnp_CurrCode" => "VND",
+            "vnp_IpAddr" => $vnp_IpAddr,
+            "vnp_Locale" => $vnp_Locale,
+            "vnp_OrderInfo" => $vnp_OrderInfo,
+            "vnp_OrderType" => $vnp_OrderType,
+            "vnp_ReturnUrl" => $vnp_Returnurl,
+            "vnp_TxnRef" => $vnp_TxnRef
+        );
+
+        ksort($inputData);
+        $query = "";
+        $i = 0;
+        $hashdata = "";
+        foreach ($inputData as $key => $value) {
+            if ($i == 1) {
+                $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
+            } else {
+                $hashdata .= urlencode($key) . "=" . urlencode($value);
+                $i = 1;
+            }
+            $query .= urlencode($key) . "=" . urlencode($value) . '&';
+        }
+
+        $vnp_Url = $vnp_Url . "?" . $query;
+        if (isset($vnp_HashSecret)) {
+            $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
+            $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
+        }
+
+        return redirect($vnp_Url);
+    }
+
+    public function vnpayReturn(Request $request)
+    {
+        $vnp_HashSecret = config('services.vnpay.hash_secret');
+        $inputData = array();
+        foreach ($_GET as $key => $value) {
+            if (substr($key, 0, 4) == "vnp_") {
+                $inputData[$key] = $value;
+            }
+        }
+        
+        $vnp_SecureHash = $inputData['vnp_SecureHash'];
+        unset($inputData['vnp_SecureHash']);
+        ksort($inputData);
+        $i = 0;
+        $hashData = "";
+        foreach ($inputData as $key => $value) {
+            if ($i == 1) {
+                $hashData = $hashData . '&' . urlencode($key) . "=" . urlencode($value);
+            } else {
+                $hashData = $hashData . urlencode($key) . "=" . urlencode($value);
+                $i = 1;
+            }
+        }
+
+        $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
+
+        if ($secureHash == $vnp_SecureHash) {
+            $orderId = $request->vnp_TxnRef;
+            $order = Order::find($orderId);
+            
+            if (!$order) {
+                return redirect()->route('cart.index')->with('error', 'Order not found.');
+            }
+
+            if ($request->vnp_ResponseCode == '00') {
+                // --- PAYMENT SUCCESSFUL ---
+                
+                // 1. Update order status
+                $order->status = 'processing'; // Or 'paid'
+                $order->save();
+
+                // 2. Clear cart (Because when creating VNPAY order, we didn't clear it yet)
+                $user = auth()->user();
+                Cart::where('user_id', $user->id)->delete();
+
+                // 3. Redirect to thank you page
+                return redirect()->route('checkout.success', ['order' => $order->id])
+                                 ->with('success', 'Payment successful via VNPAY!');
+            } else {
+                // --- PAYMENT FAILED / CANCELED ---
+
+                // Here we choose to keep it but show an error, user needs to reorder
+                return redirect()->route('cart.index')->with('error', 'Payment failed or canceled by user.');
+            }
+        } else {
+            return redirect()->route('cart.index')->with('error', 'Invalid signature.');
         }
     }
 

@@ -87,7 +87,7 @@
                             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Payment Method</label>
                             <select name="payment_method" class="w-full border border-gray-300 p-3 rounded focus:outline-none focus:border-black bg-white transition">
                                 <option value="cod">COD (Cash on Delivery)</option>
-                                <option value="banking">Bank Transfer (QR Code)</option>
+                                <option value="vnpay">VNPAY (ATM / QR / Wallet)</option>
                             </select>
                         </div>
                     </div>
