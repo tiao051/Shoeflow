@@ -114,6 +114,9 @@
         <a href="#" class="block px-4 py-2 hover:bg-gray-100 sale text-red-600">Sale Up To 50%</a>
         <a href="#" class="block px-4 py-2 hover:bg-gray-100 border-t mt-2">Sign In</a>
     </div>
+
+    {{-- CHAT BOX START --}}
+    @auth
     <button id="chat-open-btn"
     class="fixed bottom-6 right-6 z-50 bg-black text-white p-3 rounded-full shadow-2xl hover:bg-red-600 transition duration-300 transform hover:scale-110"
     title="Open Chat Box">
@@ -126,299 +129,300 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 4v-4z" />
         </svg>
     </button>
+
     <div id="chat-popup" 
      class="fixed bottom-[100px] right-6 z-[49] bg-white rounded-xl shadow-2xl border border-gray-200 
             transform translate-y-4 opacity-0 scale-95 transition-all duration-300 pointer-events-none invisible flex flex-col
             w-[calc(100vw-24px)] h-[calc(100vh-120px)] 
-            max-w-full bottom-3 right-3                 
-            sm:w-[350px] sm:h-[400px]               
-            sm:bottom-[100px] sm:right-6             
+            max-w-full bottom-3 right-3                  
+            sm:w-[350px] sm:h-[400px]                
+            sm:bottom-[100px] sm:right-6              
             sm:max-w-sm">
 
-    <div class="p-4 bg-black text-white rounded-t-xl flex justify-between items-center flex-shrink-0">
-        <h4 class="font-bold text-base uppercase">Customer Support</h4>
-        <button id="chat-close-btn" class="text-gray-300 hover:text-white transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-        </button>
-    </div>
-
-    <div class="flex-grow p-4 overflow-y-auto bg-gray-50 space-y-3" id="chat-history">
-
-    <div class="flex justify-start">
-        <div class="bg-gray-200 text-gray-800 p-3 rounded-xl rounded-tl-none max-w-[80%] text-sm shadow-sm break-words">
-            Hi there! How can Converse help you today?
+        <div class="p-4 bg-black text-white rounded-t-xl flex justify-between items-center flex-shrink-0">
+            <h4 class="font-bold text-base uppercase">Customer Support</h4>
+            <button id="chat-close-btn" class="text-gray-300 hover:text-white transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
         </div>
-    </div>
-    
-    <div class="flex justify-end"> 
-        <div id="faq-options" class="flex flex-col items-end space-y-2 max-w-[80%]"> 
+
+        <div class="flex-grow p-4 overflow-y-auto bg-gray-50 space-y-3" id="chat-history">
             </div>
+
+        <div class="p-3 border-t flex items-center flex-shrink-0">
+            <input type="text" placeholder="Type a message..." id="chat-input"
+                class="flex-grow p-2 border border-gray-300 rounded-l-lg text-sm focus:border-black focus:ring-0 outline-none">
+            
+            <button id="chat-send-btn" class="bg-black text-white p-2 rounded-r-lg hover:bg-red-600 transition duration-200 ml-[-1px]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+            </button>
         </div>
     </div>
+    @endauth
+    {{-- CHAT BOX END --}}
 
-    <div class="p-3 border-t flex items-center flex-shrink-0">
-        <input type="text" placeholder="Type a message..." id="chat-input"
-                class="flex-grow p-2 border border-gray-300 rounded-l-lg text-sm focus:border-black focus:ring-0 outline-none">
-        
-        <button id="chat-send-btn" class="bg-black text-white p-2 rounded-r-lg hover:bg-red-600 transition duration-200 ml-[-1px]">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
-        </button>
-    </div>
-</div>
 </header>
 <script>
+    // Global Variables
+    const BASE_URL = '{{ asset('/') }}';
+    const AUTH_USER_ID = {{ auth()->id() ?? 'null' }};
+    const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-const BASE_URL = '{{ asset('/') }}';
-const CHAT_HISTORY_KEY = 'chatHistory';
-const CHAT_STATE_KEY = 'chatPopupState';
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        // ==========================================
+        // 1. SEARCH LOGIC (KEPT ORIGINAL)
+        // ==========================================
+        const container = document.getElementById('search-container');
+        const form = document.getElementById('search-form');
+        const input = document.getElementById('search-input');
+        const suggestionsBox = document.getElementById('search-suggestions');
+        let debounceTimer;
 
-document.addEventListener("DOMContentLoaded", function() {
-    // Declare required variables
-    const container = document.getElementById('search-container');
-    const form = document.getElementById('search-form');
-    const input = document.getElementById('search-input');
-    const suggestionsBox = document.getElementById('search-suggestions');
-    let debounceTimer; 
-
-    const openBtn = document.getElementById('chat-open-btn');
-    const closeBtn = document.getElementById('chat-close-btn');
-    const chatPopup = document.getElementById('chat-popup');
-    const chatInput = document.getElementById('chat-input');
-    const sendBtn = document.getElementById('chat-send-btn');
-    const chatHistory = document.getElementById('chat-history');
-
-    function saveChatData() {
-        const historyHTML = chatHistory.innerHTML;
-        localStorage.setItem(CHAT_HISTORY_KEY, historyHTML);
-
-        const isChatOpen = chatPopup.classList.contains('opacity-100');
-        localStorage.setItem(CHAT_STATE_KEY, isChatOpen ? 'open' : 'closed');
-    }
-
-    function loadChatData() {
-        const historyHTML = localStorage.getItem(CHAT_HISTORY_KEY);
-        const state = localStorage.getItem(CHAT_STATE_KEY);
-
-        if (historyHTML) {
-            chatHistory.innerHTML = historyHTML;
+        function openSearch() {
+            form.classList.remove('w-16');
+            form.classList.add('w-[300px]');
+            input.classList.remove('opacity-0', 'pointer-events-none');
+            input.classList.add('opacity-100', 'pointer-events-auto');
         }
-        else {
-            chatHistory.innerHTML = `
-                <div class="flex justify-start">
-                    <div class="bg-gray-200 text-gray-800 p-3 rounded-xl rounded-tl-none max-w-[80%] text-sm shadow-sm break-words">
-                        Hi there! How can Converse help you today?
-                    </div>
-                </div>
-                <div class="flex justify-end"> 
-                    <div id="faq-options" class="flex flex-col items-end space-y-2 max-w-[80%]"> 
-                    </div>
-                </div>`;
-            saveChatData();
+
+        function closeSearch() {
+            if (document.activeElement !== input) {
+                form.classList.remove('w-[300px]');
+                form.classList.add('w-16');
+                input.classList.remove('opacity-100', 'pointer-events-auto');
+                input.classList.add('opacity-0', 'pointer-events-none');
+                suggestionsBox.classList.add('hidden');
+            }
         }
-        if (state === 'open') {
+
+        if (container) {
+            container.addEventListener('mouseenter', openSearch);
+            container.addEventListener('mouseleave', closeSearch);
+        }
+        if (input) {
+            input.addEventListener('focus', openSearch);
+            input.addEventListener('blur', function() {
+                setTimeout(closeSearch, 200);
+            });
+            input.addEventListener('input', function() {
+                const keyword = this.value.trim();
+                clearTimeout(debounceTimer);
+                if (keyword.length < 2) {
+                    suggestionsBox.classList.add('hidden');
+                    suggestionsBox.innerHTML = '';
+                    return;
+                }
+                debounceTimer = setTimeout(() => {
+                    fetchSuggestions(keyword);
+                }, 200);
+            });
+        }
+
+        function fetchSuggestions(keyword) {
+            fetch(`/search/suggestions?q=${encodeURIComponent(keyword)}`)
+                .then(response => response.json())
+                .then(products => {
+                    if (products.length > 0) {
+                        renderSuggestions(products);
+                        suggestionsBox.classList.remove('hidden');
+                    } else {
+                        suggestionsBox.innerHTML = '<div class="p-3 text-sm text-gray-500">No results found.</div>';
+                        suggestionsBox.classList.remove('hidden');
+                    }
+                });
+        }
+
+        function renderSuggestions(products) {
+            const html = products.map(product => {
+                const imagePath = product.image || 'images/placeholder.jpg';
+                return `<a href="/product/${product.slug || product.id}" class="flex items-center p-3 hover:bg-gray-100 border-b transition-colors">
+                    <img src="${BASE_URL}${imagePath}" class="w-10 h-10 object-cover mr-3 border" onerror="this.src='${BASE_URL}images/placeholder.jpg';">
+                    <div><div class="text-sm font-bold text-black line-clamp-1">${product.name}</div><div class="text-xs text-red-600 font-semibold">${new Intl.NumberFormat('en-US').format(product.price)} VND</div></div></a>`;
+            }).join('');
+            suggestionsBox.innerHTML = html;
+        }
+
+        // ==========================================
+        // 2. CHATBOX LOGIC (WEBSOCKET ENABLED)
+        // ==========================================
+        const openBtn = document.getElementById('chat-open-btn');
+        const closeBtn = document.getElementById('chat-close-btn');
+        const chatPopup = document.getElementById('chat-popup');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('chat-send-btn');
+        const chatHistory = document.getElementById('chat-history');
+        const CHAT_STATE_KEY = 'chatPopupState';
+
+        // Only initialize chat if user is logged in
+        if (AUTH_USER_ID) {
+            initChat();
+        }
+
+        function initChat() {
+            // 2.1. Load past messages from server
+            console.log('Loading past messages...');
+            loadMessagesFromServer();
+            console.log('Past messages loaded.');
+            // 2.2. Restore open/closed state from localStorage
+            const state = localStorage.getItem(CHAT_STATE_KEY);
+            if (state === 'open') openChatUI();
+            console.log('Chat popup state restored:', state);
+            // 2.3. Initialize WebSocket Listener
+            // Use setInterval to wait for 'window.Echo' to be loaded by app.js (Vite)
+            let echoCheckParams = setInterval(() => {
+                console.log('Checking for Echo...', window.Echo);
+                if (window.Echo) {
+                    console.log('Echo found:', window.Echo);
+                    clearInterval(echoCheckParams);
+                    console.log('Echo loaded. Subscribing to channel: chat.' + AUTH_USER_ID);
+
+                    window.Echo.private(`chat.${AUTH_USER_ID}`)
+                        .listen('MessageSent', (e) => {
+                            console.log('Socket Event Received:', e.message);
+
+                            // If message is from Admin (is_admin = true)
+                            if (e.message.is_admin) {
+                                createMessage(e.message.message, false); // false = NOT user (left side)
+                                
+                                // If chat is closed, open it to notify user
+                                if (chatPopup.classList.contains('invisible')) {
+                                    openChatUI();
+                                }
+                            }
+                        });
+                }
+            }, 500); // Check every 500ms
+        }
+
+        // --- UI Functions ---
+
+        function openChatUI() {
             chatPopup.classList.remove('invisible', 'opacity-0', 'translate-y-4', 'scale-95', 'pointer-events-none');
             chatPopup.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+            scrollToBottom();
+            localStorage.setItem(CHAT_STATE_KEY, 'open');
         }
-        else {
-            chatPopup.classList.add('invisible', 'opacity-0', 'translate-y-4', 'scale-95', 'pointer-events-none');
+
+        function closeChatUI() {
             chatPopup.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
+            chatPopup.classList.add('opacity-0', 'translate-y-4', 'scale-95', 'pointer-events-none');
+            setTimeout(() => {
+                chatPopup.classList.add('invisible');
+            }, 300);
+            localStorage.setItem(CHAT_STATE_KEY, 'closed');
         }
 
-        chatHistory.scrollTop = chatHistory.scrollHeight;
-    }
+        function scrollToBottom() {
+            if (chatHistory) chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
 
-    loadChatData();
+        // --- Event Listeners ---
 
-    function openChat() {
-        chatPopup.classList.remove('invisible'); 
-        
-        setTimeout(() => {
-            chatPopup.classList.remove('opacity-0', 'translate-y-4', 'scale-95', 'pointer-events-none');
-            chatPopup.classList.add('opacity-100', 'translate-y-0', 'scale-100');
-            chatHistory.scrollTop = chatHistory.scrollHeight; // Scroll to the bottom
+        openBtn?.addEventListener('click', () => {
+            if (chatPopup.classList.contains('invisible')) openChatUI();
+            else closeChatUI();
+        });
 
-            saveChatData();
-        }, 10);
-    }
+        closeBtn?.addEventListener('click', closeChatUI);
 
-    function closeChat() {
-        chatPopup.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
-        chatPopup.classList.add('opacity-0', 'translate-y-4', 'scale-95', 'pointer-events-none');
+        sendBtn?.addEventListener('click', handleSendMessage);
 
-        saveChatData();
-        setTimeout(() => {
-            chatPopup.classList.add('invisible'); 
-        }, 300);
-    }
+        chatInput?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSendMessage();
+            }
+        });
 
-    // Function to create a new message bubble
-    function createMessage(text, isUser = true) {
-        const messageWrapper = document.createElement('div');
-        messageWrapper.classList.add('flex', isUser ? 'justify-end' : 'justify-start');
-        
-        const messageBody = document.createElement('div');
-        messageBody.classList.add(
-            'p-3', 'rounded-xl', 'max-w-[80%]', 'text-sm', 'shadow-sm', 'break-words',
-            isUser ? 'bg-red-600' : 'bg-gray-200',
-            isUser ? 'text-white' : 'text-gray-800',
-            isUser ? 'rounded-br-none' : 'rounded-tl-none'
-        );
-        messageBody.textContent = text;
-        
-        messageWrapper.appendChild(messageBody);
-        chatHistory.appendChild(messageWrapper);
-        chatHistory.scrollTop = chatHistory.scrollHeight; 
+        // --- Core Message Logic ---
 
-        saveChatData();
-    }
+        /**
+         * Render a message bubble to the DOM
+         * @param {string} text - Message content
+         * @param {boolean} isUser - True if sent by user (Right), False if admin (Left)
+         */
+        function createMessage(text, isUser) {
+            const messageWrapper = document.createElement('div');
+            messageWrapper.classList.add('flex', isUser ? 'justify-end' : 'justify-start');
 
-    function sendMessage() {
-        const messageText = chatInput.value.trim();
-        if (messageText !== "") {
-            // 1. Send the user's message
-            createMessage(messageText, true);
-            
-            // 2. Clear the input
+            const messageBody = document.createElement('div');
+            // Apply your existing styles
+            messageBody.classList.add(
+                'p-3', 'rounded-xl', 'max-w-[80%]', 'text-sm', 'shadow-sm', 'break-words',
+                isUser ? 'bg-red-600' : 'bg-gray-200',
+                isUser ? 'text-white' : 'text-gray-800',
+                isUser ? 'rounded-br-none' : 'rounded-tl-none'
+            );
+            messageBody.textContent = text;
+
+            messageWrapper.appendChild(messageBody);
+            chatHistory.appendChild(messageWrapper);
+            scrollToBottom();
+        }
+
+        /**
+         * Handle sending message to server
+         */
+        async function handleSendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            // 1. Optimistic UI Update (Show immediately)
+            createMessage(text, true); // true = User sent
             chatInput.value = '';
             chatInput.focus();
 
-            // 3. Automated response (Simulation)
-            setTimeout(() => {
-                createMessage("Thank you for your question. Please wait a moment, a support agent will respond shortly.", false);
-            }, 1500);
-        }
-    }
-
-    openBtn.addEventListener('click', function() {
-        if (chatPopup.classList.contains('invisible')) {
-            openChat();
-        } else {
-            closeChat();
-        }
-    });
-    closeBtn.addEventListener('click', closeChat);
-    sendBtn.addEventListener('click', sendMessage);
-    
-    // Send message on Enter keypress
-    chatInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            sendMessage();
-        }
-    });
-
-    // Search open/close logic
-    function openSearch() {
-        // Open the search form
-        form.classList.remove('w-16');
-        form.classList.add('w-[300px]');
-
-        // Reveal the input
-        input.classList.remove('opacity-0', 'pointer-events-none');
-        input.classList.add('opacity-100', 'pointer-events-auto');
-    }
-
-    function closeSearch() {
-        // Only close if the user is NOT typing (input is not focused)
-        if (document.activeElement !== input) {
-            // Close the form
-            form.classList.remove('w-[300px]');
-            form.classList.add('w-16');
-
-            // Hide input and suggestions box
-            input.classList.remove('opacity-100', 'pointer-events-auto');
-            input.classList.add('opacity-0', 'pointer-events-none');
-            suggestionsBox.classList.add('hidden');
-        }
-    }
-
-    // Mouse enter & focus events
-    container.addEventListener('mouseenter', openSearch);
-    container.addEventListener('mouseleave', closeSearch);
-    input.addEventListener('focus', openSearch);
-
-    // Blur event (when clicking outside)
-    input.addEventListener('blur', function () {
-        setTimeout(closeSearch, 200);
-    });
-
-    // Live search logic
-    input.addEventListener('input', function () {
-        const keyword = this.value.trim();
-
-        clearTimeout(debounceTimer);
-
-        if (keyword.length < 2) {
-            suggestionsBox.classList.add('hidden');
-            suggestionsBox.innerHTML = '';
-            return;
+            // 2. Send to API
+            try {
+                await fetch('/chat/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': CSRF_TOKEN
+                    },
+                    body: JSON.stringify({
+                        message: text
+                    })
+                });
+                // Success: No action needed, message is already displayed.
+            } catch (error) {
+                console.error('Error sending message:', error);
+            }
         }
 
-        debounceTimer = setTimeout(() => {
-            fetchSuggestions(keyword);
-        }, 200);
-    });
+        /**
+         * Load message history from database
+         */
+        async function loadMessagesFromServer() {
+            try {
+                const response = await fetch('/chat/messages');
+                const messages = await response.json();
 
-    function fetchSuggestions(keyword) {
-        fetch(`/search/suggestions?q=${encodeURIComponent(keyword)}`)
-            .then(response => response.json())
-            .then(products => {
-                if (products.length > 0) {
-                    renderSuggestions(products);
-                    suggestionsBox.classList.remove('hidden');
-                } else {
-                    suggestionsBox.innerHTML = '<div class="p-3 text-sm text-gray-500">No results found for "' + keyword + '".</div>';
-                    suggestionsBox.classList.remove('hidden');
-                }
-            })
-            .catch(error => {
-                console.error('Fetch Error:', error);
-                suggestionsBox.innerHTML = '<div class="p-3 text-sm text-red-500">Error fetching results.</div>';
-                suggestionsBox.classList.remove('hidden');
-            });
-    }
+                // Always keep the default greeting
+                chatHistory.innerHTML = `
+                    <div class="flex justify-start">
+                        <div class="bg-gray-200 text-gray-800 p-3 rounded-xl rounded-tl-none max-w-[80%] text-sm shadow-sm break-words">
+                            Hi there! How can Converse help you today?
+                        </div>
+                    </div>
+                `;
 
-    function renderSuggestions(products) {
-        const html = products.map(product => {
-        const imagePath = product.image || 'images/placeholder.jpg'; 
-        
-        return `
-            <a href="/product/${product.slug || product.id}" class="flex items-center p-3 hover:bg-gray-100 border-b last:border-b-0 transition-colors">
-                <img src="${BASE_URL}${imagePath}" 
-                    alt="${product.name}" 
-                    class="w-10 h-10 object-cover mr-3 border border-gray-200"
-                    onerror="this.onerror=null;this.src='${BASE_URL}images/placeholder.jpg';"> 
-                <div>
-                    <div class="text-sm font-bold text-black line-clamp-1">${product.name}</div>
-                    
-                    ${product.category ? `<div class="text-xs text-gray-500">Category: ${product.category.name}</div>` : ''} 
-                    
-                    <div class="text-xs text-red-600 font-semibold">${product.price ? new Intl.NumberFormat('en-US').format(product.price) + ' VND' : 'Contact for price'}</div>
-                </div>
-            </a>
-        `;
-    }).join('');
-        
-        // Add "View all" button
-        const viewAll = `
-            <a href="/search?q=${input.value}" class="block p-3 text-center text-xs font-bold bg-gray-50 text-black hover:bg-gray-200 uppercase tracking-wider">
-                View all results for "${input.value}"
-            </a>
-        `;
-        
-        suggestionsBox.innerHTML = html + viewAll;
-    }
+                // Render history
+                messages.forEach(msg => {
+                    // msg.is_admin == 1 (true) => Admin => Left
+                    // msg.is_admin == 0 (false) => User => Right
+                    createMessage(msg.message, !msg.is_admin);
+                });
 
-    // Hide suggestions when clicking outside
-    document.addEventListener('click', function (e) {
-        // If click is NOT inside the search form
-        if (!form.contains(e.target)) {
-            suggestionsBox.classList.add('hidden');
+                scrollToBottom();
+            } catch (e) {
+                console.error("Error loading history:", e);
+            }
         }
     });
-});
 </script>

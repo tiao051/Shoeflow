@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\ChatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -121,6 +122,10 @@ Route::middleware('auth')->group(function () {
     // Email Verification (Form & Verify Logic)
     Route::get('/verify-code-form', [VerificationController::class, 'showVerificationForm'])->name('verification.form');
     Route::post('/verify-code', [VerificationController::class, 'verifyCode'])->name('verification.verify');
+
+    // Chat msgs
+    Route::get('/chat/messages', [ChatController::class, 'fetchMessages']);
+    Route::post('/chat/send', [ChatController::class, 'sendMessage']);
 });
 
 /*
@@ -143,6 +148,11 @@ Route::prefix('admin')->group(function () {
         Route::resource('orders', AdminOrderController::class)->only(['index', 'show', 'update', 'destroy']);
         Route::resource('brands', BrandController::class)->except(['create', 'show', 'edit']);
         Route::resource('customers', CustomerController::class)->only(['index', 'show', 'update']);
+
+        // Chat Admin
+        Route::get('/chat', [ChatController::class, 'adminIndex'])->name('chat');
+        Route::get('/chat/conversations', [ChatController::class, 'adminConversations']);
+        Route::get('/chat/messages/{userId}', [ChatController::class, 'adminFetchMessages']);
     });
 });
 

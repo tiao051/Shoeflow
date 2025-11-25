@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo; 
 use App\Models\Address;
 use App\Models\Order;
+use App\Models\Message;
 
 class User extends Authenticatable
 {
@@ -72,5 +73,9 @@ class User extends Authenticatable
     public function wishlistItems()
     {
         return $this->hasMany(Wishlist::class);
+    }
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
     }
 }
