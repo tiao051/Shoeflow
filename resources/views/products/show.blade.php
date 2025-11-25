@@ -3,7 +3,6 @@
 @section('title', $product->name . ' | CONVERSE')
 
 @push('styles')
-<!-- ... (keep CSS styles as-is) ... -->
 <style>
     /* --- FONTS & BASICS --- */
     .font-oswald { font-family: 'Oswald', sans-serif; }
@@ -345,17 +344,14 @@
 @endpush
 
 @section('content')
-<!-- ... (keep HTML body as-is) ... -->
 <div class="container product-container">
     
-    <!-- NOTE: Laravel success messages hidden because we use AJAX. -->
     @if(session('success'))
         <div class="alert alert-success mb-4 text-center d-none" id="sessionSuccessMessage">
             {{ session('success') }}
         </div>
     @endif
 
-    <!-- BREADCRUMB -->
     <nav aria-label="breadcrumb" class="mb-4 d-none d-md-block">
         <ol class="breadcrumb small text-uppercase">
             <li class="breadcrumb-item"><a href="{{ route('home') }}" class="text-dark text-decoration-none">Home</a></li>
@@ -365,7 +361,6 @@
     </nav>
 
     <div class="row">
-        <!-- LEFT COLUMN: IMAGES -->
         <div class="col-md-7">
             <div class="product-gallery">
                 @if($product->is_new)
@@ -373,12 +368,10 @@
                 @endif
                 
                 <div class="main-image-wrapper">
-                            <!-- Use main image from DB -->
                     <img src="{{ asset($product->image) }}" alt="{{ $product->name }}" id="mainImage">
                 </div>
             </div>
             
-            <!-- Description for Desktop (Optional placement) -->
             <div class="d-none d-md-block mt-5">
                 <h4 class="font-oswald text-uppercase mb-3">About this product</h4>
                 <p class="text-secondary">{{ $product->description }}</p>
@@ -389,7 +382,6 @@
             </div>
         </div>
 
-        <!-- RIGHT COLUMN: INFO & ACTIONS -->
         <div class="col-md-5">
             <div class="product-info-sticky">
                 <h1 class="product-title-detail font-oswald">{{ $product->name }}</h1>
@@ -403,25 +395,21 @@
                     @endif
                 </div>
 
-                <!-- SIZE SELECTOR -->
                 <div class="mb-4">
                     <div class="size-label">
                         <span>SELECT SIZE (US)</span>
                         <span class="size-guide-link" onclick="openSizeGuide()">Size Guide</span>
                     </div>
                     
-                    <!-- Fake sizes for UI demo -->
                     <div class="size-grid" id="sizeSelector">
                         @foreach(['7', '7.5', '8', '8.5', '9', '9.5', '10', '10.5', '11', '12'] as $size)
                             <div class="size-option" onclick="selectSize(this, '{{ $size }}')">{{ $size }}</div>
                         @endforeach
                     </div>
-                    <!-- This input is used for the JS interface, not for direct form submission -->
                     <input type="hidden" id="selectedSize" name="size">
                     <div id="sizeError" class="text-danger small d-none mb-2">Please select a size!</div>
                 </div>
 
-                <!-- ACTIONS -->
                 <div class="action-buttons">
                     <button class="btn-add-cart" id="addToCartButton" type="submit" form="addToCartForm">
                         ADD TO CART
@@ -453,9 +441,7 @@
                     </div>
                 </div>
 
-                <!-- ACCORDION INFO -->
                 <div class="product-details-accordion">
-                    <!-- Mobile Description -->
                     <div class="d-md-none">
                          <details open>
                             <summary>Description</summary>
@@ -465,50 +451,124 @@
                         </details>
                     </div>
 
-                    <details>
-                        <summary>Shipping & Returns</summary>
-                        <div class="accordion-content">
-                            <p>Free standard shipping on all orders over 1,000,000 ₫.</p>
-                            <p>Converse members enjoy free returns. Not a member? Sign up for free.</p>
+                    <details class="bg-white rounded-xl shadow-md border border-gray-100 mt-6 overflow-hidden">
+                        <summary class="p-4 cursor-pointer flex justify-between items-center bg-gray-50 hover:bg-gray-100 transition">
+                            <span class="font-bold text-lg text-gray-800">Shipping & Returns</span>
+                        </summary>
+
+                        <div class="accordion-content p-4 divide-y divide-gray-100">
+                            <div class="py-3">
+                                <p class="text-gray-700">Free standard shipping on all orders over 1,000,000 ₫.</p>
+                            </div>
+                            <div class="py-3">
+                                <p class="text-gray-700">Converse members enjoy free returns. Not a member? Sign up for free.</p>
+                            </div>
                         </div>
                     </details>
-                    <details>
-                        <summary>Reviews (0)</summary>
-                        <div class="accordion-content">
-                            <p>No reviews yet. Be the first to write a review!</p>
-                        </div>
-                    </details>
+                    
+                    <div x-data="productReviews({{ $product->id }})" x-init="fetchReviews()">
+                        <details class="bg-white rounded-xl shadow-md border border-gray-100 mt-6 overflow-hidden">
+                            
+                            {{-- SUMMARY HEADER --}}
+                            <summary class="p-4 cursor-pointer flex justify-between items-center bg-gray-50 hover:bg-gray-100 transition">
+                                <div class="flex items-center space-x-3">
+                                    <span class="font-bold text-lg text-gray-800">
+                                        Reviews 
+                                        <span x-text="'(' + summary.total_reviews + ')'"></span>
+                                    </span>
+                                    
+                                    <template x-if="summary.total_reviews > 0">
+                                        <div class="flex items-center text-sm text-gray-600">
+                                            <span class="font-bold text-black mr-2 text-base" x-text="summary.average_rating"></span>
+                                            
+                                            {{-- Star Visualization --}}
+                                            <div class="flex text-yellow-400">
+                                                <template x-for="star in 5" :key="star">
+                                                    <svg class="w-4 h-4 fill-current" :class="star <= Math.round(summary.average_rating) ? 'text-yellow-400' : 'text-gray-300'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568 8.332 1.054-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.054z"/></svg>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                                
+                            </summary>
+
+                            {{-- CONTENT: REVIEWS LIST --}}
+                            <div class="accordion-content p-4 divide-y divide-gray-100">
+                                <template x-if="summary.total_reviews === 0">
+                                    <p class="text-gray-500 text-center py-4">No reviews yet. Be the first to share your experience!</p>
+                                </template>
+                                
+                                <template x-for="review in reviews" :key="review.id">
+                                    <div class="py-4">
+                                        <div class="flex items-center justify-between mb-2">
+                                            {{-- User and Date --}}
+                                            <div class="flex items-center space-x-2">
+                                                <img :src="review.user.avatar ? '/storage/' + review.user.avatar : 'https://ui-avatars.com/api/?name=' + review.user.name" class="w-8 h-8 rounded-full object-cover">
+                                                <span class="font-semibold text-sm" x-text="review.user.name"></span>
+                                            </div>
+                                            <span class="text-xs text-gray-400" x-text="new Date(review.created_at).toLocaleDateString()"></span>
+                                        </div>
+
+                                        {{-- Rating Stars --}}
+                                        <div class="flex items-center mb-2">
+                                            <div class="flex text-yellow-400 mr-2">
+                                                <template x-for="star in 5" :key="star">
+                                                    <svg class="w-4 h-4 fill-current" :class="star <= review.rating ? 'text-yellow-400' : 'text-gray-300'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568 8.332 1.054-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.054z"/></svg>
+                                                </template>
+                                            </div>
+                                            <span class="text-sm font-medium text-gray-600" x-text="review.rating + '/5'"></span>
+                                        </div>
+
+                                        {{-- Comment --}}
+                                        <p class="text-gray-700 text-sm" x-text="review.comment || '(No comment provided)'"></p>
+                                    </div>
+                                </template>
+                                
+                                <template x-if="summary.total_reviews > reviews.length">
+                                    <div class="pt-4 text-center">
+                                        <button class="text-sm font-semibold text-black hover:underline">View All <span x-text="summary.total_reviews"></span> Reviews</button>
+                                    </div>
+                                </template>
+                            </div>
+                        </details>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- RELATED PRODUCTS -->
+</div>
+</div>
     <div class="related-section">
-        <h3 class="related-title font-oswald">You May Also Like</h3>
-        <div class="row">
-            @foreach($relatedProducts as $related)
-                <div class="col-6 col-md-3">
-                    <div class="product-card position-relative mb-4">
-                        <div class="image-wrapper bg-light position-relative" style="aspect-ratio: 1/1; overflow: hidden;">
-                             @if($related->is_new)
-                                <span class="badge-detail" style="font-size: 0.6rem; padding: 3px 8px; top: 10px; left: 10px;">NEW</span>
-                            @endif
-                            <img src="{{ asset($related->image) }}" class="w-100 h-100 object-fit-cover" alt="{{ $related->name }}">
-                            <a href="{{ route('products.show', $related->id) }}" class="stretched-link"></a>
-                        </div>
-                        <div class="mt-2">
-                            <h6 class="font-oswald text-uppercase mb-0 text-truncate">{{ $related->name }}</h6>
-                            <p class="text-secondary mb-1 small">{{ $related->brand }}</p>
-                            <span class="fw-bold">{{ number_format($related->price, 0, ',', '.') }} ₫</span>
+        <div class="container">
+            <h3 class="related-title font-oswald">You May Also Like</h3>
+            
+            <div class="row g-3 g-md-4"> 
+                @foreach($relatedProducts as $related)
+                    <div class="col-6 col-md-3">
+                        <div class="product-card position-relative mb-4">
+                            <div class="image-wrapper bg-light position-relative" style="aspect-ratio: 1/1;">
+                                @if($related->is_new)
+                                    <span class="badge-detail" style="font-size: 0.6rem; padding: 4px 8px; top: 10px; left: 10px;">NEW</span>
+                                @endif
+                                
+                                <img src="{{ asset($related->image) }}" class="w-100 h-100 object-fit-cover" alt="{{ $related->name }}">
+                                
+                                <a href="{{ route('products.show', $related->id) }}" class="stretched-link"></a>
+                            </div>
+
+                            <div class="card-info">
+                                <h6 class="font-oswald text-uppercase text-truncate fw-bold">{{ $related->name }}</h6>
+                                <p class="text-secondary mb-1 small">{{ $related->brand }}</p>
+                                <span class="fw-bold text-dark">{{ number_format($related->price, 0, ',', '.') }} ₫</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            @endforeach
+                @endforeach
+            </div>
         </div>
     </div>
 
-    <!-- SIZE GUIDE MODAL COMPONENT -->
     <div id="sizeGuideModal" class="size-guide-modal">
         <div class="size-guide-content">
             <button class="close-modal" onclick="closeSizeGuide()">&times;</button>
@@ -556,7 +616,6 @@
         </div>
     </div>
 
-    <!-- HIDDEN FORM FOR ADD TO CART -->
     <form id="addToCartForm" action="{{ route('cart.add') }}" method="POST" onsubmit="return addToCart(event);">
         @csrf
         <input type="hidden" name="product_id" value="{{ $product->id }}">
@@ -564,164 +623,124 @@
         <input type="hidden" name="size" id="form_size">
     </form>
 
-</div>
-@endsection
+</div> @endsection
 
 @push('scripts')
 <script>
-    // --- SIZE SELECTION LOGIC ---
+    // Listen for alpine:init event to register component
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('productReviews', (productId) => ({
+            productId: productId,
+            summary: { average_rating: 0, total_reviews: 0 },
+            reviews: [],
+            isLoading: false,
+
+            async fetchReviews() {
+                this.isLoading = true;
+                try {
+                    // Call API (Ensure this URL matches the Route in web.php)
+                    const response = await fetch(`/reviews/summary/${this.productId}`);
+                    
+                    if (!response.ok) throw new Error('Failed to fetch');
+                    
+                    const data = await response.json();
+                    
+                    this.summary.average_rating = data.average_rating || 0;
+                    this.summary.total_reviews = data.total_reviews || 0;
+                    this.reviews = data.reviews || [];
+
+                } catch (error) {
+                    console.error("Error fetching reviews:", error);
+                } finally {
+                    this.isLoading = false;
+                }
+            }
+        }));
+    });
+
+    // --- Other JS functions (Keep as is) ---
     function selectSize(element, size) {
         document.querySelectorAll('.size-option').forEach(el => el.classList.remove('selected'));
         element.classList.add('selected');
-        
-        // Update size into the UI input and the hidden form field
         document.getElementById('selectedSize').value = size;
         document.getElementById('form_size').value = size;
-        
         document.getElementById('sizeError').classList.add('d-none');
     }
 
-    // --- CART LOGIC (AJAX UPDATE) ---
+    // Add to Cart Logic
     async function addToCart(event) {
-        // PREVENT PAGE RELOAD
         event.preventDefault(); 
-        
         const size = document.getElementById('selectedSize').value;
         const btn = document.getElementById('addToCartButton');
         const form = document.getElementById('addToCartForm');
 
-        // Validation: must select a size first
         if (!size) {
             document.getElementById('sizeError').classList.remove('d-none');
             const grid = document.getElementById('sizeSelector');
             grid.style.animation = "shake 0.5s";
             setTimeout(() => grid.style.animation = "", 500);
-            return;
+            return false;
         }
         
-        // 1. Loading state (before sending request)
+        // Loading Effect
+        const originalText = btn.innerHTML;
         btn.innerHTML = 'ADDING...'; 
         btn.disabled = true;
         btn.style.opacity = "0.8";
 
-            try {
-            // Collect form data
+        try {
             const formData = new FormData(form);
-            
-                // 2. Send AJAX request (Fetch API)
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: formData,
-                    // Laravel expects the X-Requested-With header to detect AJAX
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
 
             const result = await response.json();
 
-            // 3. Handle server response
-            if (response.ok && result.status === 'success') {
-                // Success flash effect
-                flashCartSuccess();
+            if (response.ok && (result.status === 'success' || result.cart_count)) {
+                // Success
+                btn.innerHTML = 'ADDED TO CART!';
+                btn.classList.add('btn-success-flash');
                 
-                // --- [NEW] Update cart count in header ---
+                // Update header cart count (if available)
                 const cartBadge = document.getElementById('cart-count');
-                if (cartBadge) {
-                    // Update the count from the server response
-                    cartBadge.innerText = result.cart_count;
+                if (cartBadge && result.cart_count) cartBadge.innerText = result.cart_count;
 
-                    // (Optional) Add a small pop animation to draw attention
-                    cartBadge.classList.add('scale-150', 'transition-transform'); 
-                    setTimeout(() => {
-                        cartBadge.classList.remove('scale-150');
-                    }, 200);
-                }
-                // -------------------------------------------------------
-
-                console.log('Product added successfully. Cart Count:', result.cart_count);
-
+                // Reset button after 2s
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('btn-success-flash');
+                    btn.disabled = false;
+                    btn.style.opacity = "1";
+                }, 2000);
             } else {
-                // Handle errors returned from server (e.g. product not found, out of stock, not logged in)
-                console.error('Error adding to cart:', result.message || 'Unknown error');
-                
-                 if(response.status === 401) {
-                     alert('You need to log in to perform this action!');
-                     window.location.href = '/login'; // Redirect if not logged in
+                // Server error (e.g., not logged in)
+                if(response.status === 401) {
+                     window.location.href = "{{ route('login') }}";
                 } else {
-                     alert('An error occurred: ' + (result.message || 'Unknown error.'));
+                     alert(result.message || 'Error adding to cart');
+                     btn.innerHTML = originalText;
+                     btn.disabled = false;
+                     btn.style.opacity = "1";
                 }
-
-                // Restore button
-                resetCartButton();
             }
         } catch (error) {
-            // Handle network / fetch errors
-            console.error('Network Error:', error);
-            alert('Network error or server not responding.');
-            resetCartButton();
+            console.error('Error:', error);
+            alert('Something went wrong.');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            btn.style.opacity = "1";
         }
-
-        // Prevent default form submission
         return false; 
     }
     
-    // Reset button function (used on error)
-    function resetCartButton() {
-        const btn = document.getElementById('addToCartButton');
-        btn.innerHTML = 'ADD TO CART';
-        btn.disabled = false;
-        btn.style.opacity = "1";
-    }
-
-    /**
-     * Handle flash effect for the button after a successful add-to-cart
-     */
-    function flashCartSuccess() {
-        const btn = document.getElementById('addToCartButton');
-        
-        // 1. Switch to success state
-        btn.innerHTML = 'ADDED TO CART!';
-        btn.classList.add('btn-success-flash'); // Ensure this class is defined in CSS
-        btn.classList.remove('bg-black');
-        btn.disabled = true; 
-        btn.style.opacity = "1";
-
-        // 2. Set a timer to restore the button after 2 seconds
-        setTimeout(() => {
-            btn.innerHTML = 'ADD TO CART';
-            btn.classList.remove('btn-success-flash');
-            btn.classList.add('bg-black');
-            btn.disabled = false;
-        }, 2000); // Flash for 2 seconds
-    }
-
-    // --- SIZE GUIDE MODAL LOGIC (unchanged) ---
-    function openSizeGuide() {
-        document.getElementById('sizeGuideModal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeSizeGuide() {
-        document.getElementById('sizeGuideModal').style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-
-    window.onclick = function(event) {
-        const modal = document.getElementById('sizeGuideModal');
-        if (event.target == modal) {
-            closeSizeGuide();
-        }
-    }
-
-// --- WISHLIST AJAX LOGIC ---
+    // Wishlist Logic
     document.addEventListener('DOMContentLoaded', function() {
         const wishlistForm = document.getElementById('wishlistForm');
-        
         if (wishlistForm) {
             wishlistForm.addEventListener('submit', function(e) {
-                e.preventDefault(); // STOP REFRESH
-
+                e.preventDefault();
                 const btn = document.getElementById('wishlistBtn');
                 const toast = document.getElementById('converse-toast');
                 const toastTitle = document.getElementById('toast-title');
@@ -730,42 +749,37 @@
                 fetch(this.action, {
                     method: 'POST',
                     body: new FormData(this),
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
                 })
-                .then(response => {
-                    if (response.status === 401) {
-                        window.location.href = "{{ route('login') }}"; // Redirect if not logged in
-                        return;
-                    }
-                    return response.json();
+                .then(res => {
+                    if (res.status === 401) { window.location.href = "{{ route('login') }}"; return; }
+                    return res.json();
                 })
                 .then(data => {
                     if (!data) return;
-
-                    // 1. Update Toast Text
                     toastTitle.textContent = data.status === 'info' ? 'NOTE' : 'SUCCESS';
                     toastMessage.textContent = data.message;
-
-                    // 2. Show Toast
                     toast.classList.add('show');
                     setTimeout(() => toast.classList.remove('show'), 3000);
-
-                    // 3. Visual Effects on Button
+                    
                     if (data.status === 'success') {
-                        // Add 'active' class (Changes SVG fill/stroke to red based on your existing CSS)
-                        btn.classList.add('active');
-                        
-                        // Add animation class
+                        btn.classList.toggle('active');
                         btn.classList.add('heart-animate');
                         setTimeout(() => btn.classList.remove('heart-animate'), 400);
                     }
-                })
-                .catch(error => console.error('Error:', error));
+                });
             });
         }
     });
+    
+    // Size Guide Modal
+    function openSizeGuide() {
+        document.getElementById('sizeGuideModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+    function closeSizeGuide() {
+        document.getElementById('sizeGuideModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
 </script>
 @endpush

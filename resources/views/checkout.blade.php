@@ -205,57 +205,57 @@
 <div id="voucher-modal" class="fixed inset-0 z-[9999999] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity backdrop-blur-sm" onclick="closeVoucherModal()"></div>
 
-    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md w-full relative">
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
             
-            <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                <h3 class="text-lg font-black text-gray-900" id="modal-title">SELECT VOUCHER</h3>
-                <button onclick="closeVoucherModal()" class="text-gray-400 hover:text-black transition">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-
-            <div class="bg-white p-4 max-h-[400px] overflow-y-auto custom-scrollbar space-y-3">
+            <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md">
                 
-                @forelse($vouchers as $v)
-                <div class="border border-gray-200 rounded-lg p-3 flex justify-between items-center hover:border-black hover:bg-gray-50 transition group cursor-pointer" onclick="selectVoucher('{{ $v->code }}')">
-                    <div class="flex gap-3 items-center">
-                        <div class="bg-black text-white w-12 h-12 flex flex-col items-center justify-center rounded font-bold shadow-sm">
-                            @if($v->discount_type == 'percent')
-                                <span class="text-sm">{{ (int)$v->discount_value }}%</span>
-                            @else
-                                <span class="text-[10px]">₫</span>
-                            @endif
-                            <span class="text-[9px] opacity-80">OFF</span>
-                        </div>
-                        <div>
-                            <p class="font-black text-gray-900 text-base group-hover:text-red-600 transition">{{ $v->code }}</p>
-                            <p class="text-xs text-gray-500">{{ $v->description }}</p>
-                            @if($v->min_order_value > 0)
-                                <p class="text-[10px] text-gray-400">Min order: {{ number_format($v->min_order_value, 0, ',', '.') }}₫</p>
-                            @endif
-                        </div>
-                    </div>
-                    <button type="button" class="bg-white border border-black text-black text-xs font-bold px-4 py-2 rounded hover:bg-black hover:text-white transition">
-                        USE
+                <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                    <h3 class="text-lg font-black text-gray-900" id="modal-title">SELECT VOUCHER</h3>
+                    <button onclick="closeVoucherModal()" class="text-gray-400 hover:text-black transition outline-none focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                     </button>
                 </div>
-                @empty
-                    <div class="text-center py-8 text-gray-500">
-                        <p>There are no vouchers available at the moment.</p>
+
+                <div class="bg-white p-4 max-h-[400px] overflow-y-auto custom-scrollbar space-y-3">
+                    @forelse($vouchers as $v)
+                    <div class="border border-gray-200 rounded-lg p-3 flex justify-between items-center hover:border-black hover:bg-gray-50 transition group cursor-pointer" onclick="selectVoucher('{{ $v->code }}')">
+                        <div class="flex gap-3 items-center">
+                            <div class="bg-black text-white w-12 h-12 flex flex-col items-center justify-center rounded font-bold shadow-sm flex-shrink-0">
+                                @if($v->discount_type == 'percent')
+                                    <span class="text-sm">{{ (int)$v->discount_value }}%</span>
+                                @else
+                                    <span class="text-[10px]">₫</span>
+                                @endif
+                                <span class="text-[9px] opacity-80">OFF</span>
+                            </div>
+                            <div>
+                                <p class="font-black text-gray-900 text-base group-hover:text-red-600 transition">{{ $v->code }}</p>
+                                <p class="text-xs text-gray-500 line-clamp-1">{{ $v->description }}</p>
+                                @if($v->min_order_value > 0)
+                                    <p class="text-[10px] text-gray-400">Min order: {{ number_format($v->min_order_value, 0, ',', '.') }}₫</p>
+                                @endif
+                            </div>
+                        </div>
+                        <button type="button" class="bg-white border border-black text-black text-xs font-bold px-4 py-2 rounded hover:bg-black hover:text-white transition whitespace-nowrap ml-2">
+                            USE
+                        </button>
                     </div>
-                @endforelse
+                    @empty
+                        <div class="text-center py-8 text-gray-500">
+                            <p>There are no vouchers available at the moment.</p>
+                        </div>
+                    @endforelse
+                </div>
 
-            </div>
+                <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse">
+                    <button type="button" onclick="closeVoucherModal()" class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-100 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                        Close
+                    </button>
+                </div>
 
-            <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse">
-                <button type="button" onclick="closeVoucherModal()" class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-100 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
-                    Close
-                </button>
             </div>
         </div>
     </div>

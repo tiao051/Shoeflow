@@ -30,7 +30,7 @@
 </div>
 <hr class="border-gray-200 hidden md:block" />
 
-<header class="bg-white sticky top-0 z-[100] shadow-md">
+<header class="bg-white sticky top-0 z-[20] shadow-md">
     <div class="container mx-auto px-4 header-content flex items-center justify-between h-16">
         
         <a href="{{ url('/') }}" class="logo text-2xl font-extrabold tracking-widest text-black flex-shrink-0">CONVERSE</a>

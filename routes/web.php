@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\Admin\VoucherController;
+use App\Http\Controllers\ReviewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -128,6 +129,9 @@ Route::middleware('auth')->group(function () {
     // Chat msgs
     Route::get('/chat/messages', [ChatController::class, 'fetchMessages']);
     Route::post('/chat/send', [ChatController::class, 'sendMessage']);
+
+    Route::post('/reviews', [ReviewController::class, 'store'])->middleware('auth');
+    Route::get('/reviews/summary/{productId}', [ReviewController::class, 'getReviewsSummary']);
 });
 
 /*
@@ -157,8 +161,15 @@ Route::prefix('admin')->group(function () {
         Route::get('/chat/messages/{userId}', [ChatController::class, 'adminFetchMessages']);
         Route::post('/chat/send', [ChatController::class, 'sendMessage']);
         Route::post('/chat/read', [ChatController::class, 'markAsRead']); 
+
         // Vouchers
         Route::resource('vouchers', VoucherController::class);
+
+        // Reviews
+        Route::get('/reviews/analytics', function () {
+            return view('admin.reviews.dashboard');
+                })->name('admin.reviews.analytics');
+        Route::post('/reviews/analyze-ai', [ReviewController::class, 'analyzeReviews']);
     });
 });
 
