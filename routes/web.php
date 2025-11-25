@@ -153,7 +153,8 @@ Route::prefix('admin')->group(function () {
         Route::get('/chat', [ChatController::class, 'adminIndex'])->name('chat');
         Route::get('/chat/conversations', [ChatController::class, 'adminConversations']);
         Route::get('/chat/messages/{userId}', [ChatController::class, 'adminFetchMessages']);
-
+        Route::post('/chat/send', [ChatController::class, 'sendMessage']);
+        Route::post('/chat/read', [ChatController::class, 'markAsRead']); 
         // Vouchers
         Route::resource('vouchers', VoucherController::class);
     });

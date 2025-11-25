@@ -169,7 +169,7 @@
     document.addEventListener("DOMContentLoaded", function() {
         
         // ==========================================
-        // 1. SEARCH LOGIC (KEPT ORIGINAL)
+        // 1. SEARCH LOGIC (GIỮ NGUYÊN)
         // ==========================================
         const container = document.getElementById('search-container');
         const form = document.getElementById('search-form');
@@ -200,9 +200,7 @@
         }
         if (input) {
             input.addEventListener('focus', openSearch);
-            input.addEventListener('blur', function() {
-                setTimeout(closeSearch, 200);
-            });
+            input.addEventListener('blur', function() { setTimeout(closeSearch, 200); });
             input.addEventListener('input', function() {
                 const keyword = this.value.trim();
                 clearTimeout(debounceTimer);
@@ -211,9 +209,7 @@
                     suggestionsBox.innerHTML = '';
                     return;
                 }
-                debounceTimer = setTimeout(() => {
-                    fetchSuggestions(keyword);
-                }, 200);
+                debounceTimer = setTimeout(() => { fetchSuggestions(keyword); }, 200);
             });
         }
 
@@ -242,7 +238,7 @@
         }
 
         // ==========================================
-        // 2. CHATBOX LOGIC (WEBSOCKET ENABLED)
+        // 2. CHATBOX LOGIC (ĐÃ SỬA REALTIME)
         // ==========================================
         const openBtn = document.getElementById('chat-open-btn');
         const closeBtn = document.getElementById('chat-close-btn');
@@ -252,45 +248,43 @@
         const chatHistory = document.getElementById('chat-history');
         const CHAT_STATE_KEY = 'chatPopupState';
 
-        // Only initialize chat if user is logged in
         if (AUTH_USER_ID) {
             initChat();
         }
 
         function initChat() {
-            // 2.1. Load past messages from server
-            console.log('Loading past messages...');
+            // 2.1. Load tin nhắn cũ
             loadMessagesFromServer();
-            console.log('Past messages loaded.');
-            // 2.2. Restore open/closed state from localStorage
+
+            // 2.2. Khôi phục trạng thái mở/đóng
             const state = localStorage.getItem(CHAT_STATE_KEY);
             if (state === 'open') openChatUI();
-            console.log('Chat popup state restored:', state);
-            // 2.3. Initialize WebSocket Listener
-            // Use setInterval to wait for 'window.Echo' to be loaded by app.js (Vite)
+
+            // 2.3. Lắng nghe WebSocket (SỬA PHẦN NÀY)
             let echoCheckParams = setInterval(() => {
-                console.log('Checking for Echo...', window.Echo);
                 if (window.Echo) {
-                    console.log('Echo found:', window.Echo);
                     clearInterval(echoCheckParams);
-                    console.log('Echo loaded. Subscribing to channel: chat.' + AUTH_USER_ID);
+                    console.log('Echo loaded. Listening on chat.' + AUTH_USER_ID);
 
                     window.Echo.private(`chat.${AUTH_USER_ID}`)
-                        .listen('MessageSent', (e) => {
-                            console.log('Socket Event Received:', e.message);
+                        // LƯU Ý: Phải có dấu chấm trước message.sent vì ta dùng broadcastAs
+                        .listen('.message.sent', (e) => {
+                            console.log('New message received:', e.message);
 
-                            // If message is from Admin (is_admin = true)
+                            // Nếu tin nhắn là từ Admin (is_admin = true)
                             if (e.message.is_admin) {
-                                createMessage(e.message.message, false); // false = NOT user (left side)
+                                // 1. Hiển thị tin nhắn bên trái (false)
+                                createMessage(e.message.message, false);
                                 
-                                // If chat is closed, open it to notify user
+                                // 2. Nếu popup đang đóng, mở nó ra hoặc hiện thông báo
                                 if (chatPopup.classList.contains('invisible')) {
                                     openChatUI();
+                                    // Có thể thêm âm thanh thông báo ở đây
                                 }
                             }
                         });
                 }
-            }, 500); // Check every 500ms
+            }, 500); 
         }
 
         // --- UI Functions ---
@@ -335,17 +329,11 @@
 
         // --- Core Message Logic ---
 
-        /**
-         * Render a message bubble to the DOM
-         * @param {string} text - Message content
-         * @param {boolean} isUser - True if sent by user (Right), False if admin (Left)
-         */
         function createMessage(text, isUser) {
             const messageWrapper = document.createElement('div');
             messageWrapper.classList.add('flex', isUser ? 'justify-end' : 'justify-start');
 
             const messageBody = document.createElement('div');
-            // Apply your existing styles
             messageBody.classList.add(
                 'p-3', 'rounded-xl', 'max-w-[80%]', 'text-sm', 'shadow-sm', 'break-words',
                 isUser ? 'bg-red-600' : 'bg-gray-200',
@@ -359,45 +347,37 @@
             scrollToBottom();
         }
 
-        /**
-         * Handle sending message to server
-         */
         async function handleSendMessage() {
             const text = chatInput.value.trim();
             if (!text) return;
 
-            // 1. Optimistic UI Update (Show immediately)
-            createMessage(text, true); // true = User sent
+            // 1. Hiện tin nhắn ngay lập tức
+            createMessage(text, true); 
             chatInput.value = '';
             chatInput.focus();
 
-            // 2. Send to API
+            // 2. Gửi lên Server (Thêm X-Socket-ID để tránh lặp nếu sau này mở rộng)
             try {
                 await fetch('/chat/send', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': CSRF_TOKEN
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                        // Thêm socket ID để đồng bộ tốt hơn
+                        'X-Socket-ID': window.Echo ? window.Echo.socketId() : null
                     },
-                    body: JSON.stringify({
-                        message: text
-                    })
+                    body: JSON.stringify({ message: text })
                 });
-                // Success: No action needed, message is already displayed.
             } catch (error) {
                 console.error('Error sending message:', error);
             }
         }
 
-        /**
-         * Load message history from database
-         */
         async function loadMessagesFromServer() {
             try {
                 const response = await fetch('/chat/messages');
                 const messages = await response.json();
 
-                // Always keep the default greeting
                 chatHistory.innerHTML = `
                     <div class="flex justify-start">
                         <div class="bg-gray-200 text-gray-800 p-3 rounded-xl rounded-tl-none max-w-[80%] text-sm shadow-sm break-words">
@@ -406,10 +386,7 @@
                     </div>
                 `;
 
-                // Render history
                 messages.forEach(msg => {
-                    // msg.is_admin == 1 (true) => Admin => Left
-                    // msg.is_admin == 0 (false) => User => Right
                     createMessage(msg.message, !msg.is_admin);
                 });
 

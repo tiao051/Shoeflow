@@ -12,16 +12,22 @@ class CategoryController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Category::with('parent')->latest();
+        // CHANGED: Use withCount('products') to get the count, removed 'parent' relationship
+        $query = Category::withCount('products')->latest();
 
         if ($search = $request->search) {
             $query->where('name', 'like', "%{$search}%");
         }
 
-        $categories = $query->get();
-        $parentCategories = Category::whereNull('parent_id')->get();
+        $categories = $query->paginate(10);
         
-        return view('admin.categories.index', compact('categories', 'parentCategories'));
+        // Removed $parentCategories variable as it is no longer needed
+        return view('admin.categories.index', compact('categories'));
+    }
+
+    public function create()
+    {
+        return view('admin.categories.create');
     }
 
     public function store(Request $request)
@@ -29,11 +35,13 @@ class CategoryController extends Controller
         $request->validate([
             'name' => 'required|unique:categories,name|max:255',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'parent_id' => 'nullable|exists:categories,id'
+            // Removed parent_id validation
         ]);
 
-        $data = $request->all();
+        $data = $request->except('image');
         $data['slug'] = Str::slug($request->name);
+        // Ensure no parent_id is accidentally set
+        $data['parent_id'] = null; 
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
@@ -43,7 +51,7 @@ class CategoryController extends Controller
         }
 
         $category = Category::create($data);
-        $category->load('parent');
+        // No need to load 'parent' anymore
 
         return response()->json([
             'success' => true,
@@ -52,24 +60,27 @@ class CategoryController extends Controller
         ]);
     }
 
+    public function edit(Category $category)
+    {
+        return view('admin.categories.edit', compact('category'));
+    }
+
     public function update(Request $request, Category $category)
     {
         $request->validate([
             'name' => 'required|max:255|unique:categories,name,' . $category->id,
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'parent_id' => 'nullable|exists:categories,id'
+            // Removed parent_id validation
         ]);
 
-        $data = $request->all();
+        $data = $request->except('image');
         $data['slug'] = Str::slug($request->name);
 
         if ($request->hasFile('image')) {
-            // 1. Delete old image from public/images if exists
             if ($category->image && File::exists(public_path($category->image))) {
                 File::delete(public_path($category->image));
             }
 
-            // 2. Upload new image
             $file = $request->file('image');
             $filename = time() . '_' . $file->getClientOriginalName();
             $file->move(public_path('images'), $filename);
@@ -77,7 +88,6 @@ class CategoryController extends Controller
         }
 
         $category->update($data);
-        $category->load('parent');
 
         return response()->json([
             'success' => true,
@@ -88,7 +98,6 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
-        // Delete image file from public/images
         if ($category->image && File::exists(public_path($category->image))) {
             File::delete(public_path($category->image));
         }

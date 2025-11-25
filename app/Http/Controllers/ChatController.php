@@ -67,25 +67,38 @@ class ChatController extends Controller
 
     // ADMIN: Fetch list of users who have sent messages
     public function adminConversations()
-    {
-        // Fetch users who have sent messages, sorted by the latest message
-        $users = User::whereHas('messages')
-            ->with(['messages' => function($q) {
-                $q->latest()->limit(1); // Fetch the latest message only
-            }])
-            ->get()
-            ->sortByDesc(function($user) {
-                return $user->messages->first()->created_at ?? 0;
-            })
-            ->values();
+        {
+            $users = User::whereHas('messages')
+                ->withCount(['messages as unread_count' => function ($query) {
+                    $query->where('is_admin', false)->where('is_read', false);
+                }])
+                ->with(['messages' => function($q) {
+                    $q->latest()->limit(1); 
+                }])
+                ->get()
+                ->sortByDesc(function($user) {
+                    return $user->messages->first()->created_at ?? 0;
+                })
+                ->values();
 
-        return response()->json($users);
-    }
+            return response()->json($users);
+        }
 
     // ADMIN: Fetch messages of a specific user
     public function adminFetchMessages($userId)
     {
         return Message::where('user_id', $userId)->get();
+    }
+    
+    public function markAsRead(Request $request)
+    {
+        $userId = $request->user_id;
+        Message::where('user_id', $userId)
+            ->where('is_admin', false)
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        return response()->json(['success' => true]);
     }
     
     // ADMIN: View chat page
