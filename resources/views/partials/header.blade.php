@@ -161,7 +161,7 @@
 
 </header>
 <script>
-    // Global Variables
+    // Global Constants
     const BASE_URL = '{{ asset('/') }}';
     const AUTH_USER_ID = {{ auth()->id() ?? 'null' }};
     const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
@@ -169,7 +169,7 @@
     document.addEventListener("DOMContentLoaded", function() {
         
         // ==========================================
-        // 1. SEARCH LOGIC (GIỮ NGUYÊN)
+        // 1. SEARCH LOGIC (KEPT AS IS)
         // ==========================================
         const container = document.getElementById('search-container');
         const form = document.getElementById('search-form');
@@ -238,7 +238,7 @@
         }
 
         // ==========================================
-        // 2. CHATBOX LOGIC (ĐÃ SỬA REALTIME)
+        // 2. CHATBOX LOGIC (REALTIME & INTELLIGENT BOT)
         // ==========================================
         const openBtn = document.getElementById('chat-open-btn');
         const closeBtn = document.getElementById('chat-close-btn');
@@ -253,33 +253,30 @@
         }
 
         function initChat() {
-            // 2.1. Load tin nhắn cũ
+            // 2.1. Load past messages
             loadMessagesFromServer();
 
-            // 2.2. Khôi phục trạng thái mở/đóng
+            // 2.2. Restore state
             const state = localStorage.getItem(CHAT_STATE_KEY);
             if (state === 'open') openChatUI();
 
-            // 2.3. Lắng nghe WebSocket (SỬA PHẦN NÀY)
+            // 2.3. Listen to WebSocket
             let echoCheckParams = setInterval(() => {
                 if (window.Echo) {
                     clearInterval(echoCheckParams);
                     console.log('Echo loaded. Listening on chat.' + AUTH_USER_ID);
 
                     window.Echo.private(`chat.${AUTH_USER_ID}`)
-                        // LƯU Ý: Phải có dấu chấm trước message.sent vì ta dùng broadcastAs
                         .listen('.message.sent', (e) => {
                             console.log('New message received:', e.message);
 
-                            // Nếu tin nhắn là từ Admin (is_admin = true)
+                            // If message is from Admin/Bot (is_admin = true)
                             if (e.message.is_admin) {
-                                // 1. Hiển thị tin nhắn bên trái (false)
                                 createMessage(e.message.message, false);
                                 
-                                // 2. Nếu popup đang đóng, mở nó ra hoặc hiện thông báo
+                                // Notify user if closed
                                 if (chatPopup.classList.contains('invisible')) {
                                     openChatUI();
-                                    // Có thể thêm âm thanh thông báo ở đây
                                 }
                             }
                         });
@@ -340,7 +337,9 @@
                 isUser ? 'text-white' : 'text-gray-800',
                 isUser ? 'rounded-br-none' : 'rounded-tl-none'
             );
-            messageBody.textContent = text;
+            
+            // Use innerHTML to render links/bold text from Bot
+            messageBody.innerHTML = text;
 
             messageWrapper.appendChild(messageBody);
             chatHistory.appendChild(messageWrapper);
@@ -351,19 +350,19 @@
             const text = chatInput.value.trim();
             if (!text) return;
 
-            // 1. Hiện tin nhắn ngay lập tức
+            // 1. Show optimistic message
             createMessage(text, true); 
             chatInput.value = '';
             chatInput.focus();
 
-            // 2. Gửi lên Server (Thêm X-Socket-ID để tránh lặp nếu sau này mở rộng)
+            // 2. Send to Server
             try {
                 await fetch('/chat/send', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': CSRF_TOKEN,
-                        // Thêm socket ID để đồng bộ tốt hơn
+                        // Prevent loop by sending socket ID
                         'X-Socket-ID': window.Echo ? window.Echo.socketId() : null
                     },
                     body: JSON.stringify({ message: text })

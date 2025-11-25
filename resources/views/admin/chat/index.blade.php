@@ -6,6 +6,7 @@
 @section('content')
 <div class="h-[calc(100vh-130px)] flex bg-white rounded-xl shadow-lg overflow-hidden" x-data="chatApp()">
     
+    <!-- LEFT SIDEBAR: CONVERSATION LIST -->
     <div class="w-1/3 border-r border-gray-200 flex flex-col">
         <div class="p-4 border-b border-gray-200 bg-gray-50">
             <h2 class="font-bold text-lg text-gray-800">Conversations</h2>
@@ -21,23 +22,27 @@
                      class="p-4 flex items-center cursor-pointer hover:bg-gray-50 transition border-b border-gray-100 relative"
                      :class="activeUser && activeUser.id === user.id ? 'bg-blue-50 border-l-4 border-l-black' : ''">
                     
+                    <!-- Avatar -->
                     <div class="relative">
                         <img :src="user.avatar ? '/storage/' + user.avatar : 'https://ui-avatars.com/api/?name=' + user.name" 
                              class="w-12 h-12 rounded-full object-cover border border-gray-200">
                         <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
                     </div>
 
+                    <!-- User Info & Preview -->
                     <div class="ml-4 flex-1 overflow-hidden">
                         <div class="flex justify-between items-center mb-1">
                             <h3 class="font-bold text-sm truncate" :class="user.unread_count > 0 ? 'text-black' : 'text-gray-700'" x-text="user.name"></h3>
                             <span class="text-[10px] text-gray-400">Now</span>
                         </div>
                         
+                        <!-- Preview Message: We strip HTML tags here to keep the sidebar clean -->
                         <p class="text-sm truncate" 
                            :class="user.unread_count > 0 ? 'font-bold text-gray-900' : 'text-gray-500'"
-                           x-text="user.messages.length > 0 ? (user.messages[0].is_admin ? 'You: ' : '') + user.messages[0].message : 'No messages'"></p>
+                           x-text="user.messages.length > 0 ? (user.messages[0].is_admin ? 'You: ' : '') + user.messages[0].message.replace(/(<([^>]+)>)/gi, '') : 'No messages'"></p>
                     </div>
 
+                    <!-- Unread Badge -->
                     <template x-if="user.unread_count > 0">
                         <div class="ml-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm" x-text="user.unread_count"></div>
                     </template>
@@ -46,8 +51,10 @@
         </div>
     </div>
 
+    <!-- RIGHT SIDE: CHAT AREA -->
     <div class="w-2/3 flex flex-col bg-white">
         
+        <!-- Chat Header -->
         <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 h-16">
             <template x-if="activeUser">
                 <div class="flex items-center">
@@ -63,6 +70,7 @@
             </template>
         </div>
 
+        <!-- Messages Container -->
         <div class="flex-1 p-4 overflow-y-auto bg-white space-y-4" id="messages-container">
             <template x-if="isLoading">
                 <div class="flex justify-center mt-10"><span class="text-gray-400">Loading messages...</span></div>
@@ -72,7 +80,10 @@
                 <div class="flex w-full" :class="msg.is_admin ? 'justify-end' : 'justify-start'">
                     <div class="max-w-[70%] px-4 py-2 rounded-2xl text-sm shadow-sm relative group"
                          :class="msg.is_admin ? 'bg-black text-white rounded-br-none' : 'bg-gray-100 text-gray-800 rounded-bl-none'">
-                        <p x-text="msg.message"></p>
+                        
+                        <!-- FIXED: Use x-html to render HTML tags like <b> and <br> -->
+                        <div x-html="msg.message"></div>
+                        
                         <span class="text-[9px] opacity-0 group-hover:opacity-70 transition absolute -bottom-5 block w-max" 
                               :class="msg.is_admin ? 'right-0 text-gray-400' : 'left-0 text-gray-400'">
                             Just now
@@ -82,6 +93,7 @@
             </template>
         </div>
 
+        <!-- Chat Input -->
         <div class="p-4 border-t border-gray-100" x-show="activeUser">
             <form @submit.prevent="sendMessage" class="flex items-center gap-2">
                 <input type="text" x-model="newMessage" placeholder="Type a message..." 
@@ -111,13 +123,13 @@
             },
 
             listenForNewMessages() {
-                // Lắng nghe kênh 'admin.chat'
+                // Listen to channel 'admin.chat'
                 window.Echo.private('admin.chat')
                     .listen('.message.sent', (e) => {
                         const msg = e.message;
                         const senderId = msg.user_id;
 
-                        // 1. Nếu tin nhắn do chính Admin gửi (trên thiết bị khác)
+                        // 1. If message is sent by Admin (possibly from another device/tab)
                         if (msg.is_admin) {
                             if (this.activeUser && this.activeUser.id === senderId) {
                                 this.messages.push(msg);
@@ -126,40 +138,40 @@
                             return; 
                         }
 
-                        // 2. Xử lý tin nhắn từ USER gửi đến
+                        // 2. Handle incoming messages from USER
                         const userIndex = this.conversations.findIndex(u => u.id === senderId);
 
                         if (userIndex === -1) {
-                            // CASE A: User mới tinh (chưa có trong sidebar)
-                            // Tạo object user mới từ dữ liệu gửi kèm trong event
+                            // CASE A: Brand new user (not in sidebar list)
+                            // Create new user object from event data
                             const newUser = {
                                 id: msg.user.id,
                                 name: msg.user.name,
                                 avatar: msg.user.avatar,
-                                unread_count: 1, // Tin mới nên chưa đọc
-                                messages: [msg]  // Tin nhắn mới nhất
+                                unread_count: 1, // New message, so unread
+                                messages: [msg]  // Latest message
                             };
-                            // Đưa lên đầu danh sách
+                            // Add to top of list
                             this.conversations.unshift(newUser);
                             this.playNotificationSound();
                         } else {
-                            // CASE B: User đã có trong sidebar
+                            // CASE B: User already exists in sidebar
                             const user = this.conversations[userIndex];
                             
-                            // Cập nhật tin nhắn preview
+                            // Update preview message
                             user.messages = [msg];
 
-                            // Đưa user này lên đầu danh sách
+                            // Move user to top
                             this.conversations.splice(userIndex, 1);
                             this.conversations.unshift(user);
 
-                            // Nếu đang chat với user này -> Hiện tin nhắn luôn
+                            // If currently chatting with this user -> Show message immediately
                             if (this.activeUser && this.activeUser.id === senderId) {
                                 this.messages.push(msg);
                                 this.scrollToBottom();
-                                this.markAsRead(senderId); // Đánh dấu đọc ngay
+                                this.markAsRead(senderId); // Mark as read immediately
                             } else {
-                                // Nếu đang không chat -> Tăng số chưa đọc
+                                // If not chatting -> Increment unread count
                                 user.unread_count++;
                                 this.playNotificationSound();
                             }
@@ -178,7 +190,7 @@
                 this.activeUser = user;
                 this.isLoading = true;
                 
-                // Reset unread UI ngay lập tức
+                // Reset unread UI immediately
                 const idx = this.conversations.findIndex(u => u.id === user.id);
                 if (idx !== -1) this.conversations[idx].unread_count = 0;
 
@@ -199,17 +211,17 @@
                     target_user_id: this.activeUser.id
                 };
                 
-                // 1. HIỆN TIN NHẮN NGAY LẬP TỨC (Optimistic UI)
-                // Giữ nguyên phần này để trải nghiệm mượt mà
+                // 1. OPTIMISTIC UI UPDATE
+                // Push message to UI immediately for smooth experience
                 this.messages.push({
-                    id: Date.now(), // ID tạm
+                    id: Date.now(), // Temp ID
                     message: this.newMessage,
                     is_admin: true,
                     created_at: new Date().toISOString()
                 });
                 this.scrollToBottom();
                 
-                // Cập nhật sidebar preview
+                // Update sidebar preview
                 const idx = this.conversations.findIndex(u => u.id === this.activeUser.id);
                 if (idx !== -1) {
                     this.conversations[idx].messages = [{ message: this.newMessage, is_admin: true }];
@@ -221,16 +233,14 @@
                 this.newMessage = '';
 
                 try {
-                    // 2. GỬI LÊN SERVER (SỬA ĐOẠN NÀY)
+                    // 2. SEND TO SERVER
                     await fetch('/admin/chat/send', {
                         method: 'POST',
                         headers: { 
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                             
-                            // --- THÊM DÒNG NÀY ---
-                            // Dòng này báo cho Laravel biết Socket ID của bạn
-                            // Laravel sẽ dùng nó để loại trừ bạn ra khỏi danh sách nhận broadcast (toOthers hoạt động)
+                            // Send Socket ID to exclude current user from broadcast (prevent duplicate Echo events)
                             'X-Socket-ID': window.Echo.socketId() 
                         },
                         body: JSON.stringify(payload)
@@ -250,7 +260,7 @@
             },
 
             playNotificationSound() {
-                // Tùy chọn: Phát âm thanh tin nhắn mới
+                // Optional: Play sound on new message
                 // const audio = new Audio('/sounds/notification.mp3');
                 // audio.play().catch(e => {}); 
             },
