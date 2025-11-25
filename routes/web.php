@@ -169,7 +169,8 @@ Route::prefix('admin')->group(function () {
         Route::get('/reviews/analytics', function () {
             return view('admin.reviews.dashboard');
                 })->name('admin.reviews.analytics');
-        Route::post('/reviews/analyze-ai', [ReviewController::class, 'analyzeReviews']);
+        Route::get('/reviews/analytics', [ReviewController::class, 'index'])->name('reviews.index');
+        Route::post('/reviews/analyze-ai', [ReviewController::class, 'analyzeReviews'])->name('reviews.analyze');
     });
 });
 

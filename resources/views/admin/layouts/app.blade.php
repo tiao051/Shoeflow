@@ -66,6 +66,13 @@
                     <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                     Orders
                 </a>
+                <a href="{{ route('admin.reviews.index') }}" 
+                    class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.reviews.*') ? 'bg-yellow-500 text-black' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
+                    <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Review Analytics
+                </a>
                 <a href="{{ route('admin.vouchers.index') }}" 
                     class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors 
                     {{ request()->routeIs('admin.vouchers.*') ? 'bg-yellow-500 text-black' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">

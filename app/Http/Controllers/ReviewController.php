@@ -7,11 +7,18 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB; 
 
 class ReviewController extends Controller
 {
+    /**
+     * Render the Review Analytics Dashboard (Admin).
+     */
+    public function index()
+    {
+        return view('admin.reviews.index');
+    }
+
     /**
      * Store a newly created review in storage.
      */
@@ -35,17 +42,6 @@ class ReviewController extends Controller
                 'has_reviewed' => true 
             ], 409); 
         }
-        // --- PURCHASE VERIFICATION LOGIC (Example) ---
-        // $hasPurchased = Order::where('user_id', $user->id)
-        //     ->whereHas('items', function($q) use ($request) {
-        //         $q->where('product_id', $request->product_id);
-        //     })
-        //     ->where('status', 'delivered') // Only allow if delivered
-        //     ->exists();
-        
-        // if (!$hasPurchased) {
-        //     return response()->json(['error' => 'You must purchase and receive this product to review it.'], 403);
-        // }
 
         $review = Review::create([
             'user_id'    => $user->id,
@@ -63,7 +59,7 @@ class ReviewController extends Controller
      */
     public function analyzeReviews()
     {
-        // 1. Fetch recent reviews (e.g., last 100) to analyze trends
+        // 1. Fetch recent reviews to analyze trends
         $reviews = Review::with('product:id,name')
             ->orderBy('created_at', 'desc')
             ->limit(100)
@@ -89,7 +85,7 @@ class ReviewController extends Controller
         {$reviewsText}
 
         OUTPUT FORMAT:
-        Return ONLY valid HTML (without ```html tags). Structure the report as follows:
+        Return ONLY valid HTML WITHOUT ```html tags. Structure the report as follows:
         
         <div class='space-y-4'>
             <div class='p-4 bg-blue-50 rounded-lg'>
@@ -102,14 +98,12 @@ class ReviewController extends Controller
                     <h4 class='font-bold text-green-800'>Key Strengths</h4>
                     <ul class='list-disc list-inside text-sm mt-2'>
                         <li>...Point 1...</li>
-                        <li>...Point 2...</li>
                     </ul>
                 </div>
                 <div class='p-4 bg-red-50 rounded-lg'>
                     <h4 class='font-bold text-red-800'>Areas for Improvement</h4>
                     <ul class='list-disc list-inside text-sm mt-2'>
                         <li>...Point 1...</li>
-                        <li>...Point 2...</li>
                     </ul>
                 </div>
             </div>
@@ -118,9 +112,7 @@ class ReviewController extends Controller
                 <h3 class='font-bold text-purple-800 text-lg mb-2'>Strategic Development Plan</h3>
                 <p class='mb-2 text-sm text-gray-600'>Based on the feedback, here are actionable steps:</p>
                 <ul class='space-y-2'>
-                     <li class='flex items-start'><span class='mr-2'>👉</span><span>...Actionable Step 1...</span></li>
-                     <li class='flex items-start'><span class='mr-2'>👉</span><span>...Actionable Step 2...</span></li>
-                     <li class='flex items-start'><span class='mr-2'>👉</span><span>...Actionable Step 3...</span></li>
+                     <li class='flex items-start'><span class='mr-2'></span><span>...Actionable Step 1...</span></li>
                 </ul>
             </div>
         </div>
@@ -128,7 +120,11 @@ class ReviewController extends Controller
         Keep the tone professional, objective, and constructive. English language only.";
 
         // 4. Call Gemini API
-        $analysisHtml = $this->callGeminiAPI($systemInstruction);
+        $rawContent = $this->callGeminiAPI($systemInstruction);
+
+        $cleanHtml = str_replace(['```html', '```'], '', $rawContent);
+
+        $analysisHtml = trim($cleanHtml);
 
         return response()->json(['html' => $analysisHtml]);
     }
@@ -136,7 +132,7 @@ class ReviewController extends Controller
     private function callGeminiAPI($prompt)
     {
         $apiKey = config('services.gemini.api_key');
-        $url = "[https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=](https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=){$apiKey}";
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$apiKey}";
 
         try {
             $response = Http::withoutVerifying()
@@ -175,7 +171,7 @@ class ReviewController extends Controller
             ->where('is_visible', true) 
             ->with('user:id,name,avatar') 
             ->orderBy('created_at', 'desc')
-            ->limit(5) // Limit to top 5 reviews for brevity
+            ->limit(5)
             ->get();
 
         return response()->json([

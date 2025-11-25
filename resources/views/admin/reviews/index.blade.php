@@ -6,7 +6,6 @@
 @section('content')
 <div class="p-6" x-data="reviewAnalytics()">
     
-    <!-- Header Stats -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <h3 class="text-gray-500 text-sm font-medium">Total Reviews</h3>
@@ -27,7 +26,7 @@
                     :disabled="isLoading"
                     class="w-full h-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-bold shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-2">
                 <template x-if="!isLoading">
-                    <span>✨ Generate AI Strategy Report</span>
+                    <span>Generate Strategy Report</span>
                 </template>
                 <template x-if="isLoading">
                     <div class="flex items-center">
@@ -38,12 +37,10 @@
                         Analyzing Data...
                     </div>
                 </template>
-                <span class="text-[10px] font-normal opacity-80">Powered by Gemini AI</span>
             </button>
         </div>
     </div>
 
-    <!-- AI Report Content Area -->
     <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden min-h-[400px]">
         <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
             <h2 class="font-bold text-gray-800 flex items-center gap-2">
@@ -54,7 +51,6 @@
         </div>
 
         <div class="p-8">
-            <!-- Empty State -->
             <div x-show="!reportHtml && !isLoading" class="text-center py-10">
                 <div class="bg-gray-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                     <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
@@ -63,7 +59,6 @@
                 <p class="text-gray-500 mt-2 max-w-md mx-auto">Click the button above to let AI analyze recent customer reviews and generate a development strategy.</p>
             </div>
 
-            <!-- Report Content -->
             <div x-show="reportHtml" class="prose max-w-none animate-fade-in-up">
                 <div x-html="reportHtml"></div>
             </div>
@@ -85,7 +80,7 @@
                 
                 try {
                     // Call the Controller Endpoint
-                    const response = await fetch('/admin/reviews/analyze-ai', {
+                    const response = await fetch('{{ route("admin.reviews.analyze") }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -95,7 +90,7 @@
                     
                     const data = await response.json();
                     
-                    // Simulate typing effect or just show it
+                    // Update state with AI response
                     this.reportHtml = data.html;
                     this.lastUpdated = new Date().toLocaleString();
                     
