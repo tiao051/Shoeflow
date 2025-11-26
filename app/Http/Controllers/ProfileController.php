@@ -94,7 +94,7 @@ class ProfileController extends Controller
         $user->avatar = $path;
         $user->save();
 
-        return redirect()->route('profile.show')->with('success', 'Your profile picture has been updated successfully!');
+        return redirect()->back()->with('success', 'Profile has been updated.');
     }
     
     public function getOrderDetails($id)
