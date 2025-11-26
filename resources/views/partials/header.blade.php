@@ -230,7 +230,7 @@
         function renderSuggestions(products) {
             const html = products.map(product => {
                 const imagePath = product.image || 'images/placeholder.jpg';
-                return `<a href="/product/${product.slug || product.id}" class="flex items-center p-3 hover:bg-gray-100 border-b transition-colors">
+                return `<a href="/products/${product.slug || product.id}" class="flex items-center p-3 hover:bg-gray-100 border-b transition-colors">
                     <img src="${BASE_URL}${imagePath}" class="w-10 h-10 object-cover mr-3 border" onerror="this.src='${BASE_URL}images/placeholder.jpg';">
                     <div><div class="text-sm font-bold text-black line-clamp-1">${product.name}</div><div class="text-xs text-red-600 font-semibold">${new Intl.NumberFormat('en-US').format(product.price)} VND</div></div></a>`;
             }).join('');
