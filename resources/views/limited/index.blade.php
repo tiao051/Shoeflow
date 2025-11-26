@@ -159,9 +159,6 @@
                     <a href="{{ route('products.show', $product->id) }}" class="add-to-cart-limited px-10 py-4 text-sm rounded-lg shadow-xl">
                         ADD TO CART
                     </a>
-                        <!-- <a href="{{ route('products.show', $product->id) }}" class="d-block">
-                        <img src="{{ asset($product->image) }}" alt="{{ $product->name }}" class="img-fluid transition duration-300 hover:opacity-90">
-                    </a> -->
                 </form>
 
                 <p class="text-xs text-gray-400 mt-2">Estimated resale: ~ {{ number_format($resale_value ?? 0, 0, ',', '.') }} ₫</p>

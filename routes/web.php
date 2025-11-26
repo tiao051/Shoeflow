@@ -32,6 +32,7 @@ use App\Http\Controllers\ReviewController;
 |--------------------------------------------------------------------------
 */
 
+Route::middleware('auth:sanctum')->post('/chat/signal', [ChatController::class, 'sendCallSignal']);
 Route::get('/', [DashboardController::class, 'index'])->name('home');
 Route::get('/search/process', [SearchController::class, 'process'])->name('search.process');
 Route::get('/run-star-trainer', [ProductController::class, 'runStarTrainer'])->name('products.run-star-trainer');

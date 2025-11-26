@@ -265,4 +265,31 @@ class ChatController extends Controller
     public function adminIndex() {
         return view('admin.chat.index');
     }
+    public function sendCallSignal(Request $request)
+    {
+        $request->validate([
+                'type' => 'required|string', 
+            ]);
+
+        $targetId = $request->to_user_id; 
+
+        // Nếu không có targetId (Khách gọi lần đầu), tìm Admin
+        if (!$targetId) {
+            $admin = User::where('role_id', 2)->first();
+            if (!$admin) return response()->json(['error' => 'Offline'], 404);
+            $targetId = $admin->id;
+        }
+
+        $payload = [
+            'type' => $request->type, // 'offer', 'answer', 'candidate', 'hangup'
+            'data' => $request->payload, // Dữ liệu SDP hoặc ICE
+            'from_user_id' => Auth::id(),
+            'from_name' => Auth::user()->name,
+            'avatar' => Auth::user()->avatar
+        ];
+
+        broadcast(new \App\Events\CallSignalEvent($payload, $targetId))->toOthers();
+
+        return response()->json(['status' => 'Signal sent']);
+    }
 }

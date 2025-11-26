@@ -419,9 +419,12 @@ class CartController extends Controller
         $vnp_TxnRef = $order->id; 
         $vnp_OrderInfo = "Thanh toan don hang #" . $order->id;
         $vnp_OrderType = "billpayment";
-        $vnp_Amount = $order->total_amount * 100; 
+        $vnp_Amount = (int)($order->total_amount * 100);
         $vnp_Locale = 'vn';
         $vnp_IpAddr = request()->ip();
+        if ($vnp_IpAddr == '::1') {
+            $vnp_IpAddr = '127.0.0.1';
+        }
 
         $inputData = array(
             "vnp_Version" => "2.1.0",
