@@ -145,17 +145,26 @@
             {{-- Countdown Timer --}}
             <div id="countdown-display" class="countdown-timer mb-8">SOLD OUT</div>
 
-            {{-- Price & Add to Cart --}}
             <div class="flex flex-col items-start gap-3">
                 <p class="text-2xl font-exclusive text-red-600 font-black">
                     PRICE: {{ number_format($product->price, 0, ',', '.') }} ₫
                 </p>
 
-                <button class="add-to-cart-limited px-10 py-4 text-sm rounded-lg shadow-xl" data-product-id="{{ $product->id }}">
-                    ADD TO CART
-                </button>
+                <form id="addToCartForm" action="{{ route('cart.add') }}" method="POST" style="margin: 20px 0px 20px 0px;>
+                    @csrf
+                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                    <input type="hidden" name="quantity" value="1">
+                    <input type="hidden" name="size" id="selectedSize" value="M"> 
 
-                <p class="text-xs text-gray-400 mt-2">Estimated resale: ~ {{ number_format($resale_value, 0, ',', '.') }} ₫</p>
+                    <a href="{{ route('products.show', $product->id) }}" class="add-to-cart-limited px-10 py-4 text-sm rounded-lg shadow-xl">
+                        ADD TO CART
+                    </a>
+                        <!-- <a href="{{ route('products.show', $product->id) }}" class="d-block">
+                        <img src="{{ asset($product->image) }}" alt="{{ $product->name }}" class="img-fluid transition duration-300 hover:opacity-90">
+                    </a> -->
+                </form>
+
+                <p class="text-xs text-gray-400 mt-2">Estimated resale: ~ {{ number_format($resale_value ?? 0, 0, ',', '.') }} ₫</p>
             </div>
         </div>
 
