@@ -107,6 +107,14 @@
                         <p class="text-xs text-gray-700">Don't have an account? <a href="{{ route('register') }}" class="font-black text-themed hover:text-secondary-khaki transition">Sign up here</a></p>
                     </div>
                 @endif
+                <div class="mt-6 text-center">
+                    <a href="{{ url('admin/login') }}" class="inline-flex items-center text-xs font-semibold text-gray-400 hover:text-themed transition-colors duration-200 group">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 group-hover:text-secondary-khaki" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        Admin Portal
+                    </a>
+                </div>
             </div>
 
             {{-- FORGOT PASSWORD MODAL START --}}
